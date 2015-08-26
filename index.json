@@ -1,0 +1,29 @@
+{
+"libraries": {
+"bzip": {
+"armeabi-v7a": ["output/libraries/armeabi-v7a/libbzip.so", "c0cb5dbc1060b974fe5c8288e8351e25"]
+},
+"pythonPatch": {
+"armeabi-v7a": ["output/libraries/armeabi-v7a/libpythonPatch.so", "8545f07a790e860ee7c5196b03023435"]
+},
+"openSSL": {
+"armeabi-v7a": ["output/libraries/armeabi-v7a/libopenSSL.so", "39fbfda70e228708887f53d90b2dd170"]
+},
+"ffi": {
+"armeabi-v7a": ["output/libraries/armeabi-v7a/libffi.so", "d14c69b81488761e7aed318eb58ffa40"]
+}
+},
+"2.7.2": {
+"armeabi-v7a": {
+"pythonLib": ["output/Python2.7.2/armeabi-v7a/libpython2.7.so", "186401bbf89e8ccc69bc4ec16a3cc7d0"]
+},
+"lib": ["output/Python2.7.2/lib.zip", "abbb0531d75105536b4fd62564e6d27a"]
+},
+"3.4.3": {
+"armeabi-v7a": {
+"pythonLib": ["output/Python3.4.3/armeabi-v7a/libpython3.4.so", "c8e2478caac447c8e3c65f795583ab45"]
+},
+"lib": ["output/Python3.4.3/lib.zip", "0043813f9e8439e06788592753723831"]
+},
+"__version__": 1
+}
