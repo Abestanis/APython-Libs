@@ -100,9 +100,9 @@ extern void init_codecs_tw(void);
 //extern void init_subprocess(void);
 extern void init_lsprof(void);
 extern void init_io(void);
-//extern void init_ssl(void);
+extern void init_ssl(void);
 extern void initunicodedata(void);
-//extern void init_ctypes(void);
+extern void init_ctypes(void);
 
 struct _inittab _PyImport_Inittab[] = {
 
@@ -209,9 +209,9 @@ struct _inittab _PyImport_Inittab[] = {
     {"_codecs_tw", init_codecs_tw},
 //
     {"_io", init_io},
-//    {"_ssl", init_ssl},
+    {"_ssl", init_ssl},
     {"unicodedata", initunicodedata},
-//    {"_ctypes", init_ctypes},
+    {"_ctypes", init_ctypes},
 
     /* Sentinel */
     {0, 0}

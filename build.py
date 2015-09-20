@@ -159,6 +159,10 @@ class Configuration(object):
                     continue
                 lib = entry[:-4]
                 libData = [parser.get('AdditionalLibs', entry)]
+                if lib + '_req' in libEntries:
+                    libData.append(parser.get('AdditionalLibs', lib + '_req').replace(',', '').split())
+                else:
+                    libData.append([])
                 if lib + '_extraction_filter' in libEntries:
                     libData.append(parser.get('AdditionalLibs', lib + '_extraction_filter').replace(',', '').split())
                 else:
@@ -269,8 +273,8 @@ class Util(object):
         Creates the md5 hash of the file at 'filePath'.
         '''
         md5Hash = md5()
-        with open(filePath) as f:
-            for chunk in iter(lambda: f.read(4096), ""):
+        with open(filePath, 'rb') as f:
+            for chunk in iter(lambda: f.read(4096), ''):
                 md5Hash.update(chunk)
         return md5Hash.hexdigest()
     
@@ -433,11 +437,11 @@ class Builder(object):
             self.config.log.info('Downloading library ' + lib + ' from ' + data[0] + '...')
             downloadFile = Util.download(data[0], tempDir, self.config.log)
             self.config.log.info('Extracting ' + os.path.basename(downloadFile) + '...')
-            extractDir = Util.extract(downloadFile, sourceDir, data[1] if len(data) > 1 else None, ['.c', '.h', '.S'])
+            extractDir = Util.extract(downloadFile, sourceDir, data[2] if len(data) > 2 else None, ['.c', '.h', '.S'])
             self.config.log.info('Extracting done.')
             shutil.copy(makefilePath, os.path.join(extractDir, 'Android.mk'))
-            if len(data) > 2 and len(data[2]) != 0:
-                for src, dest in data[2]:
+            if len(data) > 3 and len(data[3]) != 0:
+                for src, dest in data[3]:
                     dest = dest.replace('/', os.path.sep)
                     shutil.copy(os.path.join(self.config.filesDir, src), os.path.join(extractDir, dest))
             libs[lib] = extractDir
@@ -589,7 +593,10 @@ class Builder(object):
                 if 'lib' + lib + '.so' in os.listdir(os.path.join(self.config.outputDir, 'libraries', architecture)):
                     filePath = os.path.join(self.config.outputDir, 'libraries', architecture, 'lib' + lib + '.so')
                     additionalLibsData += '"' + architecture + '": ["output/libraries/' + architecture + '/lib' + lib + '.so", "' + Util.createMd5Hash(filePath) + '"],\n'
-            additionalLibsData = additionalLibsData[:-2] + '\n'
+            if self.config.additionalLibs.has_key(lib):
+                additionalLibsData += '"required_for": [' + ', '.join(['"' + dep + '"' for dep in self.config.additionalLibs.get(lib)[1]]) + ']\n'
+            else:
+                additionalLibsData = additionalLibsData[:-2] + '\n'
             additionalLibsData += '},\n'
         additionalLibsData = additionalLibsData[:-2] + '\n'
         additionalLibsData += '},\n'
@@ -638,8 +645,8 @@ if __name__ == '__main__':
     parser.add_argument('--gitPath', help = 'The path to the patch executable in the git directory.')
     parser.add_argument('--ndkPath', help = 'The path to the ndk-build executable.')
     parser.add_argument('--pythonPatchUrl', help = 'The url to the Github directory containing the pythonPatch library source code.')
-    parser.add_argument('--pythonServer', default = 'www.python.org', help = 'The host address of the Python server. Defaults to "www.python.org".')
-    parser.add_argument('--pythonServerPath', default = '/ftp/python/', help = 'The path on the Python server to see all available Python versions. Defaults to "/ftp/python/".')
+    parser.add_argument('--pythonServer', default = Configuration.pythonServer, help = 'The host address of the Python server. Defaults to "' + Configuration.pythonServer + '".')
+    parser.add_argument('--pythonServerPath', default = Configuration.pythonServerPath, help = 'The path on the Python server to see all available Python versions. Defaults to "' + Configuration.pythonServerPath + '".')
     parser.add_argument('versions', nargs = '*', help = 'The Python versions to download. Empty means all versions available.')
     args = parser.parse_args()
     builder = Builder(args)

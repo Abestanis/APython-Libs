@@ -93,9 +93,9 @@ extern PyObject* PyInit__codecs_tw(void);
 //extern PyObject* PyInit__subprocess(void);
 extern PyObject* PyInit__lsprof(void);
 extern PyObject* PyInit__io(void);
-//extern PyObject* PyInit__ssl(void);
+extern PyObject* PyInit__ssl(void);
 extern PyObject* PyInit_unicodedata(void);
-//extern PyObject* PyInit__ctypes(void);
+extern PyObject* PyInit__ctypes(void);
 
 struct _inittab _PyImport_Inittab[] = {
 
@@ -195,11 +195,11 @@ struct _inittab _PyImport_Inittab[] = {
     {"_codecs_jp", PyInit__codecs_jp},
     {"_codecs_kr", PyInit__codecs_kr},
     {"_codecs_tw", PyInit__codecs_tw},
-//
+
     {"_io", PyInit__io},
-//    {"_ssl", PyInit__ssl},
+    {"_ssl", PyInit__ssl},
     {"unicodedata", PyInit_unicodedata},
-//    {"_ctypes", PyInit__ctypes},
+    {"_ctypes", PyInit__ctypes},
 
     /* Sentinel */
     {0, 0}

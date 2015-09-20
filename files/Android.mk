@@ -38,7 +38,6 @@ EXCLUDED_FILES := Modules/almodule.c \
                   Modules/_hashopenssl.c \
                   Modules/_lzmamodule.c \
                   Modules/_scproxy.c \
-                  Modules/_ssl.c \
                   Modules/_tkinter.c \
                   Modules/_testembed.c \
                   Modules/_ctypes/darwin/dlfcn_simple.c \
@@ -80,6 +79,7 @@ EXCLUDED_FILES := Modules/almodule.c \
                   Python/getcwd.c \
                   Python/mactoolboxglue.c \
                   Python/sigcheck.c \
+                  #Modules/_ssl.c \
 
 LOCAL_SRC_FILES := $(filter-out $(EXCLUDED_FILES), $(FILE_LIST:$(LOCAL_PATH)/%=%))
 
