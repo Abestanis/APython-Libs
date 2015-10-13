@@ -93,9 +93,10 @@ extern PyObject* PyInit__codecs_tw(void);
 //extern PyObject* PyInit__subprocess(void);
 extern PyObject* PyInit__lsprof(void);
 extern PyObject* PyInit__io(void);
-extern PyObject* PyInit__ssl(void);
 extern PyObject* PyInit_unicodedata(void);
-extern PyObject* PyInit__ctypes(void);
+extern PyObject* PyInit_atexit(void);
+extern PyObject* PyInit__posixsubprocess(void);
+extern PyObject* PyInit_pyexpat(void);
 
 struct _inittab _PyImport_Inittab[] = {
 
@@ -105,7 +106,7 @@ struct _inittab _PyImport_Inittab[] = {
     {"marshal", PyMarshal_Init},
 
     /* This lives in import.c */
-    {"imp", PyInit_imp},
+    {"_imp", PyInit_imp},
 
     /* This lives in Python/Python-ast.c */
     {"_ast", PyInit__ast},
@@ -150,7 +151,7 @@ struct _inittab _PyImport_Inittab[] = {
     #ifdef WITH_THREAD
     {"_thread", PyInit__thread},
     #endif
-    {"_Pickle", PyInit__pickle},
+    {"_pickle", PyInit__pickle},
     #ifdef WIN32
     {"msvcrt", PyInit_msvcrt},
     {"_locale", PyInit__locale},
@@ -197,9 +198,10 @@ struct _inittab _PyImport_Inittab[] = {
     {"_codecs_tw", PyInit__codecs_tw},
 
     {"_io", PyInit__io},
-    {"_ssl", PyInit__ssl},
     {"unicodedata", PyInit_unicodedata},
-    {"_ctypes", PyInit__ctypes},
+    {"atexit", PyInit_atexit},
+    {"_posixsubprocess", PyInit__posixsubprocess},
+    {"pyexpat", PyInit_pyexpat},
 
     /* Sentinel */
     {0, 0}

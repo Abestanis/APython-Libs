@@ -79,7 +79,6 @@ extern void init_struct(void);
 extern void initdatetime(void);
 extern void init_functools(void);
 extern void init_json(void);
-extern void initzlib(void);
 extern void initpwd(void);
 extern void inittermios(void);
 //extern void initrgbimg(void);
@@ -100,9 +99,7 @@ extern void init_codecs_tw(void);
 //extern void init_subprocess(void);
 extern void init_lsprof(void);
 extern void init_io(void);
-extern void init_ssl(void);
 extern void initunicodedata(void);
-extern void init_ctypes(void);
 
 struct _inittab _PyImport_Inittab[] = {
 
@@ -189,7 +186,6 @@ struct _inittab _PyImport_Inittab[] = {
 
     {"xxsubtype", initxxsubtype},
     {"zipimport", initzipimport},
-    {"zlib", initzlib},
     {"pwd", initpwd},
     {"termios", inittermios},
     //{"rgbimg", initrgbimg},
@@ -209,9 +205,7 @@ struct _inittab _PyImport_Inittab[] = {
     {"_codecs_tw", init_codecs_tw},
 //
     {"_io", init_io},
-    {"_ssl", init_ssl},
     {"unicodedata", initunicodedata},
-    {"_ctypes", init_ctypes},
 
     /* Sentinel */
     {0, 0}

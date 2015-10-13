@@ -1,3 +1,22 @@
+--- Python-3.4.3.orig/Lib/_sitebuiltins.py
++++ Python-3.4.3.new/Lib/_sitebuiltins.py
+@@ -51,7 +51,15 @@ class _Printer(object):
+                     data = fp.read()
+                 break
+             except OSError:
+-                pass
++                try:
++                    import zipfile
++                    zipPath, subPath = filename.split(".zip")
++                    with zipfile.ZipFile(zipPath + ".zip", "r") as z:
++                        with z.open(subPath.replace("\\", "/")[1:], "r") as fp:
++                            data = fp.read().decode("utf-8")
++                            break
++                except Exception:
++                    pass
+         if not data:
+             data = self.__data
+         self.__lines = data.split('\n')
 --- Python-3.4.3.orig/Lib/distutils/sysconfig.py
 +++ Python-3.4.3.new/Lib/distutils/sysconfig.py
 @@ -165,7 +165,7 @@ def customize_compiler(compiler):
@@ -13,7 +32,7 @@
  def _init_posix():
      """Initialize the module as appropriate for POSIX systems."""
      g = {}
-+    global _config_vars # TODO: Edited here
++    global _config_vars
 +    if sys.platform == 'android':
 +        g['LIBDEST'] = get_python_lib(plat_specific=0, standard_lib=1)
 +        g['BINLIBDEST'] = get_python_lib(plat_specific=1, standard_lib=1)
@@ -39,7 +58,7 @@
  
 --- Python-3.4.3.orig/Lib/sysconfig.py
 +++ Python-3.4.3.new/Lib/sysconfig.py
-@@ -345,24 +345,34 @@ def _generate_posix_vars():
+@@ -345,25 +345,35 @@ def _generate_posix_vars():
      """Generate the Python module containing build-time variables."""
      import pprint
      vars = {}
@@ -61,6 +80,7 @@
 -        msg = "invalid Python installation: unable to open %s" % config_h
 -        if hasattr(e, "strerror"):
 -            msg = msg + " (%s)" % e.strerror
+-        raise OSError(msg)
 +    if sys.platform == 'android':
 +        vars['LIBDEST'] = get_path('stdlib')
 +        vars['BINLIBDEST'] = get_path('platstdlib')
@@ -89,9 +109,10 @@
 +            msg = "invalid Python installation: unable to open %s" % config_h
 +            if hasattr(e, "strerror"):
 +                msg = msg + " (%s)" % e.strerror
-         raise OSError(msg)
++            raise OSError(msg)
      # On AIX, there are wrong paths to the linker scripts in the Makefile
      # -- these paths are relative to the Python source, but when installed
+     # the scripts are in another directory.
 @@ -407,8 +417,18 @@ def _generate_posix_vars():
  def _init_posix(vars):
      """Initialize the module as appropriate for POSIX systems."""
@@ -279,6 +300,18 @@
      {"tcflush", termios_tcflush,
       METH_VARARGS, termios_tcflush__doc__},
      {"tcflow", termios_tcflow,
+--- Python-3.4.3.orig/Parser/myreadline.c
++++ Python-3.4.3.new/Parser/myreadline.c
+@@ -168,6 +168,9 @@ PyOS_StdioReadline(FILE *sys_stdin, FILE *sys_stdout, const char *prompt)
+ 
+ char *(*PyOS_ReadlineFunctionPointer)(FILE *, FILE *, const char *);
+ 
++void set_PyOS_ReadlineFunctionPointer(char *(*func)(FILE *, FILE *, char *)) {
++    PyOS_ReadlineFunctionPointer = func;
++}
+ 
+ /* Interface used by tokenizer.c and bltinmodule.c */
+ 
 --- Python-3.4.3.orig/Python/bltinmodule.c
 +++ Python-3.4.3.new/Python/bltinmodule.c
 @@ -24,7 +24,7 @@
@@ -307,10 +340,20 @@
          locale_info->grouping = locale_data->grouping;
 -        break;
 -    }
-+        break; */
++        break;*/
      case LT_DEFAULT_LOCALE:
          locale_info->decimal_point = PyUnicode_FromOrdinal('.');
          locale_info->thousands_sep = PyUnicode_FromOrdinal(',');
+--- Python-3.4.3.orig/Python/getversion.c
++++ Python-3.4.3.new/Python/getversion.c
+@@ -13,3 +13,7 @@ Py_GetVersion(void)
+ 		      PY_VERSION, Py_GetBuildInfo(), Py_GetCompiler());
+ 	return version;
+ }
++
++const char* Py_getVersionString(void) {
++	return PY_VERSION;
++}
 --- Python-3.4.3.orig/Python/pystrtod.c
 +++ Python-3.4.3.new/Python/pystrtod.c
 @@ -165,7 +165,7 @@ _PyOS_ascii_strtod(const char *nptr, char **endptr)

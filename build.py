@@ -119,7 +119,6 @@ class Configuration(object):
             return False
         if self.outputDir == None:
             self.log.error('The path to the output directory is not specified.')
-            print(self.outputDir)
             return False
         if self.filesDir == None or not os.path.isdir(self.filesDir) :
             self.log.error('The path to the files directory is incorrect.')
@@ -154,19 +153,15 @@ class Configuration(object):
             self.pythonPatchUrl = parser.get('Paths', 'python_patch_url')
         if parser.has_section('AdditionalLibs'):
             libEntries = parser.options('AdditionalLibs')
-            for entry in libEntries:
-                if not entry.endswith('_url'):
-                    continue
+            for entry in [entry for entry in libEntries if entry.endswith('_url')]:
                 lib = entry[:-4]
-                libData = [parser.get('AdditionalLibs', entry)]
+                libData = {'url': parser.get('AdditionalLibs', entry)}
                 if lib + '_req' in libEntries:
-                    libData.append(parser.get('AdditionalLibs', lib + '_req').replace(',', '').split())
-                else:
-                    libData.append([])
+                    requiredFor = [module.split('|') for module in parser.get('AdditionalLibs', lib + '_req').replace(',', '').split()]
+                    libData['req']  = [module[0] for module in requiredFor]
+                    libData['req3'] = [module[1] if len(module) > 1 else module[0] for module in requiredFor]
                 if lib + '_extraction_filter' in libEntries:
-                    libData.append(parser.get('AdditionalLibs', lib + '_extraction_filter').replace(',', '').split())
-                else:
-                    libData.append([])
+                    libData['extraction_filter'] = parser.get('AdditionalLibs', lib + '_extraction_filter').replace(',', '').split()
                 if lib + '_add_file_copy_opr' in libEntries:
                     opr = parser.get('AdditionalLibs', lib + '_add_file_copy_opr')
                     oprList = re.split(r'(?<!->),?\s(?!->)', opr)
@@ -174,7 +169,7 @@ class Configuration(object):
                     for operation in oprList:
                         oprParts = operation.split('->')
                         lst.append((oprParts[0].strip(), oprParts[1].strip()))
-                    libData.append(lst)
+                    libData['file_copy_opr'] = lst
                 self.additionalLibs[lib] = libData
     
     def processPaths(self, path):
@@ -216,23 +211,27 @@ class Util(object):
         return destFile
     
     @staticmethod
-    def extract(sourceArchive, extractionDir, subDirFilter = None, allowedFileTypes = None):
-        '''>>> extract(sourceArchive, extractionDir, subDirFilter) -> path
+    def extract(sourceArchive, extractionDir, subDirFilter = None, allowedFileTypes = None, allowedPaths = None):
+        '''>>> extract(sourceArchive, extractionDir, subDirFilter, allowedFileTypes, allowedPaths) -> path
         Extracts the archive located under 'sourceArchive'
         and puts its content under 'extractionDir'. If
         'subDirFilter' is specified as a list of directory
         names, those directories and their contents will not
         get extracted. If 'allowedFileTypes' is specified, only
-        files with the given file ending are extracted. Returns
-        the path to the first directory of the extracted content.
+        files with the given file ending are extracted. When
+        'allowedPaths' is present, it overwrites the 'allowedFileTypes'
+        for these paths. Returns the path to the first directory
+        of the extracted content.
         '''
         subDirFilter = subDirFilter or []
+        allowedPaths = allowedPaths if allowedPaths != None else []
         tarFile = tarfile.open(sourceArchive)
         if len(tarFile.getmembers()) == 0:
             return extractionDir
         baseDir = tarFile.getmembers()[0].name.split('/')[0]
         def check_members(members):
             allowedDirs = [baseDir + '/' + path for path in subDirFilter]
+            whitelistPaths = [baseDir + '/' + path for path in allowedPaths]
             for member in members:
                 if member.name == baseDir:
                     yield member
@@ -240,8 +239,9 @@ class Util(object):
                 pathParts = member.name.split('/')
                 if len(pathParts) < 2:
                     continue
-                if len(allowedDirs) == 0 or pathParts[0] + '/' + pathParts[1] in allowedDirs:
-                    if allowedFileTypes == None or member.isdir() or os.path.splitext(member.name)[1] in allowedFileTypes:
+                pathInWhitelist = member.name in whitelistPaths
+                if len(allowedDirs) == 0 or pathParts[0] + '/' + pathParts[1] in allowedDirs or pathInWhitelist:
+                    if allowedFileTypes == None or member.isdir() or os.path.splitext(member.name)[1] in allowedFileTypes or pathInWhitelist:
                         yield member
         tarFile.extractall(path = extractionDir, members = check_members(tarFile.getmembers()))
         return os.path.join(extractionDir, baseDir)
@@ -314,6 +314,19 @@ class Util(object):
         return destDir
     
     @staticmethod
+    def fillTemplate(templatePath, destination, **formatArguments):
+        '''>>> fillTemplate(templatePath, destination, **formatArguments)
+        Reads a template from 'templatePath', formats it
+        using 'formatArguments' and saves the formatted
+        template at 'destination'.
+        '''
+        templateContent = ''
+        with open(templatePath) as template:
+            templateContent = template.read()
+        with open(destination, 'w') as output:
+            output.write(templateContent.format(**formatArguments))
+    
+    @staticmethod
     def getShortVersion(version):
         '''>>> getShortVersion(version) -> shortVersion
         Returns the major and minor part of 'version'.
@@ -358,7 +371,10 @@ class Builder(object):
                     if not os.path.isdir(self.config.outputDir):
                         os.remove(self.config.outputDir)
                     else:
-                        shutil.rmtree(self.config.outputDir)
+                        for i in range(3):
+                            shutil.rmtree(self.config.outputDir, ignore_errors = True)
+                            if not os.path.exists(self.config.outputDir):
+                                break
                     sleep(0.5)
                     os.mkdir(self.config.outputDir)
             else:
@@ -414,7 +430,7 @@ class Builder(object):
         finally:
             self.config.log.info('Cleaning up...')
             shutil.rmtree(tempdir, ignore_errors = True)
-            self.config.log.log('Build', 'DONE' if success else 'FAILED')
+            self.config.log.log('Build', 'SUCCESS' if success else 'FAILED')
             self.config.closeLog()
             return success
     
@@ -434,22 +450,23 @@ class Builder(object):
             if not os.path.exists(makefilePath):
                 self.config.log.warn('Ignoring library ' + lib + ', because no Android.mk file was found.')
                 continue
-            self.config.log.info('Downloading library ' + lib + ' from ' + data[0] + '...')
-            downloadFile = Util.download(data[0], tempDir, self.config.log)
+            self.config.log.info('Downloading library ' + lib + ' from ' + data['url'] + '...')
+            downloadFile = Util.download(data['url'], tempDir, self.config.log)
             self.config.log.info('Extracting ' + os.path.basename(downloadFile) + '...')
-            extractDir = Util.extract(downloadFile, sourceDir, data[2] if len(data) > 2 else None, ['.c', '.h', '.S'])
+            extractDir = Util.extract(downloadFile, sourceDir, data.get('extraction_filter', None), ['.c', '.h', '.S'])
             self.config.log.info('Extracting done.')
             shutil.copy(makefilePath, os.path.join(extractDir, 'Android.mk'))
-            if len(data) > 3 and len(data[3]) != 0:
-                for src, dest in data[3]:
-                    dest = dest.replace('/', os.path.sep)
-                    shutil.copy(os.path.join(self.config.filesDir, src), os.path.join(extractDir, dest))
+            for src, dest in data.get('file_copy_opr', []):
+                dest = dest.replace('/', os.path.sep)
+                shutil.copy(os.path.join(self.config.filesDir, src), os.path.join(extractDir, dest))
             libs[lib] = extractDir
         applicationMKPath = os.path.join(sourceDir, 'Application.mk')
+        Util.fillTemplate(
+            os.path.join(self.config.filesDir, 'Application.mk'),
+            applicationMKPath,
+            pyShortVersion = ''
+        )
         androidMKPath = os.path.join(sourceDir, 'Android.mk')
-        with open(applicationMKPath, 'w') as applicationMK:
-            with open(os.path.join(self.config.filesDir, 'Application.mk')) as template:
-                applicationMK.write(template.read().format(pyShortVersion = ''))
         with open(androidMKPath, 'w') as androidMK:
             androidMK.write('include $(call all-subdir-makefiles)')
         if not Util.compile(self.config.ndkPath, os.path.join(tempDir, 'NDK-Temp'), sourceDir, os.path.join(self.config.outputDir, 'libraries'), self.config.log):
@@ -460,7 +477,6 @@ class Builder(object):
         self.config.log.info('Patching Android.mk files...')
         for module, modulePath in libs.iteritems():
             androidMKPath = os.path.join(modulePath, 'Android.mk')
-            print(androidMKPath)
             if os.path.exists(androidMKPath):
                 data = ''
                 with open(androidMKPath) as source:
@@ -535,8 +551,9 @@ class Builder(object):
     def extractPythonArchive(self, sourceArchive, extractedDir):
         self.config.log.info('Extracting ' + sourceArchive + '...')
         try:
-            return Util.extract(sourceArchive, extractedDir, ['Include', 'Lib', 'Modules', 'Objects', 'Parser', 'Python'], ['.c', '.h', '.py', '.pyc', '.inc'])
-        except CompressionError as error:
+            return Util.extract(sourceArchive, extractedDir, ['Include', 'Lib', 'Modules', 'Objects', 'Parser', 'Python'],
+                                ['.c', '.h', '.py', '.pyc', '.inc'], ['LICENSE'])
+        except tarfile.CompressionError as error:
             self.config.log.error('Failed to extract ' + sourceArchive + ': Archive is compressed with an unsupported compression.')
             print(error)
             return None
@@ -552,21 +569,46 @@ class Builder(object):
         outputPath = os.path.join(outputDir, 'lib')
         if (os.path.exists(outputPath)):
             os.remove(outputPath)
+        shutil.copy(os.path.join(sourcePath, 'LICENSE'), os.path.join(sourcePath, 'Lib', 'LICENSE.txt'))
+        shutil.rmtree(os.path.join(sourcePath, 'Lib', 'test')) # TODO: Make this remove all test and test directories to save storage space
         return shutil.make_archive(outputPath, 'zip', os.path.join(sourcePath, 'Lib')).endswith('lib.zip')
     
     def compilePythonSource(self, sourcePath, pythonVersion, tempDir):
         parentDir = os.path.dirname(sourcePath)
-        applicationMKContent = ''
-        with open(os.path.join(self.config.filesDir, 'Application.mk')) as template:
-            applicationMKContent = template.read()
-        applicationMKContent = applicationMKContent.format(
-            pyShortVersion = Util.getShortVersion(pythonVersion),
+        # Setup the Application.mk.
+        Util.fillTemplate(
+            os.path.join(self.config.filesDir, 'Application.mk'),
+            os.path.join(parentDir, 'Application.mk'),
+            pyShortVersion = Util.getShortVersion(pythonVersion)
         )
-        with open(os.path.join(parentDir, 'Application.mk'), 'w') as output:
-            output.write(applicationMKContent)
+        with open(os.path.join(parentDir, 'Android.mk'), 'w') as androidMK:
+            androidMK.write('include $(call all-subdir-makefiles)')
+        # Copy the Android.mk and configuration files
         shutil.copy(os.path.join(self.config.filesDir, 'Android.mk'), sourcePath)
         shutil.copy(os.path.join(self.config.filesDir, 'config3.c' if int(pythonVersion[0]) >= 3 else 'config.c'), os.path.join(sourcePath, 'Modules', 'config.c'))
         shutil.copy(os.path.join(self.config.filesDir, 'pyconfig.h'), os.path.join(sourcePath, 'Include'))
+        # Setup module libraries
+        for lib, libData in self.config.additionalLibs.items():
+            if (len(libData.get('req', [])) < 1):
+                continue
+            moduleName = None # TODO: Handle multiple dependencies
+            if int(pythonVersion[0]) >= 3:
+                moduleName = libData['req3'][0]
+            else:
+                moduleName = libData['req'][0]
+            moduleDir = os.path.join(parentDir, moduleName)
+            if not os.path.exists(moduleDir):
+                os.mkdir(moduleDir)
+            pythonDir = os.path.basename(sourcePath)
+            moduleWildcards = [moduleName + '.[ch]', moduleName + 'module.c', moduleName + '/*.c']
+            moduleWildcards = ['$(wildcard $(LOCAL_PATH)/../' + pythonDir + '/Modules/' + wildcard + ')' for wildcard in moduleWildcards]
+            Util.fillTemplate(
+                os.path.join(self.config.filesDir, 'module-Android.mk'),
+                os.path.join(moduleDir, 'Android.mk'),
+                moduleSourceWildcards = ' '.join(moduleWildcards),
+                libDependencies = lib
+            )
+        # Compile
         self.config.log.info('Compiling Python ' + pythonVersion + '...')
         return Util.compile(self.config.ndkPath, os.path.join(tempDir, 'NDK-Temp'), parentDir, os.path.join(self.config.outputDir, 'Python' + pythonVersion), self.config.log)
     
@@ -578,6 +620,15 @@ class Builder(object):
                 for libfile in os.listdir(os.path.join(outputDir, subdir)):
                     if libfile[3:-3] in self.config.additionalLibs.keys() or libfile == 'libpythonPatch.so':
                         os.remove(os.path.join(outputDir, subdir, libfile))
+        sourceParentPath = os.path.dirname(sourcePath)
+        additionalPythonModules = []
+        for moduleData in self.config.additionalLibs.itervalues():
+            additionalPythonModules += moduleData.get('req', [])
+            additionalPythonModules += moduleData.get('req3', [])
+        for subdir in os.listdir(sourceParentPath):
+            if os.path.isdir(os.path.join(sourceParentPath, subdir)):
+                if subdir in additionalPythonModules:
+                    shutil.rmtree(os.path.join(sourceParentPath, subdir))
     
     def generateJSON(self):
         self.config.log.info('Generating JSON file...')
@@ -594,7 +645,9 @@ class Builder(object):
                     filePath = os.path.join(self.config.outputDir, 'libraries', architecture, 'lib' + lib + '.so')
                     additionalLibsData += '"' + architecture + '": ["output/libraries/' + architecture + '/lib' + lib + '.so", "' + Util.createMd5Hash(filePath) + '"],\n'
             if self.config.additionalLibs.has_key(lib):
-                additionalLibsData += '"required_for": [' + ', '.join(['"' + dep + '"' for dep in self.config.additionalLibs.get(lib)[1]]) + ']\n'
+                reqs = self.config.additionalLibs[lib].get('req', [])[:]
+                reqs += self.config.additionalLibs[lib].get('req3', [])
+                additionalLibsData += '"required_for": [' + ', '.join(['"' + requirement + '"' for requirement in set(reqs)]) + ']\n'
             else:
                 additionalLibsData = additionalLibsData[:-2] + '\n'
             additionalLibsData += '},\n'

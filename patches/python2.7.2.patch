@@ -5,7 +5,7 @@
      varies across Unices and is stored in Python's Makefile.
      """
 -    if compiler.compiler_type == "unix":
-+    if compiler.compiler_type == "unix" and sys.platform != "android": # TODO: Edited here
++    if compiler.compiler_type == "unix" and sys.platform != "android":
          (cc, cxx, opt, cflags, ccshared, ldshared, so_ext) = \
              get_config_vars('CC', 'CXX', 'OPT', 'CFLAGS',
                              'CCSHARED', 'LDSHARED', 'SO')
@@ -13,7 +13,7 @@
  def _init_posix():
      """Initialize the module as appropriate for POSIX systems."""
      g = {}
-+    global _config_vars # TODO: Edited here
++    global _config_vars
 +    if sys.platform == 'android':
 +        g['LIBDEST'] = get_python_lib(plat_specific=0, standard_lib=1)
 +        g['BINLIBDEST'] = get_python_lib(plat_specific=1, standard_lib=1)
@@ -36,27 +36,86 @@
 +    #global _config_vars
      _config_vars = g
  
-
+ 
+--- Python-2.7.2.orig/Lib/site.py
++++ Python-2.7.2.new/Lib/site.py
+@@ -400,7 +400,17 @@ class _Printer(object):
+                     fp.close()
+                     break
+                 except IOError:
+-                    pass
++                    try:
++                        import zipfile
++                        zipPath, subPath = filename.split(".zip")
++                        zfp = zipfile.ZipFile(zipPath + ".zip", "r")
++                        fp = zfp.open(subPath.replace("\\", "/")[1:], "rU")
++                        data = fp.read()
++                        fp.close()
++                        zfp.close()
++                        break
++                    except Exception:
++                        pass
+             if data:
+                 break
+         if not data:
 --- Python-2.7.2.orig/Lib/sysconfig.py
 +++ Python-2.7.2.new/Lib/sysconfig.py
-@@ -276,6 +276,16 @@ def _get_makefile_filename():
-
+@@ -276,26 +276,36 @@ def _get_makefile_filename():
+ 
  def _init_posix(vars):
      """Initialize the module as appropriate for POSIX systems."""
+-    # load the installed Makefile:
+-    makefile = _get_makefile_filename()
+-    try:
+-        _parse_makefile(makefile, vars)
+-    except IOError, e:
+-        msg = "invalid Python installation: unable to open %s" % makefile
+-        if hasattr(e, "strerror"):
+-            msg = msg + " (%s)" % e.strerror
+-        raise IOError(msg)
 +    if sys.platform == 'android':
 +        vars['LIBDEST'] = get_path('stdlib')
 +        vars['BINLIBDEST'] = get_path('platstdlib')
-+
+ 
+-    # load the installed pyconfig.h:
+-    config_h = get_config_h_filename()
+-    try:
+-        with open(config_h) as f:
+-            parse_config_h(f, vars)
+-    except IOError, e:
+-        msg = "invalid Python installation: unable to open %s" % config_h
+-        if hasattr(e, "strerror"):
+-            msg = msg + " (%s)" % e.strerror
+-        raise IOError(msg)
 +        #vars['INCLUDEPY'] = get_python_inc(plat_specific=0)
 +
 +        vars['SO'] = '.so'
 +        vars['VERSION'] = _PY_VERSION_SHORT_NO_DOT
 +        vars['BINDIR'] = os.path.dirname(_safe_realpath(sys.executable))
-+        return
-     # load the installed Makefile:
-     makefile = _get_makefile_filename()
-     try:
-
++    else:
++        # load the installed Makefile:
++        makefile = _get_makefile_filename()
++        try:
++            _parse_makefile(makefile, vars)
++        except IOError, e:
++            msg = "invalid Python installation: unable to open %s" % makefile
++            if hasattr(e, "strerror"):
++                msg = msg + " (%s)" % e.strerror
++            raise IOError(msg)
++
++        # load the installed pyconfig.h:
++        config_h = get_config_h_filename()
++        try:
++            with open(config_h) as f:
++                parse_config_h(f, vars)
++        except IOError, e:
++            msg = "invalid Python installation: unable to open %s" % config_h
++            if hasattr(e, "strerror"):
++                msg = msg + " (%s)" % e.strerror
++            raise IOError(msg)
+ 
+     # On AIX, there are wrong paths to the linker scripts in the Makefile
+     # -- these paths are relative to the Python source, but when installed
 --- Python-2.7.2.orig/Modules/_localemodule.c
 +++ Python-2.7.2.new/Modules/_localemodule.c
 @@ -206,7 +206,7 @@ static PyObject*
@@ -64,7 +123,7 @@
  {
      PyObject* result;
 -    struct lconv *l;
-+    //struct lconv *l; //TODO: Edited here
++    //struct lconv *l;
      PyObject *x;
  
      result = PyDict_New();
@@ -155,7 +214,7 @@
 -    ioctl(slave_fd, I_PUSH, "ttcompat"); /* push ttcompat */
 -#endif /* __hpux */
 -#endif /* HAVE_CYGWIN */
-+//#if !defined(__CYGWIN__) && !defined(HAVE_DEV_PTC) // TODO: Edited here
++//#if !defined(__CYGWIN__) && !defined(HAVE_DEV_PTC)
 +//    ioctl(slave_fd, I_PUSH, "ptem"); /* push ptem */
 +//    ioctl(slave_fd, I_PUSH, "ldterm"); /* push ldterm */
 +//#ifndef __hpux
@@ -172,17 +231,28 @@
      SETI(setIndex++, p->pw_uid);
      SETI(setIndex++, p->pw_gid);
 -#ifdef __VMS
-+#if 1//def __VMS// TODO: Edited here
++#if 1//def __VMS
      SETS(setIndex++, "");
  #else
      SETS(setIndex++, p->pw_gecos);
+--- Python-2.7.2.orig/Modules/python.c
++++ Python-2.7.2.new/Modules/python.c
+@@ -7,7 +7,7 @@
+ #endif
+ 
+ int
+-main(int argc, char **argv)
++oldPy_Main(int argc, char **argv)
+ {
+ 	/* 754 requires that FP exceptions run in "no stop" mode by default,
+ 	 * and until C vendors implement C99's ways to control FP exceptions,
 --- Python-2.7.2.orig/Modules/termios.c
 +++ Python-2.7.2.new/Modules/termios.c
 @@ -227,6 +227,7 @@ termios_tcsendbreak(PyObject *self, PyObject *args)
      return Py_None;
  }
  
-+#if 0 // TODO: Edited here:
++#if 0
  PyDoc_STRVAR(termios_tcdrain__doc__,
  "tcdrain(fd) -> None\n\
  \n\
@@ -200,25 +270,26 @@
       METH_VARARGS, termios_tcsendbreak__doc__},
 -    {"tcdrain", termios_tcdrain,
 -     METH_VARARGS, termios_tcdrain__doc__},
-+    //{"tcdrain", termios_tcdrain, //TODO: Edited here
++    //{"tcdrain", termios_tcdrain,
 +     //METH_VARARGS, termios_tcdrain__doc__},
      {"tcflush", termios_tcflush,
       METH_VARARGS, termios_tcflush__doc__},
      {"tcflow", termios_tcflow,
 --- Python-2.7.2.orig/Objects/stringlib/formatter.h
 +++ Python-2.7.2.new/Objects/stringlib/formatter.h
-@@ -639,13 +639,7 @@ static void
+@@ -639,13 +639,13 @@ static void
  get_locale_info(int type, LocaleInfo *locale_info)
  {
      switch (type) {
 -    case LT_CURRENT_LOCALE: {
--        struct lconv *locale_data = localeconv();
--        locale_info->decimal_point = locale_data->decimal_point;
--        locale_info->thousands_sep = locale_data->thousands_sep;
--        locale_info->grouping = locale_data->grouping;
--        break;
++    case LT_CURRENT_LOCALE: /*{
+         struct lconv *locale_data = localeconv();
+         locale_info->decimal_point = locale_data->decimal_point;
+         locale_info->thousands_sep = locale_data->thousands_sep;
+         locale_info->grouping = locale_data->grouping;
+         break;
 -    }
-+    case LT_CURRENT_LOCALE:// TODO: HAD TO FIX HERE!!!
++    }*/
      case LT_DEFAULT_LOCALE:
          locale_info->decimal_point = ".";
          locale_info->thousands_sep = ",";
@@ -231,12 +302,24 @@
 -        struct lconv *locale_data = localeconv();
 -        const char *grouping = locale_data->grouping;
 -        const char *thousands_sep = locale_data->thousands_sep;
-+        //struct lconv *locale_data = localeconv(); //TODO: Edited here
++        //struct lconv *locale_data = localeconv();
 +        const char *grouping = "\3\0";//locale_data->grouping;
 +        const char *thousands_sep = ",";//locale_data->thousands_sep;
  
          return _Py_InsertThousandsGrouping(buffer, n_buffer, digits, n_digits,
                                             min_width, grouping, thousands_sep);
+--- Python-2.7.2.orig/Parser/myreadline.c
++++ Python-2.7.2.new/Parser/myreadline.c
+@@ -164,6 +164,9 @@ PyOS_StdioReadline(FILE *sys_stdin, FILE *sys_stdout, char *prompt)
+ 
+ char *(*PyOS_ReadlineFunctionPointer)(FILE *, FILE *, char *);
+ 
++void set_PyOS_ReadlineFunctionPointer(char *(*func)(FILE *, FILE *, char *)) {
++    PyOS_ReadlineFunctionPointer = func;
++}
+ 
+ /* Interface used by tokenizer.c and bltinmodule.c */
+ 
 --- Python-2.7.2.orig/Python/bltinmodule.c
 +++ Python-2.7.2.new/Python/bltinmodule.c
 @@ -19,7 +19,7 @@
@@ -244,10 +327,20 @@
  #if defined(MS_WINDOWS) && defined(HAVE_USABLE_WCHAR_T)
  const char *Py_FileSystemDefaultEncoding = "mbcs";
 -#elif defined(__APPLE__)
-+#elif defined(__APPLE__) || 1 // TODO: Edited here
++#elif defined(__APPLE__) || 1
  const char *Py_FileSystemDefaultEncoding = "utf-8";
  #else
  const char *Py_FileSystemDefaultEncoding = NULL; /* use default */
+--- Python-2.7.2.orig/Python/getversion.c
++++ Python-2.7.2.new/Python/getversion.c
+@@ -13,3 +13,7 @@ Py_GetVersion(void)
+ 		      PY_VERSION, Py_GetBuildInfo(), Py_GetCompiler());
+ 	return version;
+ }
++
++const char* Py_getVersionString(void) {
++	return PY_VERSION;
++}
 --- Python-2.7.2.orig/Python/pystrtod.c
 +++ Python-2.7.2.new/Python/pystrtod.c
 @@ -126,7 +126,7 @@ _PyOS_ascii_strtod(const char *nptr, char **endptr)
@@ -255,29 +348,28 @@
      char *fail_pos;
      double val = -1.0;
 -    struct lconv *locale_data;
-+    //struct lconv *locale_data; // TODO: FIXED HERE
++    //struct lconv *locale_data;
      const char *decimal_point;
      size_t decimal_point_len;
      const char *p, *decimal_point_pos;
-@@ -138,8 +138,9 @@ _PyOS_ascii_strtod(const char *nptr, char **endptr)
+@@ -138,8 +138,8 @@ _PyOS_ascii_strtod(const char *nptr, char **endptr)
  
      fail_pos = NULL;
  
 -    locale_data = localeconv();
 -    decimal_point = locale_data->decimal_point;
-+    // TODO: And here
 +    //locale_data = localeconv();
 +    decimal_point = "."; //locale_data->decimal_point;
      decimal_point_len = strlen(decimal_point);
  
      assert(decimal_point_len != 0);
-@@ -375,8 +376,8 @@ PyOS_string_to_double(const char *s,
+@@ -375,8 +375,8 @@ PyOS_string_to_double(const char *s,
  Py_LOCAL_INLINE(void)
  change_decimal_from_locale_to_dot(char* buffer)
  {
 -    struct lconv *locale_data = localeconv();
 -    const char *decimal_point = locale_data->decimal_point;
-+    //struct lconv *locale_data = localeconv(); // TODO: FIXED HERE
++    //struct lconv *locale_data = localeconv();
 +    const char *decimal_point = ".";//locale_data->decimal_point;
  
      if (decimal_point[0] != '.' || decimal_point[1] != 0) {

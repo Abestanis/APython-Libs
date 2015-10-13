@@ -3,6 +3,8 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := python$(PYTHON_SHORT_VERSION)
 FILE_LIST := $(wildcard $(LOCAL_PATH)/*/*.c) $(wildcard $(LOCAL_PATH)/*/*/*.c) #$(wildcard $(LOCAL_PATH)/Modules/_decimal/*/*.c)
+
+# Filter out all modules that are not supported on Android
 EXCLUDED_FILES := Modules/almodule.c \
                   Modules/bsddbmodule.c \
                   Modules/cdmodule.c \
@@ -79,10 +81,16 @@ EXCLUDED_FILES := Modules/almodule.c \
                   Python/getcwd.c \
                   Python/mactoolboxglue.c \
                   Python/sigcheck.c \
-                  #Modules/_ssl.c \
 
 LOCAL_SRC_FILES := $(filter-out $(EXCLUDED_FILES), $(FILE_LIST:$(LOCAL_PATH)/%=%))
 
+# Filter out all modules that are sepperate in their own additional library
+EXCLUDED_FILES := $(LOCAL_PATH)/Modules/_ssl.c \
+                  $(LOCAL_PATH)/Modules/bz2module.c \
+                  $(wildcard $(LOCAL_PATH)/Modules/_ctypes/*) \
+                  $(wildcard $(LOCAL_PATH)/Modules/_ctypes/*/*) \
+
+LOCAL_SRC_FILES := $(filter-out $(EXCLUDED_FILES:$(LOCAL_PATH)/%=%), $(LOCAL_SRC_FILES))
 
 LOCAL_CFLAGS = -D 'PLATFORM=\"android\"' \
                -D 'VERSION=\"$(PYTHON_SHORT_VERSION)\"' \
@@ -91,8 +99,8 @@ LOCAL_CFLAGS = -D 'PLATFORM=\"android\"' \
                -D CONFIG_32 \
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/Include $(LOCAL_PATH)/Modules/_io $(LOCAL_PATH)/Modules/expat $(LOCAL_PATH)/Modules/cjkcodecs $(LOCAL_PATH)Modules/_decimal/libmpdec
-LOCAL_EXPORT_C_INCLUDES += $(LOCAL_PATH)Include
-LOCAL_SHARED_LIBRARIES := pythonPatch ffi openSSL bzip # TODO: This is Temp
+LOCAL_EXPORT_C_INCLUDES += $(LOCAL_PATH)/Include
+LOCAL_SHARED_LIBRARIES := pythonPatch
 LOCAL_LDLIBS := -lz
 
 LOCAL_SHORT_COMMANDS = true

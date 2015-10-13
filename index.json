@@ -2,13 +2,13 @@
 "libraries": {
 "bzip": {
 "armeabi-v7a": ["output/libraries/armeabi-v7a/libbzip.so", "40af25bdf8fe3b242db0b75f75a5d941"],
-"required_for": ["zlib"]
+"required_for": ["_bz2", "bz2"]
 },
 "pythonPatch": {
-"armeabi-v7a": ["output/libraries/armeabi-v7a/libpythonPatch.so", "5ef4c5c7eaafcc0e055dec25ac797f47"]
+"armeabi-v7a": ["output/libraries/armeabi-v7a/libpythonPatch.so", "0643fd84317bf600f2c71ef748f5c425"]
 },
 "openSSL": {
-"armeabi-v7a": ["output/libraries/armeabi-v7a/libopenSSL.so", "75b58be2541ab74507079db305a12384"],
+"armeabi-v7a": ["output/libraries/armeabi-v7a/libopenSSL.so", "4bc7139d49f847784d746e84c046854f"],
 "required_for": ["_ssl"]
 },
 "ffi": {
@@ -18,15 +18,21 @@
 },
 "2.7.2": {
 "armeabi-v7a": {
-"pythonLib": ["output/Python2.7.2/armeabi-v7a/libpython2.7.so", "af31ce1837e6f47158a4068529ac9ebc"]
+"bz2": ["output/Python2.7.2/armeabi-v7a/bz2.so", "536efcc31ced83550dc420aea8dec1b4"],
+"pythonLib": ["output/Python2.7.2/armeabi-v7a/libpython2.7.so", "9ed9ee4ae77ad94b938c782f1699a0e9"],
+"_ctypes": ["output/Python2.7.2/armeabi-v7a/_ctypes.so", "c861c02b0c77f456dfaa62d4b6035488"],
+"_ssl": ["output/Python2.7.2/armeabi-v7a/_ssl.so", "9bb75f8fba05efa553f5fa1c489a3a26"]
 },
-"lib": ["output/Python2.7.2/lib.zip", "c47d4ec449b721124b0f8f178d4722b4"]
+"lib": ["output/Python2.7.2/lib.zip", "45108e3a6bff755971805396472d46fb"]
 },
 "3.4.3": {
 "armeabi-v7a": {
-"pythonLib": ["output/Python3.4.3/armeabi-v7a/libpython3.4.so", "0126d7151f0d9f12176c7ef259040e2e"]
+"pythonLib": ["output/Python3.4.3/armeabi-v7a/libpython3.4.so", "5d798184e113210aecc4115f3f982d6d"],
+"_bz2": ["output/Python3.4.3/armeabi-v7a/_bz2.so", "0ff2313221b0be49832750e923ebab80"],
+"_ctypes": ["output/Python3.4.3/armeabi-v7a/_ctypes.so", "83e4e1b3ac63461191b6b4f6407d4c3a"],
+"_ssl": ["output/Python3.4.3/armeabi-v7a/_ssl.so", "623ea634911dc0d0babf9c648b41402f"]
 },
-"lib": ["output/Python3.4.3/lib.zip", "cad04338617f81e6522bf398dfdc86d0"]
+"lib": ["output/Python3.4.3/lib.zip", "8a8e345910ffde1b6bb00a1004d307c0"]
 },
 "__version__": 1
 }
