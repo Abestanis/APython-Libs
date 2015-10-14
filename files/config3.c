@@ -126,8 +126,6 @@ struct _inittab _PyImport_Inittab[] = {
     /* This lives in _warnings.c */
     {"_warnings", _PyWarnings_Init},
 
-    //TODO: Edited:
-
     {"errno", PyInit_errno},
 
     {"array", PyInit_array},

@@ -79,6 +79,7 @@ extern void init_struct(void);
 extern void initdatetime(void);
 extern void init_functools(void);
 extern void init_json(void);
+extern void initzlib(void);
 extern void initpwd(void);
 extern void inittermios(void);
 //extern void initrgbimg(void);
@@ -125,8 +126,6 @@ struct _inittab _PyImport_Inittab[] = {
 
     /* This lives in _warnings.c */
     {"_warnings", _PyWarnings_Init},
-
-    //TODO: Edited:
 
     {"errno", initerrno},
 
@@ -186,6 +185,7 @@ struct _inittab _PyImport_Inittab[] = {
 
     {"xxsubtype", initxxsubtype},
     {"zipimport", initzipimport},
+    {"zlib", initzlib},
     {"pwd", initpwd},
     {"termios", inittermios},
     //{"rgbimg", initrgbimg},
