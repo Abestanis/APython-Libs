@@ -11,6 +11,6 @@ The script will also download and compile the source code from some additional l
 Currently these additional libraries are downloaded:
 * [openSSL](https://www.openssl.org/) for the _ssl module
 * [ffi](https://sourceware.org/libffi/) for the _ctypes module
-* [bzip](http://www.bzip.org/) for the zlib module
+* [bzip](http://www.bzip.org/) for the bz2/_bz2 module
 
 The generated lib-files and the json file will be used by the [Python Host App](https://github.com/Abestanis/APython) to download Python versions and the additional modules.
