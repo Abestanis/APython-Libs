@@ -56,6 +56,18 @@
      _config_vars = g
  
  
+--- Python-3.4.3.orig/Lib/subprocess.py
++++ Python-3.4.3.new/Lib/subprocess.py
+@@ -1345,7 +1345,8 @@ class Popen(object):
+                 args = list(args)
+ 
+             if shell:
+-                args = ["/bin/sh", "-c"] + args
++                shellPath = "/system/bin/sh" if sys.platform == "android" else "/bin/sh"
++                args = [shellPath, "-c"] + args
+                 if executable:
+                     args[0] = executable
+ 
 --- Python-3.4.3.orig/Lib/sysconfig.py
 +++ Python-3.4.3.new/Lib/sysconfig.py
 @@ -345,25 +345,35 @@ def _generate_posix_vars():
@@ -215,6 +227,21 @@
      return result;
  
    failed:
+--- Python-3.4.3.orig/Modules/_posixsubprocess.c
++++ Python-3.4.3.new/Modules/_posixsubprocess.c
+@@ -20,7 +20,11 @@
+ 
+ #if defined(__ANDROID__) && !defined(SYS_getdents64)
+ /* Android doesn't expose syscalls, add the definition manually. */
+-# include <sys/linux-syscalls.h>
++# ifdef ABI_64_BIT
++#  include <sys/glibc-syscalls.h>
++# else
++#  include <sys/linux-syscalls.h>
++# endif /*ABI_64_BIT*/
+ # define SYS_getdents64  __NR_getdents64
+ #endif
+ 
 --- Python-3.4.3.orig/Modules/posixmodule.c
 +++ Python-3.4.3.new/Modules/posixmodule.c
 @@ -6068,13 +6068,13 @@ posix_openpty(PyObject *self, PyObject *noargs)

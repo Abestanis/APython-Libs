@@ -2,7 +2,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := openSSL
-FILE_LIST := $(wildcard $(LOCAL_PATH)/ssl/*.c) $(wildcard $(LOCAL_PATH)/crypto/*.c) $(wildcard $(LOCAL_PATH)/crypto/*/*.c) #$(LOCAL_PATH)/../Python/Modules/_ssl.c
+FILE_LIST := $(wildcard $(LOCAL_PATH)/ssl/*.c) $(wildcard $(LOCAL_PATH)/crypto/*.c) $(wildcard $(LOCAL_PATH)/crypto/*/*.c)
 LOCAL_SRC_FILES := $(FILE_LIST:$(LOCAL_PATH)/%=%)
 EXCLUDED_FILES := ssl/ssl_task.c \
                   ssl/ssltest.c \
@@ -114,10 +114,16 @@ EXCLUDED_FILES := ssl/ssl_task.c \
 
 LOCAL_SRC_FILES := $(filter-out $(EXCLUDED_FILES), $(FILE_LIST:$(LOCAL_PATH)/%=%))
 
-LOCAL_CFLAGS = -DOPENSSL_NO_HW -DOPENSSL_NO_GOST
+ifeq ($(TARGET_ARCH), x86_64)
+    LOCAL_SRC_FILES += crypto/rc4/rc4-md5-x86_64.S
+endif
+
+LOCAL_CFLAGS += -DOPENSSL_NO_HW -DOPENSSL_NO_GOST
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/include $(LOCAL_PATH)/crypto $(dir $(wildcard $(LOCAL_PATH)/crypto/*/*.h))
 LOCAL_EXPORT_C_INCLUDES += $(LOCAL_PATH)/include
-LOCAL_SHARED_LIBRARIES := pythonPatch
+
+#TODO: Find solution
+#LOCAL_SHARED_LIBRARIES := pythonPatch
 
 LOCAL_SHORT_COMMANDS = true
 include $(BUILD_SHARED_LIBRARY)

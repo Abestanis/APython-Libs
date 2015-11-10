@@ -251,7 +251,7 @@
 #define HAVE_FTELLO 1
 
 /* Define to 1 if you have the `ftime' function. */
-#define HAVE_FTIME 1
+#undef HAVE_FTIME
 
 /* Define to 1 if you have the `ftruncate' function. */
 #define HAVE_FTRUNCATE 1
@@ -427,6 +427,9 @@
 
 /* Define if you have the 'link' function. */
 #define HAVE_LINK 1
+
+/* Define to 1 if you have the <linux/can.h> header file. */
+//#undef HAVE_LINUX_CAN_H
 
 /* Define to 1 if you have the <linux/netlink.h> header file. */
 #define HAVE_LINUX_NETLINK_H 1
@@ -872,7 +875,7 @@
 #define HAVE_UTIME_H 1
 
 /* Define to 1 if you have the `wait3' function. */
-#define HAVE_WAIT3 1
+#undef HAVE_WAIT3
 
 /* Define to 1 if you have the `wait4' function. */
 /* #undef HAVE_WAIT4 */
@@ -978,52 +981,73 @@
 /* #undef SIGNED_RIGHT_SHIFT_ZERO_FILLS */
 
 /* The size of `double', as computed by sizeof. */
-#define SIZEOF_DOUBLE 8
+#define SIZEOF_DOUBLE __SIZEOF_DOUBLE__
 
 /* The size of `float', as computed by sizeof. */
-#define SIZEOF_FLOAT 4
+#define SIZEOF_FLOAT __SIZEOF_FLOAT__
 
 /* The size of `fpos_t', as computed by sizeof. */
-#define SIZEOF_FPOS_T 4
+#ifdef ABI_64_BIT
+#  define SIZEOF_FPOS_T 8
+#else
+#  define SIZEOF_FPOS_T 4
+#endif
 
 /* The size of `int', as computed by sizeof. */
-#define SIZEOF_INT 4
+#define SIZEOF_INT __SIZEOF_INT__
 
 /* The size of `long', as computed by sizeof. */
-#define SIZEOF_LONG 4
+#define SIZEOF_LONG __SIZEOF_LONG__
 
 /* The size of `long double', as computed by sizeof. */
-#define SIZEOF_LONG_DOUBLE 8
+#define SIZEOF_LONG_DOUBLE __SIZEOF_LONG_DOUBLE__
 
 /* The size of `long long', as computed by sizeof. */
-#define SIZEOF_LONG_LONG 8
+#define SIZEOF_LONG_LONG __SIZEOF_LONG_LONG__
 
 /* The size of `off_t', as computed by sizeof. */
-#define SIZEOF_OFF_T 4
+#ifdef ABI_64_BIT
+#  define SIZEOF_OFF_T 8
+#else
+#  define SIZEOF_OFF_T 4
+#endif
+
 
 /* The size of `pid_t', as computed by sizeof. */
 #define SIZEOF_PID_T 4
 
 /* The size of `pthread_t', as computed by sizeof. */
-#define SIZEOF_PTHREAD_T 4
+#ifdef ABI_64_BIT
+#  define SIZEOF_PTHREAD_T 8
+#else
+#  define SIZEOF_PTHREAD_T 4
+#endif
 
 /* The size of `short', as computed by sizeof. */
-#define SIZEOF_SHORT 2
+#define SIZEOF_SHORT __SIZEOF_SHORT__
 
 /* The size of `size_t', as computed by sizeof. */
-#define SIZEOF_SIZE_T 4
+#define SIZEOF_SIZE_T __SIZEOF_SIZE_T__
 
 /* The size of `time_t', as computed by sizeof. */
-#define SIZEOF_TIME_T 4
+#ifdef ABI_64_BIT
+#  define SIZEOF_TIME_T 8
+#else
+#  define SIZEOF_TIME_T 4
+#endif
 
 /* The size of `uintptr_t', as computed by sizeof. */
-#define SIZEOF_UINTPTR_T 4
+#ifdef ABI_64_BIT
+#  define SIZEOF_UINTPTR_T 8
+#else
+#  define SIZEOF_UINTPTR_T 4
+#endif
 
 /* The size of `void *', as computed by sizeof. */
-#define SIZEOF_VOID_P 4
+#define SIZEOF_VOID_P __SIZEOF_POINTER__
 
 /* The size of `wchar_t', as computed by sizeof. */
-#define SIZEOF_WCHAR_T 4
+#define SIZEOF_WCHAR_T __SIZEOF_WCHAR_T__
 
 /* The size of `_Bool', as computed by sizeof. */
 #define SIZEOF__BOOL 1

@@ -4,6 +4,7 @@ LOCAL_PATH := $(call my-dir)
 APP_PLATFORM := android-8
 
 PYTHON_SHORT_VERSION := {pyShortVersion}
-APP_ABI := armeabi-v7a#all
+#APP_ABI := all
+# The value of APP_ABI is given via the command line.
 
 APP_BUILD_SCRIPT := $(LOCAL_PATH)/Android.mk

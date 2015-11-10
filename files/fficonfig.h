@@ -12,7 +12,7 @@
 #undef C_ALLOCA
 
 /* Define to the flags needed for the .section .eh_frame directive. */
-#undef EH_FRAME_FLAGS
+#define EH_FRAME_FLAGS "aw"
 
 /* Define this if you want extra debugging. */
 #undef FFI_DEBUG
@@ -27,7 +27,7 @@
 #undef FFI_MMAP_EXEC_WRIT
 
 /* Define this if you do not want support for the raw API. */
-#undef FFI_NO_RAW_API
+#define FFI_NO_RAW_API 1
 
 /* Define this if you do not want support for aggregate types. */
 #undef FFI_NO_STRUCTS
@@ -40,7 +40,7 @@
 #define HAVE_ALLOCA_H 1
 
 /* Define if your assembler supports .ascii. */
-#undef HAVE_AS_ASCII_PSEUDO_OP
+#define HAVE_AS_ASCII_PSEUDO_OP 1
 
 /* Define if your assembler supports .cfi_* directives. */
 #undef HAVE_AS_CFI_PSEUDO_OP
@@ -59,7 +59,7 @@
 #undef HAVE_AS_X86_64_UNWIND_SECTION_TYPE
 
 /* Define if your assembler supports PC relative relocs. */
-#undef HAVE_AS_X86_PCREL
+#define HAVE_AS_X86_PCREL 1
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define HAVE_DLFCN_H

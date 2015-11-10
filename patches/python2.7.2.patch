@@ -58,6 +58,18 @@
              if data:
                  break
          if not data:
+--- Python-2.7.2.orig/Lib/subprocess.py
++++ Python-2.7.2.new/Lib/subprocess.py
+@@ -1107,7 +1107,8 @@ class Popen(object):
+                 args = list(args)
+ 
+             if shell:
+-                args = ["/bin/sh", "-c"] + args
++                shellPath = "/system/bin/sh" if sys.platform == "android" else "/bin/sh"
++                args = [shellPath, "-c"] + args
+                 if executable:
+                     args[0] = executable
+ 
 --- Python-2.7.2.orig/Lib/sysconfig.py
 +++ Python-2.7.2.new/Lib/sysconfig.py
 @@ -276,26 +276,36 @@ def _get_makefile_filename():

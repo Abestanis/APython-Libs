@@ -26,6 +26,8 @@ from urlparse     import urlparse
 from urllib2      import urlopen
 from contextlib   import closing
 from hashlib      import md5
+from subprocess   import Popen, PIPE
+from multiprocessing import Pool
 import re
 import shutil
 import os
@@ -67,6 +69,8 @@ class Logger(object):
 
 class Configuration(object):
     
+    ALL_CPU_ABIS = ['armeabi', 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64', 'mips', 'mips64']
+    
     logFile = None
     log = None
     warnOnOutputOverwrite = False
@@ -78,9 +82,11 @@ class Configuration(object):
     filesDir = None
     pythonServer = 'www.python.org'
     pythonServerPath = '/ftp/python/'
-    pythonPatchUrl = None
+    pythonPatchDir = None
     versionList = None
     additionalLibs = None
+    cpuAbis = ALL_CPU_ABIS[:]
+    useMultiThreading = True
     
     def __init__(self, args):
         super(Configuration, self).__init__()
@@ -98,11 +104,12 @@ class Configuration(object):
         self.filesDir = self.processPaths(args.filesDir) or self.filesDir
         self.gitPath = self.processPaths(args.gitPath) or self.gitPath
         self.ndkPath = self.processPaths(args.ndkPath) or self.ndkPath
-        self.pythonPatchUrl = args.pythonPatchUrl or self.pythonPatchUrl
+        self.pythonPatchDir = args.pythonPatchDir or self.pythonPatchDir
         self.versionList = args.versions if args.versions != None and len(args.versions) != 0 else self.versionList
         self.pythonServer = args.pythonServer or self.pythonServer
         self.pythonServerPath = args.pythonServerPath or self.pythonServerPath
-        
+        self.cpuAbis = args.cpuAbis if args.cpuAbis != None and len(args.cpuAbis) != 0 else self.cpuAbis
+        self.useMultiThreading = not args.disableMultiThreading if args.disableMultiThreading != None else self.useMultiThreading
     
     def check(self):
         if self.gitPath == None or not os.path.isfile(self.gitPath):
@@ -111,8 +118,8 @@ class Configuration(object):
         if self.ndkPath == None or not os.path.isfile(self.ndkPath):
             self.log.error('The path to the ndk executable is not specified or incorrect.')
             return False
-        if self.pythonPatchUrl == None:
-            self.log.error('The url to the Python Patch Github directory is not specified.')
+        if self.pythonPatchDir == None:
+            self.log.error('The path to the Python Patch source directory is not specified.')
             return False
         if self.patchesDir == None or not os.path.isdir(self.patchesDir):
             self.log.error('The path to the patches directory is incorrect.')
@@ -123,6 +130,11 @@ class Configuration(object):
         if self.filesDir == None or not os.path.isdir(self.filesDir) :
             self.log.error('The path to the files directory is incorrect.')
             return False
+        if not all([cpuAbi in self.ALL_CPU_ABIS for cpuAbi in self.cpuAbis]):
+            for cpuAbi in self.cpuAbis:
+                if cpuAbi not in self.ALL_CPU_ABIS:
+                    self.log.error('Got invalid cpu api: ' + str(cpuAbi))
+            return False
         return True
     
     def parseConfigFile(self, path):
@@ -131,8 +143,12 @@ class Configuration(object):
         parser.read(path)
         if parser.has_option('General', 'warnOnOutputOverwrite'):
             self.warnOnOutputOverwrite = parser.getboolean('General', 'warnOnOutputOverwrite')
+        if parser.has_option('General', 'useMultiThreading'):
+            self.useMultiThreading = parser.getboolean('General', 'useMultiThreading')
         if parser.has_option('General', 'versions') and parser.get('General', 'versions').strip().lower() not in ['any', 'all']:
-            self.versionList = parser.get('General', 'versions').replace(',', '').split()
+            self.versionList = parser.get('General', 'versions').replace(',', ' ').split()
+        if parser.has_option('General', 'cpuAbis') and parser.get('General', 'cpuAbis').strip().lower() not in ['any', 'all']:
+            self.cpuAbis = parser.get('General', 'cpuAbis').replace(',', ' ').split()
         if parser.has_option('Paths', 'ndk_dir'):
             self.ndkPath = self.processPaths(parser.get('Paths', 'ndk_dir'))
         if parser.has_option('Paths', 'git_dir'):
@@ -149,19 +165,19 @@ class Configuration(object):
             self.pythonServer = parser.get('Paths', 'python_server')
         if parser.has_option('Paths', 'python_server_path'):
             self.pythonServerPath = parser.get('Paths', 'python_server_path')
-        if parser.has_option('Paths', 'python_patch_url'):
-            self.pythonPatchUrl = parser.get('Paths', 'python_patch_url')
+        if parser.has_option('Paths', 'python_patch_dir'):
+            self.pythonPatchDir = self.processPaths(parser.get('Paths', 'python_patch_dir'))
         if parser.has_section('AdditionalLibs'):
             libEntries = parser.options('AdditionalLibs')
             for entry in [entry for entry in libEntries if entry.endswith('_url')]:
                 lib = entry[:-4]
                 libData = {'url': parser.get('AdditionalLibs', entry)}
                 if lib + '_req' in libEntries:
-                    requiredFor = [module.split('|') for module in parser.get('AdditionalLibs', lib + '_req').replace(',', '').split()]
+                    requiredFor = [module.split('|') for module in parser.get('AdditionalLibs', lib + '_req').replace(',', ' ').split()]
                     libData['req']  = [module[0] for module in requiredFor]
                     libData['req3'] = [module[1] if len(module) > 1 else module[0] for module in requiredFor]
                 if lib + '_extraction_filter' in libEntries:
-                    libData['extraction_filter'] = parser.get('AdditionalLibs', lib + '_extraction_filter').replace(',', '').split()
+                    libData['extraction_filter'] = parser.get('AdditionalLibs', lib + '_extraction_filter').replace(',', ' ').split()
                 if lib + '_add_file_copy_opr' in libEntries:
                     opr = parser.get('AdditionalLibs', lib + '_add_file_copy_opr')
                     oprList = re.split(r'(?<!->),?\s(?!->)', opr)
@@ -183,6 +199,21 @@ class Configuration(object):
         if self.logFile != None:
             self.logFile.flush()
             self.logFile.close()
+
+def _callSubprocess(args):
+    '''>>>_callSubprocess(args) -> True or (exitcode, stdout, stderr)
+    Helper Function to call a subprocess in a different process.
+    Calls the subprocess given via 'args'. Returns True, if
+    the subprocess succeeded and returns the exitcode and the
+    contents of the stdout and stderr of the subprocess on failure.
+    '''
+    subprocess = Popen(args, bufsize = -1, stdout = PIPE, stderr = PIPE)
+    stdout, stderr = subprocess.communicate()
+    subprocess.terminate()
+    if subprocess.returncode != 0:
+        return subprocess.returncode, stdout, stderr
+    else:
+        return True
 
 class Util(object):
     
@@ -247,24 +278,18 @@ class Util(object):
         return os.path.join(extractionDir, baseDir)
     
     @staticmethod
-    def compile(ndkPath, tempDir, sourcePath, outputPath, logger):
-        '''>>> compile(ndkPath, tempDir, sourcePath, outputPath, logger) -> success
+    def compile(ndkPath, tempDir, sourcePath, outputPath, cpuAbis, logger):
+        '''>>> compile(ndkPath, tempDir, sourcePath, outputPath, cpuAbis, logger) -> success
         Compiles the source in 'sourcePath', using the ndk
         located at 'ndkPath'. An Application.mk file is
         expected under 'sourcePath'. All temporary objects
         will be placed under 'tempDir'. The output is placed
-        under 'outputPath'/$(TARGET_ARCH_ABI). Logs the
+        under 'outputPath'/$(TARGET_ARCH_ABI). The cpu abis
+        to compile for are given via 'cpuAbis'. Logs the
         executed command via 'logger'. Returns True, if the
         compilation succeeded, False on failure.
         '''
-        args = [
-            ndkPath,
-            'NDK_OUT=' + Util.escapeNDKParameter(tempDir),
-            'NDK_APPLICATION_MK=' + Util.escapeNDKParameter(sourcePath) + '/Application.mk',
-            'NDK_PROJECT_PATH=' + Util.escapeNDKParameter(sourcePath),
-            'NDK_APP_DST_DIR=' + Util.escapeNDKParameter(outputPath) + '/$(TARGET_ARCH_ABI)'
-        ]
-        logger.debug(subprocess.list2cmdline(args))
+        args = Util.createCompileSubprocessArgs(ndkPath, tempDir, sourcePath, outputPath, cpuAbis, logger)
         return subprocess.call(args, cwd = sourcePath, stdout = logger.getOutput(), stderr = logger.getOutput()) == 0
     
     @staticmethod
@@ -342,6 +367,47 @@ class Util(object):
             return parameter.replace('\\', '/')
         else:
             return parameter
+    
+    @staticmethod
+    def callSubprocessesMultiThreaded(subprocessArgs, logger):
+        '''>>>callSubprocessesMultiThreaded(subprocessArgs, logger) -> success
+        Executes the subprocesses constructed from the given 'subprocessArgs' in
+        parrallel. If one of them fail, the exitcode, stdout and stderr are written
+        to the logs via 'logger' and False is returned.
+        '''
+        pool = Pool(min(10, len(subprocessArgs)))
+        handles = [pool.apply_async(_callSubprocess, [args]) for args in subprocessArgs]
+        logger.debug('Started ' + str(len(handles)) + ' subprocesses.')
+        pool.close()
+        while len(handles) > 0:
+            result = handles.pop(0).get()
+            if result != True:
+                logger.error('Subprocess exited with code ' + str(result[0]))
+                logger.info(result[1])
+                logger.error(result[2])
+                return False
+        return True
+    
+    @staticmethod
+    def createCompileSubprocessArgs(ndkPath, tempDir, sourcePath, outputPath, abis, logger):
+        '''>>> createCompileSubprocessArgs(ndkPath, tempDir, sourcePath, outputPath, abis, logger) -> arguments
+        Create a list of arguments that can be used to create a subprocess to
+        compile the source in 'sourcePath' using the ndk located at 'ndkPath'.
+        An Application.mk file is expected under 'sourcePath'. All temporary
+        objects will be placed under 'tempDir'. The cpu abis to compile for are
+        given via 'abis'. The output is placed at 'outputPath'/$(TARGET_ARCH_ABI).
+        Logs the executed command via 'logger'. Returns the list of arguments.
+        '''
+        args = [
+            ndkPath,
+            'NDK_OUT=' + Util.escapeNDKParameter(tempDir),
+            'NDK_APPLICATION_MK=' + Util.escapeNDKParameter(sourcePath) + '/Application.mk',
+            'NDK_PROJECT_PATH=' + Util.escapeNDKParameter(sourcePath),
+            'NDK_APP_DST_DIR=' + Util.escapeNDKParameter(outputPath) + '/$(TARGET_ARCH_ABI)',
+            'APP_ABI=' + ' '.join(abis if type(abis) in [list, tuple] else [abis])
+        ]
+        logger.debug(subprocess.list2cmdline(args))
+        return args
 
 class Builder(object):
     
@@ -418,8 +484,11 @@ class Builder(object):
             if not self.generateJSON():
                 return
             delta = time() - startTime
-            deltah, deltas = divmod(delta, 60)
-            self.config.log.info('Building finished in ' + str(int(deltah)) + ' minutes, ' + str(int(deltas)) + ' seconds and ' + str(int(round((delta - int(delta)) * 1000))) + ' milliseconds.')
+            deltaMinutes, deltaSeconds = divmod(delta, 60)
+            deltaHours, deltaMinutes = divmod(deltaMinutes, 60)
+            self.config.log.info('Building finished in ' + ((str(int(deltaHours)) + ' hours, ') if deltaHours != 0 else '')
+                                 + str(int(deltaMinutes)) + ' minutes, ' + str(int(deltaSeconds)) + ' seconds and '
+                                 + str(int(round((delta - int(delta)) * 1000))) + ' milliseconds.')
             success = True
         except KeyboardInterrupt:
             self.config.log.error('Cancelling build due to interrupt.')
@@ -438,13 +507,9 @@ class Builder(object):
         self.config.log.info('Setting up optional libraries...')
         if not os.path.isdir(sourceDir):
             os.mkdir(sourceDir)
-        self.config.log.info('Downloading Python patch...')
-        result = Util.downloadGitDir(self.config.pythonPatchUrl, sourceDir, self.config.log)
-        if type(result) == HTTPResponse:
-            self.config.log.error('Failed to download Python patch from "' + self.config.pythonPatchUrl + '":')
-            self.config.log.error('Response ' + str(response.status) + ': ' + response.reason)
-            return False
-        libs = {'pythonPatch': result}
+        self.config.log.info('Copying Python patch...')
+        shutil.copytree(self.config.pythonPatchDir, os.path.join(sourceDir, 'PythonPatch'))
+        libs = {'pythonPatch': os.path.join(sourceDir, 'PythonPatch')}
         for lib, data in self.config.additionalLibs.iteritems():
             makefilePath = os.path.join(self.config.filesDir, lib + '-Android.mk')
             if not os.path.exists(makefilePath):
@@ -467,13 +532,24 @@ class Builder(object):
             pyShortVersion = ''
         )
         androidMKPath = os.path.join(sourceDir, 'Android.mk')
+        outputDir = os.path.join(self.config.outputDir, 'libraries')
         with open(androidMKPath, 'w') as androidMK:
             androidMK.write('include $(call all-subdir-makefiles)')
-        if not Util.compile(self.config.ndkPath, os.path.join(tempDir, 'NDK-Temp'), sourceDir, os.path.join(self.config.outputDir, 'libraries'), self.config.log):
+        self.config.log.info('Compiling ' + str(len(self.config.additionalLibs)) + ' additional libraries...')
+        success = False
+        if self.config.useMultiThreading:
+            subprocessArgs = [Util.createCompileSubprocessArgs(self.config.ndkPath, os.path.join(tempDir, 'NDK-Temp'),
+                                                               sourceDir, outputDir, abi, self.config.log) for abi in self.config.cpuAbis]
+            success = Util.callSubprocessesMultiThreaded(subprocessArgs, self.config.log)
+        else:
+            success = Util.compile(self.config.ndkPath, os.path.join(tempDir, 'NDK-Temp'),
+                                   sourceDir, outputDir, self.config.cpuAbis, self.config.log)
+        if not success:
             self.config.log.error('Compiling the additional libraries failed.')
             return False
         self.config.log.info('Compiling of the additional libraries succeeded.')
         os.remove(applicationMKPath)
+        os.remove(androidMKPath)
         self.config.log.info('Patching Android.mk files...')
         for module, modulePath in libs.iteritems():
             androidMKPath = os.path.join(modulePath, 'Android.mk')
@@ -483,6 +559,8 @@ class Builder(object):
                     for line in source:
                         if 'LOCAL_SRC_FILES :=' in line:
                             data += 'LOCAL_SRC_FILES := ' + Util.escapeNDKParameter(self.config.outputDir) + '/libraries/$(TARGET_ARCH_ABI)/lib' + module + '.so\n'
+                        elif 'LOCAL_SRC_FILES +=' in line:
+                            continue
                         elif 'include $(BUILD_SHARED_LIBRARY)' in line:
                             data += 'include $(PREBUILT_SHARED_LIBRARY)\n'
                         else:
@@ -526,7 +604,8 @@ class Builder(object):
             url = self.versionToUrl(connection, version)
             if type(url) != str:
                 if version != '2.0':
-                    self.config.log.info('Ignoring version ' + version + ' because it has no downloadable source code. Maybe this version is still in development.')
+                    self.config.log.info('Ignoring version ' + version + ' because it has no downloadable source code. ' +
+                                         'Maybe this version is still in development.')
                 continue
             versions[version] = url
         connection.close()
@@ -585,7 +664,8 @@ class Builder(object):
             androidMK.write('include $(call all-subdir-makefiles)')
         # Copy the Android.mk and configuration files
         shutil.copy(os.path.join(self.config.filesDir, 'Android.mk'), sourcePath)
-        shutil.copy(os.path.join(self.config.filesDir, 'config3.c' if int(pythonVersion[0]) >= 3 else 'config.c'), os.path.join(sourcePath, 'Modules', 'config.c'))
+        shutil.copy(os.path.join(self.config.filesDir, 'config3.c' if int(pythonVersion[0]) >= 3 else 'config.c'),
+                    os.path.join(sourcePath, 'Modules', 'config.c'))
         shutil.copy(os.path.join(self.config.filesDir, 'pyconfig.h'), os.path.join(sourcePath, 'Include'))
         # Setup module libraries
         for lib, libData in self.config.additionalLibs.items():
@@ -610,7 +690,14 @@ class Builder(object):
             )
         # Compile
         self.config.log.info('Compiling Python ' + pythonVersion + '...')
-        return Util.compile(self.config.ndkPath, os.path.join(tempDir, 'NDK-Temp'), parentDir, os.path.join(self.config.outputDir, 'Python' + pythonVersion), self.config.log)
+        outputDir = os.path.join(self.config.outputDir, 'Python' + pythonVersion)
+        if self.config.useMultiThreading:
+            subprocessArgs = [Util.createCompileSubprocessArgs(self.config.ndkPath, os.path.join(tempDir, 'NDK-Temp'),
+                                                               parentDir, outputDir, abi, self.config.log) for abi in self.config.cpuAbis]
+            return Util.callSubprocessesMultiThreaded(subprocessArgs, self.config.log)
+        else:
+            return Util.compile(self.config.ndkPath, os.path.join(tempDir, 'NDK-Temp'),
+                                parentDir, outputDir, self.config.cpuAbis, self.config.log)
     
     def cleanup(self, sourcePath, outputDir):
         self.config.log.info('Removing unnecessary files...')
@@ -697,9 +784,11 @@ if __name__ == '__main__':
     parser.add_argument('--filesDir', default = 'files', help = 'The path to the files directory. Defaults to the directory "files" in the current directory.')
     parser.add_argument('--gitPath', help = 'The path to the patch executable in the git directory.')
     parser.add_argument('--ndkPath', help = 'The path to the ndk-build executable.')
-    parser.add_argument('--pythonPatchUrl', help = 'The url to the Github directory containing the pythonPatch library source code.')
+    parser.add_argument('--pythonPatchDir', help = 'The path to the directory where the pythonPatch library source code can be found.')
     parser.add_argument('--pythonServer', default = Configuration.pythonServer, help = 'The host address of the Python server. Defaults to "' + Configuration.pythonServer + '".')
     parser.add_argument('--pythonServerPath', default = Configuration.pythonServerPath, help = 'The path on the Python server to see all available Python versions. Defaults to "' + Configuration.pythonServerPath + '".')
+    parser.add_argument('--cpuAbis', nargs = '*', default = Configuration.ALL_CPU_ABIS, help = 'The cpu abis to compile for. Defaults to all. Possible values are ' + ', '.join(Configuration.ALL_CPU_ABIS))
+    parser.add_argument('--disableMultiThreading', default = False, action='store_true', help = 'If set, turns off the multithreading of the compilation. By default, multithreading is turned on.')
     parser.add_argument('versions', nargs = '*', help = 'The Python versions to download. Empty means all versions available.')
     args = parser.parse_args()
     builder = Builder(args)
