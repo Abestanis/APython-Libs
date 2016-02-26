@@ -1,6 +1,8 @@
 # APython-Libs
 This repository hosts all the library files and their generating code for the [APython Project](https://github.com/Abestanis/APython).
 
+The hosted libraries can be accessed with the information provided by the generated index.json which is available at http://abestanis.github.io/APython-Libs/index.json.
+
 ##Usage
 
 The build.py script takes care of downloading and patching the source code, calling the [ndk](https://developer.android.com/tools/sdk/ndk/index.html) and generating the index.json file.
