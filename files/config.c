@@ -33,15 +33,10 @@ extern void _PyWarnings_Init(void);
 extern void initerrno(void);
 
 extern void initarray(void);
-#ifndef MS_WINI64
 extern void initaudioop(void);
-#endif
 extern void initbinascii(void);
 extern void initcmath(void);
 extern void initfuture_builtins(void);
-#ifndef MS_WINI64
-extern void initimageop(void);
-#endif
 extern void initmath(void);
 extern void init_md5(void);
 extern void initposix(void);
@@ -55,14 +50,10 @@ extern void inittime(void);
 extern void initthread(void);
 extern void initcStringIO(void);
 extern void initcPickle(void);
-#ifdef WIN32
-extern void initmsvcrt(void);
 extern void init_locale(void);
-#endif
 extern void init_codecs(void);
 extern void init_weakref(void);
 extern void init_hotshot(void);
-extern void initxxsubtype(void);
 extern void initzipimport(void);
 extern void init_random(void);
 extern void inititertools(void);
@@ -74,7 +65,6 @@ extern void initmmap(void);
 extern void init_csv(void);
 extern void init_sre(void);
 extern void initparser(void);
-//extern void init_winreg(void);
 extern void init_struct(void);
 extern void initdatetime(void);
 extern void init_functools(void);
@@ -82,11 +72,9 @@ extern void init_json(void);
 extern void initzlib(void);
 extern void initpwd(void);
 extern void inittermios(void);
-//extern void initrgbimg(void);
 extern void initselect(void);
 extern void init_socket(void);
 extern void initstrop(void);
-//extern void initpcre(void);
 extern void initfcntl(void);
 
 extern void init_multibytecodec(void);
@@ -97,10 +85,15 @@ extern void init_codecs_iso2022(void);
 extern void init_codecs_jp(void);
 extern void init_codecs_kr(void);
 extern void init_codecs_tw(void);
-//extern void init_subprocess(void);
 extern void init_lsprof(void);
 extern void init_io(void);
 extern void initunicodedata(void);
+extern void initpyexpat(void);
+extern void init_elementtree(void);
+extern void init_multiprocessing(void);
+extern void initossaudiodev(void);
+extern void initresource(void);
+extern void initsyslog(void);
 
 struct _inittab _PyImport_Inittab[] = {
 
@@ -130,18 +123,11 @@ struct _inittab _PyImport_Inittab[] = {
     {"errno", initerrno},
 
     {"array", initarray},
-    #ifdef MS_WINDOWS
-    #ifndef MS_WINI64
     {"audioop", initaudioop},
-    #endif
-    #endif
     {"binascii", initbinascii},
     {"cmath", initcmath},
     {"errno", initerrno},
     {"future_builtins", initfuture_builtins},
-    #ifndef MS_WINI64
-    {"imageop", initimageop},
-    #endif
     {"math", initmath},
     {"_md5", init_md5},
     {"posix", initposix},
@@ -152,17 +138,12 @@ struct _inittab _PyImport_Inittab[] = {
     {"_sha512", init_sha512},
     {"strop", initstrop},
     {"time", inittime},
-    #ifdef WITH_THREAD
+#ifdef WITH_THREAD
     {"thread", initthread},
-    #endif
+#endif
     {"cStringIO", initcStringIO},
     {"cPickle", initcPickle},
-    #ifdef WIN32
-    {"msvcrt", initmsvcrt},
     {"_locale", init_locale},
-    #endif
-//    {"_subprocess", init_subprocess},
-
     {"_codecs", init_codecs},
     {"_weakref", init_weakref},
     {"_hotshot", init_hotshot},
@@ -177,22 +158,18 @@ struct _inittab _PyImport_Inittab[] = {
     {"_csv", init_csv},
     {"_sre", init_sre},
     {"parser", initparser},
-//    {"_winreg", init_winreg},
     {"_struct", init_struct},
     {"datetime", initdatetime},
     {"_functools", init_functools},
     {"_json", init_json},
 
-    {"xxsubtype", initxxsubtype},
     {"zipimport", initzipimport},
     {"zlib", initzlib},
     {"pwd", initpwd},
     {"termios", inittermios},
-    //{"rgbimg", initrgbimg},
     {"select", initselect},
     {"_socket", init_socket},
     {"strop", initstrop},
-    //{"pcre", initpcre},
     {"fcntl", initfcntl},
 
     /* CJK codecs */
@@ -203,9 +180,15 @@ struct _inittab _PyImport_Inittab[] = {
     {"_codecs_jp", init_codecs_jp},
     {"_codecs_kr", init_codecs_kr},
     {"_codecs_tw", init_codecs_tw},
-//
+
     {"_io", init_io},
     {"unicodedata", initunicodedata},
+    {"pyexpat", initpyexpat},
+    {"_elementtree", init_elementtree},
+    {"_multiprocessing", init_multiprocessing},
+    {"ossaudiodev", initossaudiodev},
+    {"resource", initresource},
+    {"syslog", initsyslog},
 
     /* Sentinel */
     {0, 0}

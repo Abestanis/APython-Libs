@@ -34,9 +34,7 @@ extern PyObject* PyInit__string(void);
 extern PyObject* PyInit_errno(void);
 
 extern PyObject* PyInit_array(void);
-#ifndef MS_WINI64
 extern PyObject* PyInit_audioop(void);
-#endif
 extern PyObject* PyInit_binascii(void);
 extern PyObject* PyInit_cmath(void);
 extern PyObject* PyInit_math(void);
@@ -50,13 +48,9 @@ extern PyObject* PyInit__sha512(void);
 extern PyObject* PyInit_time(void);
 extern PyObject* PyInit__thread(void);
 extern PyObject* PyInit__pickle(void);
-#ifdef WIN32
-extern PyObject* PyInit_msvcrt(void);
 extern PyObject* PyInit__locale(void);
-#endif
 extern PyObject* PyInit__codecs(void);
 extern PyObject* PyInit__weakref(void);
-extern PyObject* PyInit_xxsubtype(void);
 extern PyObject* PyInit_zipimport(void);
 extern PyObject* PyInit__random(void);
 extern PyObject* PyInit_itertools(void);
@@ -68,7 +62,6 @@ extern PyObject* PyInit_mmap(void);
 extern PyObject* PyInit__csv(void);
 extern PyObject* PyInit__sre(void);
 extern PyObject* PyInit_parser(void);
-//extern PyObject* PyInit__winreg(void);
 extern PyObject* PyInit__struct(void);
 extern PyObject* PyInit__datetime(void);
 extern PyObject* PyInit__functools(void);
@@ -76,10 +69,8 @@ extern PyObject* PyInit__json(void);
 extern PyObject* PyInit_zlib(void);
 extern PyObject* PyInit_pwd(void);
 extern PyObject* PyInit_termios(void);
-//extern PyObject* PyInit_rgbimg(void);
 extern PyObject* PyInit_select(void);
 extern PyObject* PyInit__socket(void);
-//extern PyObject* PyInit_pcre(void);
 extern PyObject* PyInit_fcntl(void);
 
 extern PyObject* PyInit__multibytecodec(void);
@@ -90,13 +81,21 @@ extern PyObject* PyInit__codecs_iso2022(void);
 extern PyObject* PyInit__codecs_jp(void);
 extern PyObject* PyInit__codecs_kr(void);
 extern PyObject* PyInit__codecs_tw(void);
-//extern PyObject* PyInit__subprocess(void);
 extern PyObject* PyInit__lsprof(void);
 extern PyObject* PyInit__io(void);
 extern PyObject* PyInit_unicodedata(void);
 extern PyObject* PyInit_atexit(void);
 extern PyObject* PyInit__posixsubprocess(void);
 extern PyObject* PyInit_pyexpat(void);
+extern PyObject* PyInit__elementtree(void);
+extern PyObject* PyInit__multiprocessing(void);
+extern PyObject* PyInit_ossaudiodev(void);
+extern PyObject* PyInit__opcode(void);
+extern PyObject* PyInit__stat(void);
+extern PyObject* PyInit__tracemalloc(void);
+extern PyObject* PyInit_faulthandler(void);
+extern PyObject* PyInit_resource(void);
+extern PyObject* PyInit_syslog(void);
 
 struct _inittab _PyImport_Inittab[] = {
 
@@ -129,11 +128,7 @@ struct _inittab _PyImport_Inittab[] = {
     {"errno", PyInit_errno},
 
     {"array", PyInit_array},
-    #ifdef MS_WINDOWS
-    #ifndef MS_WINI64
     {"audioop", PyInit_audioop},
-    #endif
-    #endif
     {"binascii", PyInit_binascii},
     {"cmath", PyInit_cmath},
     {"errno", PyInit_errno},
@@ -150,11 +145,7 @@ struct _inittab _PyImport_Inittab[] = {
     {"_thread", PyInit__thread},
     #endif
     {"_pickle", PyInit__pickle},
-    #ifdef WIN32
-    {"msvcrt", PyInit_msvcrt},
     {"_locale", PyInit__locale},
-    #endif
-//    {"_subprocess", PyInit__subprocess},
 
     {"_codecs", PyInit__codecs},
     {"_weakref", PyInit__weakref},
@@ -169,21 +160,17 @@ struct _inittab _PyImport_Inittab[] = {
     {"_csv", PyInit__csv},
     {"_sre", PyInit__sre},
     {"parser", PyInit_parser},
-//    {"_winreg", PyInit__winreg},
     {"_struct", PyInit__struct},
     {"_datetime", PyInit__datetime},
     {"_functools", PyInit__functools},
     {"_json", PyInit__json},
 
-    {"xxsubtype", PyInit_xxsubtype},
     {"zipimport", PyInit_zipimport},
     {"zlib", PyInit_zlib},
     {"pwd", PyInit_pwd},
     {"termios", PyInit_termios},
-    //{"rgbimg", PyInit_rgbimg},
     {"select", PyInit_select},
     {"_socket", PyInit__socket},
-    //{"pcre", PyInit_pcre},
     {"fcntl", PyInit_fcntl},
 
     /* CJK codecs */
@@ -200,6 +187,15 @@ struct _inittab _PyImport_Inittab[] = {
     {"atexit", PyInit_atexit},
     {"_posixsubprocess", PyInit__posixsubprocess},
     {"pyexpat", PyInit_pyexpat},
+    {"_elementtree", PyInit__elementtree},
+    {"_multiprocessing", PyInit__multiprocessing},
+    {"ossaudiodev", PyInit_ossaudiodev},
+    {"_opcode", PyInit__opcode},
+    {"_stat", PyInit__stat},
+    {"_tracemalloc", PyInit__tracemalloc},
+    {"faulthandler", PyInit_faulthandler},
+    {"resource", PyInit_resource},
+    {"syslog", PyInit_syslog},
 
     /* Sentinel */
     {0, 0}

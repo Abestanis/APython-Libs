@@ -213,6 +213,42 @@
      return result;
  
    failed:
+--- Python-2.7.2.orig/Modules/_multiprocessing/multiprocessing.c
++++ Python-2.7.2.new/Modules/_multiprocessing/multiprocessing.c
+@@ -122,7 +122,7 @@ multiprocessing_sendfd(PyObject *self, PyObject *args)
+     cmsg->cmsg_type = SCM_RIGHTS;
+     cmsg->cmsg_len = CMSG_LEN(sizeof(int));
+     msg.msg_controllen = cmsg->cmsg_len;
+-    *CMSG_DATA(cmsg) = fd;
++    memcpy((int*) CMSG_DATA(cmsg), &fd, sizeof(int));
+ 
+     Py_BEGIN_ALLOW_THREADS
+     res = sendmsg(conn, &msg, 0);
+@@ -165,7 +165,8 @@ multiprocessing_recvfd(PyObject *self, PyObject *args)
+     if (res < 0)
+         return PyErr_SetFromErrno(PyExc_OSError);
+ 
+-    fd = *CMSG_DATA(cmsg);
++    int* dataPointer = CMSG_DATA(cmsg);
++    fd = *dataPointer;
+     return Py_BuildValue("i", fd);
+ }
+ 
+--- Python-2.7.2.orig/Modules/ossaudiodev.c
++++ Python-2.7.2.new/Modules/ossaudiodev.c
+@@ -30,7 +30,11 @@
+ #endif
+ 
+ #include <sys/ioctl.h>
+-#include <sys/soundcard.h>
++#ifdef __ANDROID__
++# include <linux/soundcard.h>
++#else
++# include <sys/soundcard.h>
++#endif
+ 
+ #if defined(linux)
+ 
 --- Python-2.7.2.orig/Modules/posixmodule.c
 +++ Python-2.7.2.new/Modules/posixmodule.c
 @@ -3787,13 +3787,13 @@ posix_openpty(PyObject *self, PyObject *noargs)
@@ -322,7 +358,18 @@
                                             min_width, grouping, thousands_sep);
 --- Python-2.7.2.orig/Parser/myreadline.c
 +++ Python-2.7.2.new/Parser/myreadline.c
-@@ -164,6 +164,9 @@ PyOS_StdioReadline(FILE *sys_stdin, FILE *sys_stdout, char *prompt)
+@@ -29,6 +29,10 @@ static PyThread_type_lock _PyOS_ReadlineLock = NULL;
+ 
+ int (*PyOS_InputHook)(void) = NULL;
+ 
++int (*get_PyOS_InputHook())(void) {
++    return PyOS_InputHook;
++}
++
+ #ifdef RISCOS
+ int Py_RISCOSWimpFlag;
+ #endif
+@@ -164,6 +168,9 @@ PyOS_StdioReadline(FILE *sys_stdin, FILE *sys_stdout, char *prompt)
  
  char *(*PyOS_ReadlineFunctionPointer)(FILE *, FILE *, char *);
  

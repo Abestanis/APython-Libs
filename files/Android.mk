@@ -11,6 +11,8 @@ EXCLUDED_FILES := Modules/almodule.c \
                   Modules/clmodule.c \
                   Modules/cryptmodule.c \
                   Modules/dbmmodule.c \
+                  Modules/expat/xmltok_impl.c \
+                  Modules/expat/xmltok_ns.c \
                   Modules/flmodule.c \
                   Modules/fmmodule.c \
                   Modules/fpectlmodule.c \
@@ -21,33 +23,24 @@ EXCLUDED_FILES := Modules/almodule.c \
                   Modules/grpmodule.c \
                   Modules/imgfile.c \
                   Modules/nismodule.c \
-                  Modules/ossaudiodev.c \
+                  Modules/overlapped.c \
                   Modules/readline.c \
                   Modules/sgimodule.c \
                   Modules/spwdmodule.c \
                   Modules/sunaudiodev.c \
                   Modules/svmodule.c \
-                  Modules/tkappinit.c \
                   Modules/_bsddb.c \
                   Modules/_cryptmodule.c \
-                  Modules/_cursesmodule.c \
-                  Modules/_curses_panel.c \
-                  Modules/_dbmmodule.c \
-                  Modules/_elementtree.c \
-                  Modules/_freeze_importlib.c \
-                  Modules/_gdbmmodule.c \
-                  Modules/_hashopenssl.c \
-                  Modules/_lzmamodule.c \
-                  Modules/_scproxy.c \
-                  Modules/_tkinter.c \
-                  Modules/_testembed.c \
                   Modules/_ctypes/darwin/dlfcn_simple.c \
+                  Modules/_curses_panel.c \
+                  Modules/_cursesmodule.c \
+                  Modules/_dbmmodule.c \
                   Modules/_decimal/_decimal.c \
-                  Modules/_multiprocessing/multiprocessing.c \
+                  Modules/_gdbmmodule.c \
+                  Modules/_lzmamodule.c \
                   Modules/_multiprocessing/pipe_connection.c \
                   Modules/_multiprocessing/win32_functions.c \
-                  Modules/_multiprocessing/socket_connection.c \
-                  Modules/_multiprocessing/semaphore.c \
+                  Modules/_scproxy.c \
                   Modules/_sqlite/cache.c \
                   Modules/_sqlite/connection.c \
                   Modules/_sqlite/cursor.c \
@@ -58,14 +51,7 @@ EXCLUDED_FILES := Modules/almodule.c \
                   Modules/_sqlite/statement.c \
                   Modules/_sqlite/util.c \
                   Modules/_winapi.c \
-                  Modules/audioop.c \
-                  Modules/expat/xmltok_impl.c \
-                  Modules/expat/xmltok_ns.c \
-                  Modules/overlapped.c \
-                  Modules/zlib/example.c \
-                  Modules/zlib/minigzip.c \
                   Parser/intrcheck.c \
-                  Parser/pgenmain.c \
                   Parser/parsetok_pgen.c \
                   Parser/tokenizer_pgen.c \
                   Python/dynload_aix.c \
@@ -77,25 +63,44 @@ EXCLUDED_FILES := Modules/almodule.c \
                   Python/dynload_os2.c \
                   Python/dynload_stub.c \
                   Python/dynload_win.c \
-                  Python/getcwd.c \
                   Python/mactoolboxglue.c \
                   Python/sigcheck.c \
+
+
+# Test, example or template source files and source files defining main
+EXCLUDED_FILES += Modules/_ctypes/_ctypes_test.c \
+                  Modules/_freeze_importlib.c \
+                  Modules/_testbuffer.c \
+                  Modules/_testcapimodule.c \
+                  Modules/_testembed.c \
+                  Modules/_testimportmultiple.c \
+                  Modules/fpetestmodule.c \
+                  Modules/xxlimited.c \
+                  Modules/xxmodule.c \
+                  Modules/xxsubtype.c \
+                  Modules/zlib/example.c \
+                  Modules/zlib/minigzip.c \
+                  Parser/pgenmain.c \
 
 LOCAL_SRC_FILES := $(filter-out $(EXCLUDED_FILES), $(FILE_LIST:$(LOCAL_PATH)/%=%))
 
 # Filter out all modules that are sepperate in their own additional library
 EXCLUDED_FILES := $(LOCAL_PATH)/Modules/_ssl.c \
+                  $(LOCAL_PATH)/Modules/_hashopenssl.c \
                   $(LOCAL_PATH)/Modules/bz2module.c \
                   $(LOCAL_PATH)/Modules/_bz2module.c \
+                  $(LOCAL_PATH)/Modules/_tkinter.c \
+                  $(LOCAL_PATH)/Modules/tkappinit.c \
                   $(wildcard $(LOCAL_PATH)/Modules/_ctypes/*) \
                   $(wildcard $(LOCAL_PATH)/Modules/_ctypes/*/*) \
 
 LOCAL_SRC_FILES := $(filter-out $(EXCLUDED_FILES:$(LOCAL_PATH)/%=%), $(LOCAL_SRC_FILES))
 
-LOCAL_CFLAGS = -D 'PLATFORM=\"android\"' \
-               -D 'VERSION=\"$(PYTHON_SHORT_VERSION)\"' \
-               -D HAVE_EXPAT_CONFIG_H \
-               -D 'SOABI=\"apython-$(TARGET_ARCH_ABI)\"' \
+LOCAL_CFLAGS := -D 'PLATFORM=\"android\"' \
+                -D 'VERSION=\"$(PYTHON_SHORT_VERSION)\"' \
+                -D HAVE_EXPAT_CONFIG_H \
+                -D 'SOABI=\"apython-$(TARGET_ARCH_ABI)\"' \
+                -D __ANDROID__ \
 
 ifneq (,$(filter $(TARGET_ARCH), arm64 x86_64 mips64))
   LOCAL_CFLAGS += -D ABI_64_BIT -D CONFIG_64 -D HAVE_LINUX_CAN_H

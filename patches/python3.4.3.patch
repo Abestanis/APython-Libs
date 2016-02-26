@@ -242,6 +242,21 @@
  # define SYS_getdents64  __NR_getdents64
  #endif
  
+--- Python-3.4.3.orig/Modules/ossaudiodev.c
++++ Python-3.4.3.new/Modules/ossaudiodev.c
+@@ -30,7 +30,11 @@
+ #endif
+ 
+ #include <sys/ioctl.h>
+-#include <sys/soundcard.h>
++#ifdef __ANDROID__
++# include <linux/soundcard.h>
++#else
++# include <sys/soundcard.h>
++#endif
+ 
+ #if defined(linux)
+ 
 --- Python-3.4.3.orig/Modules/posixmodule.c
 +++ Python-3.4.3.new/Modules/posixmodule.c
 @@ -6068,13 +6068,13 @@ posix_openpty(PyObject *self, PyObject *noargs)
@@ -329,11 +344,22 @@
      {"tcflow", termios_tcflow,
 --- Python-3.4.3.orig/Parser/myreadline.c
 +++ Python-3.4.3.new/Parser/myreadline.c
-@@ -168,6 +168,9 @@ PyOS_StdioReadline(FILE *sys_stdin, FILE *sys_stdout, const char *prompt)
+@@ -25,6 +25,10 @@ static PyThread_type_lock _PyOS_ReadlineLock = NULL;
+ 
+ int (*PyOS_InputHook)(void) = NULL;
+ 
++int (*get_PyOS_InputHook())(void) {
++    return PyOS_InputHook;
++}
++
+ /* This function restarts a fgets() after an EINTR error occurred
+    except if PyOS_InterruptOccurred() returns true. */
+ 
+@@ -168,6 +172,9 @@ PyOS_StdioReadline(FILE *sys_stdin, FILE *sys_stdout, const char *prompt)
  
  char *(*PyOS_ReadlineFunctionPointer)(FILE *, FILE *, const char *);
  
-+void set_PyOS_ReadlineFunctionPointer(char *(*func)(FILE *, FILE *, char *)) {
++void set_PyOS_ReadlineFunctionPointer(char *(*func)(FILE *, FILE *, const char *)) {
 +    PyOS_ReadlineFunctionPointer = func;
 +}
  

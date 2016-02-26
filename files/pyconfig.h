@@ -24,15 +24,18 @@
 
 /* Define if C doubles are 64-bit IEEE 754 binary format, stored in ARM
    mixed-endian order (byte order 45670123) */
-/* #undef DOUBLE_IS_ARM_MIXED_ENDIAN_IEEE754 */
+/*#undef DOUBLE_IS_ARM_MIXED_ENDIAN_IEEE754 */
 
+#if __FLOAT_WORD_ORDER__ == __ORDER_BIG_ENDIAN__
 /* Define if C doubles are 64-bit IEEE 754 binary format, stored with the most
    significant byte first */
-/* #undef DOUBLE_IS_BIG_ENDIAN_IEEE754 */
+#define DOUBLE_IS_BIG_ENDIAN_IEEE754
 
+#elif __FLOAT_WORD_ORDER__ == __ORDER_LITTLE_ENDIAN__
 /* Define if C doubles are 64-bit IEEE 754 binary format, stored with the
    least significant byte first */
-/* #undef DOUBLE_IS_LITTLE_ENDIAN_IEEE754 */
+#define DOUBLE_IS_LITTLE_ENDIAN_IEEE754
+#endif
 
 /* Define if --enable-ipv6 is specified */
 #define ENABLE_IPV6  1
@@ -251,7 +254,7 @@
 #define HAVE_FTELLO 1
 
 /* Define to 1 if you have the `ftime' function. */
-#undef HAVE_FTIME
+//#define HAVE_FTIME 1
 
 /* Define to 1 if you have the `ftruncate' function. */
 #define HAVE_FTRUNCATE 1
@@ -875,7 +878,7 @@
 #define HAVE_UTIME_H 1
 
 /* Define to 1 if you have the `wait3' function. */
-#undef HAVE_WAIT3
+//#define HAVE_WAIT3 1
 
 /* Define to 1 if you have the `wait4' function. */
 /* #undef HAVE_WAIT4 */
@@ -1055,6 +1058,9 @@
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
+/* Define to 1 if you have the sigaltstack function. */
+#define HAVE_SIGALTSTACK 1
+
 /* Define if you can safely include both <sys/select.h> and <sys/time.h>
    (which you can't on SCO ODT 3.0). */
 #define SYS_SELECT_WITH_SYS_TIME 1
@@ -1132,6 +1138,9 @@
 
 /* Define if you want pymalloc to be disabled when running under valgrind */
 /* #undef WITH_VALGRIND */
+
+/* Define if you compile with tkappinit.c */
+#define WITH_APPINIT
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
@@ -1229,11 +1238,11 @@
 
 /* Define to the type of a signed integer type of width exactly 32 bits if
    such a type exists and the standard includes do not define it. */
-/* #undef int32_t */
+#define int32_t int32_t
 
 /* Define to the type of a signed integer type of width exactly 64 bits if
    such a type exists and the standard includes do not define it. */
-/* #undef int64_t */
+#define int64_t int64_t
 
 /* Define to `int' if <sys/types.h> does not define. */
 /* #undef mode_t */
@@ -1258,11 +1267,11 @@
 
 /* Define to the type of an unsigned integer type of width exactly 32 bits if
    such a type exists and the standard includes do not define it. */
-/* #undef uint32_t */
+#define uint32_t uint32_t
 
 /* Define to the type of an unsigned integer type of width exactly 64 bits if
    such a type exists and the standard includes do not define it. */
-/* #undef uint64_t */
+#define uint64_t uint64_t
 
 /* Define to empty if the keyword does not work. */
 /* #undef volatile */
