@@ -511,7 +511,7 @@ class Builder(object):
         shutil.copytree(self.config.pythonPatchDir, os.path.join(sourceDir, 'PythonPatch'))
         libs = {'pythonPatch': os.path.join(sourceDir, 'PythonPatch')}
         for lib, data in self.config.additionalLibs.iteritems():
-            makefilePath = os.path.join(self.config.filesDir, lib, lib + '-Android.mk')
+            makefilePath = os.path.join(self.config.filesDir, lib, 'Android.mk')
             if not os.path.exists(makefilePath):
                 self.config.log.warn('Ignoring library ' + lib + ', because no Android.mk file was found.')
                 continue
