@@ -1,4 +1,5 @@
 import os
+import re
 import tarfile
 import subprocess
 try:
@@ -8,11 +9,12 @@ except ImportError:
     from httplib import HTTPConnection as Connection
 from httplib         import HTTPResponse, BadStatusLine, HTTPConnection
 from urlparse        import urlparse
-from urllib2         import urlopen
+from urllib2         import urlopen, HTTPError
 from contextlib      import closing
 from hashlib         import md5
 from multiprocessing import Pool
 from time            import time
+from zipfile         import ZipFile, BadZipfile
 
 def _callSubprocess(args):
     '''>>>_callSubprocess(args) -> True or (exitcode, stdout, stderr)
@@ -21,70 +23,105 @@ def _callSubprocess(args):
     the subprocess succeeded and returns the exitcode and the
     contents of the stdout and stderr of the subprocess on failure.
     '''
-    subprocess = subprocess.Popen(args, bufsize = -1, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-    stdout, stderr = subprocess.communicate()
-    subprocess.terminate()
-    if subprocess.returncode != 0:
-        return subprocess.returncode, stdout, stderr
+    subProcess = subprocess.Popen(args, bufsize = -1, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+    stdout, stderr = subProcess.communicate()
+    subProcess.terminate()
+    if subProcess.returncode != 0:
+        return subProcess.returncode, stdout, stderr
     else:
         return True
 
 def download(url, destFile, logger):
-    '''>>> download(url, destFile, logger) -> HTTPResponse or path
+    '''>>> download(url, destFile, logger) -> None or path
     Downloads a file from 'url'. The retrieved file will be saved
     in 'destFile'. If 'destFile' is a directory, the file is saved
     in this directory with the same name it had on the server.
     Progress information is written to the logs via 'logger'.
-    In the case of a connection failure, the HTTPResponse containing
-    the reason is returned. On success, the path to the downloaded
-    file is returned.
+    On success, the path to the downloaded file is returned.
+    In case of an error, None is returned.
     '''
     destFile = destFile if not os.path.isdir(destFile) else os.path.join(destFile, os.path.basename(url))
+    if (('//github.com' in url) or ('www.github.com' in url)) and os.path.splitext(url)[1] == '':
+        url = getGitRepositoryDownloadUrl(url)
+        if os.path.splitext(destFile)[-1] == '':
+            destFile += os.path.splitext(u)[-1]
     startTime = time()
-    with closing(urlopen(url)) as download:
-        totalLength = int(download.headers['Content-Length'])
-        fifth = totalLength / 20
-        with open(destFile, 'wb') as downloadFile:
-            for i in range(20):
-                downloadFile.write(download.read(size = fifth))
-                logger.console('[Info ] ' + str(int(round(((i + 1) / 20.0) * 100))) + '%', end = '\r')
-            downloadFile.write(download.read())
+    try:
+        with closing(urlopen(url)) as download:
+            if download.code != 200 or not 'Content-Length' in download.headers:
+                if download.code == None:
+                    logger.warn('Failed to receive response code from ' + url + ' (status: '
+                                 + str(download.info().status) + '), download may fail!')
+                else:
+                    raise HTTPError(url, download.code, download.info().status, download.headers, None)
+            totalLength = int(download.headers['Content-Length'])
+            fifth = totalLength / 20
+            with open(destFile, 'wb') as downloadFile:
+                for i in range(20):
+                    downloadFile.write(download.read(size = fifth))
+                    logger.console('[Info ] ' + str(int(round(((i + 1) / 20.0) * 100))) + '%', end = '\r')
+                downloadFile.write(download.read())
+    except HTTPError as e:
+        logger.error('Download from ' + url + ' failed (Response code ' + str(e.code)
+             + '): ' + str(e.reason))
+        return None
+    except IOError as ioError:
+        logger.error('Download from ' + url + ' failed: ' + ioError.message)
+        return None
     logger.info('Download finished in ' + str(round(time() - startTime, 2)) + ' seconds.')
     return destFile
 
-def extract(sourceArchive, extractionDir, subDirFilter = None, allowedFileTypes = None, allowedPaths = None):
-    '''>>> extract(sourceArchive, extractionDir, subDirFilter, allowedFileTypes, allowedPaths) -> path
+def extract(sourceArchive, extractionDir, extractionFilter = None, allowedFileTypes = None):
+    '''>>> extract(sourceArchive, extractionDir, extractionFilter, allowedFileTypes) -> path
     Extracts the archive located under 'sourceArchive'
     and puts its content under 'extractionDir'. If
-    'subDirFilter' is specified as a list of directory
-    names, those directories and their contents will not
+    'extractionFilter' is specified as a list of filters
+    All files and direcories matching a filter won't
     get extracted. If 'allowedFileTypes' is specified, only
-    files with the given file ending are extracted. When
-    'allowedPaths' is present, it overwrites the 'allowedFileTypes'
-    for these paths. Returns the path to the first directory
-    of the extracted content.
+    files with the given file ending are extracted. Returns
+    the path to the first directory of the extracted content.
+    Returns False, if the archive format is not supported and
+    None, if an exception occurred during extraction.
     '''
-    subDirFilter = subDirFilter or []
-    allowedPaths = allowedPaths if allowedPaths != None else []
-    tarFile = tarfile.open(sourceArchive)
-    if len(tarFile.getmembers()) == 0:
-        return extractionDir
-    baseDir = tarFile.getmembers()[0].name.split('/')[0]
-    def check_members(members):
-        allowedDirs = [baseDir + '/' + path for path in subDirFilter]
-        whitelistPaths = [baseDir + '/' + path for path in allowedPaths]
-        for member in members:
-            if member.name == baseDir:
-                yield member
-                continue
-            pathParts = member.name.split('/')
-            if len(pathParts) < 2:
-                continue
-            pathInWhitelist = member.name in whitelistPaths
-            if len(allowedDirs) == 0 or pathParts[0] + '/' + pathParts[1] in allowedDirs or pathInWhitelist:
-                if allowedFileTypes == None or member.isdir() or os.path.splitext(member.name)[1] in allowedFileTypes or pathInWhitelist:
+    matcher = None
+    if extractionFilter:
+        for i in range(len(extractionFilter)):
+            filterItem = extractionFilter[i]
+            if os.path.splitext(filterItem)[1] == '':
+                extractionFilter.append('^' + filterItem.replace('.', '\\.').replace('*', '.*') + '/.*')
+            extractionFilter[i] = '^' + filterItem.replace('.', '\\.').replace('*', '.*')
+        matcher = re.compile('|'.join(extractionFilter))
+    archiveFile = None
+    archiveMembers = []
+    extension = os.path.splitext(sourceArchive)[-1]
+    getMemberName = None
+    try:
+        if extension == '.zip':
+            archiveFile = ZipFile(sourceArchive)
+            archiveMembers = archiveFile.namelist()
+            getMemberName = lambda member: member
+        else:
+            archiveFile = tarfile.open(sourceArchive)
+            archiveMembers = archiveFile.getmembers()
+            getMemberName = lambda member: member.name
+        if len(archiveMembers) == 0:
+            return extractionDir
+        baseDir = getMemberName(archiveMembers[0]).split('/')[0]
+        def check_members(members):
+            for member in members:
+                if getMemberName(member) == baseDir:
                     yield member
-    tarFile.extractall(path = extractionDir, members = check_members(tarFile.getmembers()))
+                    continue
+                if allowedFileTypes != None and os.path.splitext(getMemberName(member))[-1] not in allowedFileTypes:
+                    continue
+                if matcher != None and matcher.match(getMemberName(member).split('/', 1)[-1]) == None:
+                    continue
+                yield member
+        archiveFile.extractall(path = extractionDir, members = check_members(archiveMembers))
+    except tarfile.CompressionError:
+        return False
+    except (tarfile.TarError, BadZipfile, IOError):
+        return None
     return os.path.join(extractionDir, baseDir)
 
 def compile(ndkPath, tempDir, sourcePath, outputPath, cpuAbis, logger):
@@ -98,7 +135,7 @@ def compile(ndkPath, tempDir, sourcePath, outputPath, cpuAbis, logger):
     executed command via 'logger'. Returns True, if the
     compilation succeeded, False on failure.
     '''
-    args = Util.createCompileSubprocessArgs(ndkPath, tempDir, sourcePath, outputPath, cpuAbis, logger)
+    args = createCompileSubprocessArgs(ndkPath, tempDir, sourcePath, outputPath, cpuAbis, logger)
     return subprocess.call(args, cwd = sourcePath, stdout = logger.getOutput(), stderr = logger.getOutput()) == 0
 
 def createMd5Hash(filePath):
@@ -110,6 +147,13 @@ def createMd5Hash(filePath):
         for chunk in iter(lambda: f.read(4096), ''):
             md5Hash.update(chunk)
     return md5Hash.hexdigest()
+
+def getGitRepositoryDownloadUrl(url):
+    '''>>> getGitRepositoryDownloadUrl(url) -> url
+    Takes a git repository url 'url' and returns
+    the url to the master zip.
+    '''
+    return url + ('/' if url[-1] != '/' else '') + 'archive/master.zip'
 
 def downloadGitDir(url, destination, logger):
     '''>>> downloadGitDir(url, destination, logger) -> path
@@ -127,7 +171,7 @@ def downloadGitDir(url, destination, logger):
     logger.info('Searching in git dir from "' + url.geturl() + '"...')
     connection.request('GET', url.path, headers={"Connection":" keep-alive"})
     response = connection.getresponse()
-    if (response.status != 200):
+    if response.status != 200:
         return response
     result = response.read()
     downloadUrls = []
@@ -142,7 +186,7 @@ def downloadGitDir(url, destination, logger):
         os.mkdir(destDir)
     for downloadFile in downloadUrls:
         logger.info('Downloading ' + os.path.basename(downloadFile[1]) + ' ...')
-        Util.download(downloadFile[1], os.path.join(destDir, downloadFile[0]), logger)
+        download(downloadFile[1], os.path.join(destDir, downloadFile[0]), logger)
     return destDir
 
 def fillTemplate(templatePath, destination, **formatArguments):
@@ -202,11 +246,20 @@ def createCompileSubprocessArgs(ndkPath, tempDir, sourcePath, outputPath, abis, 
     '''
     args = [
         ndkPath,
-        'NDK_OUT=' + Util.escapeNDKParameter(tempDir),
-        'NDK_APPLICATION_MK=' + Util.escapeNDKParameter(sourcePath) + '/Application.mk',
-        'NDK_PROJECT_PATH=' + Util.escapeNDKParameter(sourcePath),
-        'NDK_APP_DST_DIR=' + Util.escapeNDKParameter(outputPath) + '/$(TARGET_ARCH_ABI)',
+        'NDK_OUT=' + escapeNDKParameter(tempDir),
+        'NDK_APPLICATION_MK=' + escapeNDKParameter(sourcePath) + '/Application.mk',
+        'NDK_PROJECT_PATH=' + escapeNDKParameter(sourcePath),
+        'NDK_APP_DST_DIR=' + escapeNDKParameter(outputPath) + '/$(TARGET_ARCH_ABI)',
         'APP_ABI=' + ' '.join(abis if type(abis) in [list, tuple] else [abis])
     ]
     logger.debug(subprocess.list2cmdline(args))
     return args
+
+def applyPatch(gitPath, sourcePath, patchFilePath, logger):
+    '''>>> applyPatch(gitPath, sourcePath, patchFilePath, logger) -> success
+    Apply the patch in the patchfile 'patchFilePath' to 'sourcePath'.
+    '''
+    args = [gitPath, '-t', '-p1', '-d', sourcePath, '-i', patchFilePath]
+    logger.info('Patching the source code with ' + patchFilePath + '...')
+    logger.debug(subprocess.list2cmdline(args))
+    return subprocess.call(args, stdout = logger.getOutput(), stderr = logger.getOutput()) == 0

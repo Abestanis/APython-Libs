@@ -6,6 +6,7 @@ from logger       import Logger
 class Configuration(object):
     
     ALL_CPU_ABIS = ['armeabi', 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64', 'mips', 'mips64']
+    DEFAULT_MIN_SKD_VERSION = 8
     
     logFile = None
     log = None
@@ -16,13 +17,26 @@ class Configuration(object):
     outputDir = None
     patchesDir = None
     filesDir = None
+    cacheDir = None
     pythonServer = 'www.python.org'
     pythonServerPath = '/ftp/python/'
     pythonPatchDir = None
     versionList = None
+    #template = {
+    #    'libName': {
+    #        'url': '',
+    #        'dependencies': [],                      # optional
+    #        'extractionFilter': [],                  # optional
+    #        'pyModuleReq': [],                       # optional
+    #        'py3ModuleReq': [],                      # optional
+    #        'minAndroidSdk': 8,                      # optional
+    #        'data': [['src', 'output_name', 'dest']] # optional
+    #    }
+    #}
     additionalLibs = None
     cpuAbis = ALL_CPU_ABIS[:]
     useMultiThreading = True
+    librariesDataPath = None
     
     def __init__(self, args):
         super(Configuration, self).__init__()
@@ -35,17 +49,19 @@ class Configuration(object):
         if self.logFile != None:
             self.logFile = open(self.logFile, 'w')
         self.log = Logger(self.logFile)
-        self.patchesDir = self.processPaths(args.patchesDir) or self.patchesDir
-        self.outputDir = self.processPaths(args.outputDir) or self.outputDir
-        self.filesDir = self.processPaths(args.filesDir) or self.filesDir
-        self.gitPath = self.processPaths(args.gitPath) or self.gitPath
-        self.ndkPath = self.processPaths(args.ndkPath) or self.ndkPath
+        self.patchesDir = self.resolvePath(args.patchesDir) or self.patchesDir
+        self.outputDir = self.resolvePath(args.outputDir) or self.outputDir
+        self.filesDir = self.resolvePath(args.filesDir) or self.filesDir
+        self.cacheDir = self.resolvePath(args.cacheDir) or self.cacheDir
+        self.gitPath = self.resolvePath(args.gitPath) or self.gitPath
+        self.ndkPath = self.resolvePath(args.ndkPath) or self.ndkPath
         self.pythonPatchDir = args.pythonPatchDir or self.pythonPatchDir
         self.versionList = args.versions if args.versions != None and len(args.versions) != 0 else self.versionList
         self.pythonServer = args.pythonServer or self.pythonServer
         self.pythonServerPath = args.pythonServerPath or self.pythonServerPath
         self.cpuAbis = args.cpuAbis if args.cpuAbis != None and len(args.cpuAbis) != 0 else self.cpuAbis
         self.useMultiThreading = not args.disableMultiThreading if args.disableMultiThreading != None else self.useMultiThreading
+        self.librariesDataPath = args.librariesDataFile or self.librariesDataPath
     
     def check(self):
         if self.gitPath == None or not os.path.isfile(self.gitPath):
@@ -65,6 +81,9 @@ class Configuration(object):
             return False
         if self.filesDir == None or not os.path.isdir(self.filesDir) :
             self.log.error('The path to the files directory is incorrect.')
+            return False
+        if self.librariesDataPath == None or not os.path.isdir(self.filesDir) :
+            self.log.error('The path to the libraries data file is incorrect: ' + str(self.librariesDataPath))
             return False
         if not all([cpuAbi in self.ALL_CPU_ABIS for cpuAbi in self.cpuAbis]):
             for cpuAbi in self.cpuAbis:
@@ -86,45 +105,103 @@ class Configuration(object):
         if parser.has_option('General', 'cpuAbis') and parser.get('General', 'cpuAbis').strip().lower() not in ['any', 'all']:
             self.cpuAbis = parser.get('General', 'cpuAbis').replace(',', ' ').split()
         if parser.has_option('Paths', 'ndk_dir'):
-            self.ndkPath = self.processPaths(parser.get('Paths', 'ndk_dir'))
+            self.ndkPath = self.resolvePath(parser.get('Paths', 'ndk_dir'))
         if parser.has_option('Paths', 'git_dir'):
-            self.gitPath = self.processPaths(parser.get('Paths', 'git_dir'))
+            self.gitPath = self.resolvePath(parser.get('Paths', 'git_dir'))
         if parser.has_option('Paths', 'files_dir'):
-            self.filesDir = self.processPaths(parser.get('Paths', 'files_dir'))
+            self.filesDir = self.resolvePath(parser.get('Paths', 'files_dir'))
         if parser.has_option('Paths', 'output_dir'):
-            self.outputDir = self.processPaths(parser.get('Paths', 'output_dir'))
+            self.outputDir = self.resolvePath(parser.get('Paths', 'output_dir'))
         if parser.has_option('Paths', 'patches_dir'):
-            self.patchesDir = self.processPaths(parser.get('Paths', 'patches_dir'))
+            self.patchesDir = self.resolvePath(parser.get('Paths', 'patches_dir'))
+        if parser.has_option('Paths', 'cache_dir'):
+            self.cacheDir = self.resolvePath(parser.get('Paths', 'cache_dir'))
         if parser.has_option('Paths', 'log_file'):
-            self.logFile = self.processPaths(parser.get('Paths', 'log_file'))
+            self.logFile = self.resolvePath(parser.get('Paths', 'log_file'))
         if parser.has_option('Paths', 'python_server'):
             self.pythonServer = parser.get('Paths', 'python_server')
         if parser.has_option('Paths', 'python_server_path'):
             self.pythonServerPath = parser.get('Paths', 'python_server_path')
         if parser.has_option('Paths', 'python_patch_dir'):
-            self.pythonPatchDir = self.processPaths(parser.get('Paths', 'python_patch_dir'))
-        if parser.has_section('AdditionalLibs'):
-            libEntries = parser.options('AdditionalLibs')
-            for entry in [entry for entry in libEntries if entry.endswith('_url')]:
-                lib = entry[:-4]
-                libData = {'url': parser.get('AdditionalLibs', entry)}
-                if lib + '_req' in libEntries:
-                    requiredFor = [module.split('|') for module in parser.get('AdditionalLibs', lib + '_req').replace(',', ' ').split()]
-                    libData['req']  = [module[0] for module in requiredFor]
-                    libData['req3'] = [module[1] if len(module) > 1 else module[0] for module in requiredFor]
-                if lib + '_extraction_filter' in libEntries:
-                    libData['extraction_filter'] = parser.get('AdditionalLibs', lib + '_extraction_filter').replace(',', ' ').split()
-                if lib + '_add_file_copy_opr' in libEntries:
-                    opr = parser.get('AdditionalLibs', lib + '_add_file_copy_opr')
-                    oprList = re.split(r'(?<!->),?\s(?!->)', opr)
-                    lst = []
-                    for operation in oprList:
-                        oprParts = operation.split('->')
-                        lst.append((oprParts[0].strip(), oprParts[1].strip()))
-                    libData['file_copy_opr'] = lst
-                self.additionalLibs[lib] = libData
+            self.pythonPatchDir = self.resolvePath(parser.get('Paths', 'python_patch_dir'))
+        if parser.has_option('Paths', 'libraries_data_file'):
+            self.librariesDataPath = self.resolvePath(parser.get('Paths', 'libraries_data_file'))
     
-    def processPaths(self, path):
+    def parseLibrariesData(self):
+        self.parseLibrariesFile(self.librariesDataPath)
+    
+    def parseLibrariesFile(self, path):
+        parser = ConfigParser()
+        parser.optionxform = str
+        parser.read(path)
+        for libraryName, rawData in [(libName, dict(parser.items(libName))) for libName in parser.sections()]:
+            libData = {}
+            if not 'url' in rawData.keys():
+                self.log.warn('Module ' + libraryName + ' read from "' + path +
+                              '" does not have the required dataEntry "url", ignoring it.')
+                continue
+            libData['url'] = rawData['url']
+            if 'lib_dep' in rawData.keys():
+                libData['dependencies'] = rawData['lib_dep'].split(', ')
+            if 'extraction_filter' in rawData.keys():
+                libData['extractionFilter'] = rawData['extraction_filter'].split(', ')
+            if 'py_module_dep' in rawData.keys():
+                libData['pyModuleReq'] = rawData['py_module_dep'].split(', ')
+            if 'py3_module_dep' in rawData.keys():
+                libData['py3ModuleReq'] = rawData['py3_module_dep'].split(', ')
+            if 'min_android_sdk' in rawData.keys():
+                if not rawData['min_android_sdk'].isdigit():
+                    self.log.warn('Module ' + libraryName + ' read from "' + path +
+                                  '" has a malformed (not nummeric) dataEntry "min_android_sdk": "' +
+                                  rawData['min_android_sdk'] + '" , ignoring it.')
+                    continue
+                libData['minAndroidSdk'] = int(rawData['min_android_sdk'])
+            if 'data' in rawData.keys():
+                libData['data'] = []
+                for dataEntriy in rawData['data'].split(', '):
+                    dataStages = dataEntriy.split(' -> ')
+                    if len(dataStages) != 3:
+                        self.log.warn('Module ' + libraryName + ' read from "' + path +
+                                  '" has a malformed dataEntry in "data": "' +
+                                  dataEntriy + '" (Could not parse 3 stages), ignoring dataEntry.')
+                        continue
+                    libData['data'].append(dataStages)
+            self.additionalLibs[libraryName] = libData
+    
+    def computeLibMinAndroidSdkList(self):
+        res = {}
+        libVersionTable = {}
+        changed = False
+        for libName, libData in self.additionalLibs.iteritems():
+            libVersionTable[libName] = libData.get('minAndroidSdk', self.DEFAULT_MIN_SKD_VERSION)
+        def getMinSdkVersion(lib, scannedLibs):
+            minSdk = libVersionTable[lib]
+            if 'dependencies' in self.additionalLibs[lib].keys():
+                for dep in self.additionalLibs[lib]['dependencies']:
+                    if dep in scannedLibs:
+                        raise Exception('Infinite recursive dependency detected for lib "' + dep +
+                                        '" (scannedLibs = ' + str(scannedLibs) + ')')
+                    minSdk = max(getMinSdkVersion(dep, scannedLibs + [dep]), minSdk)
+                    if minSdk > libVersionTable[dep]:
+                        libVersionTable[dep] = minSdk
+                        changed = True
+            return minSdk
+        def computeVersionTable(versionTable):
+            changed = False
+            for libName, sdkVersion in libVersionTable.iteritems():
+                sdkVersion = getMinSdkVersion(libName, [])
+                if sdkVersion > libVersionTable[libName]:
+                    libVersionTable[libName] = sdkVersion
+                    changed = True
+            return computeVersionTable(versionTable) if changed else versionTable
+        libVersionTable = computeVersionTable(libVersionTable)
+        for libName, sdkVersion in libVersionTable.iteritems():
+            if not sdkVersion in res.keys():
+                res[sdkVersion] = []
+            res[sdkVersion].append(libName)
+        return res
+    
+    def resolvePath(self, path):
         if path == None: return None
         path = os.path.expanduser(os.path.expandvars(path))
         if os.path.isabs(path):

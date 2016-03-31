@@ -37,6 +37,143 @@
      _config_vars = g
  
  
+--- Python-2.7.2.orig/Lib/idlelib/PyShell.py
++++ Python-2.7.2.new/Lib/idlelib/PyShell.py
+@@ -402,7 +402,7 @@ class ModifiedInterpreter(InteractiveInterpreter):
+         self.spawn_subprocess()
+         #time.sleep(20) # test to simulate GUI not accepting connection
+         # Accept the connection from the Python execution server
+-        self.rpcclt.listening_sock.settimeout(10)
++        self.rpcclt.listening_sock.settimeout(10 * 5000)
+         try:
+             self.rpcclt.accept()
+         except socket.timeout, err:
+--- Python-2.7.2.orig/Lib/idlelib/TreeWidget.py
++++ Python-2.7.2.new/Lib/idlelib/TreeWidget.py
+@@ -21,16 +21,10 @@ import imp
+ from idlelib import ZoomHeight
+ from idlelib.configHandler import idleConf
+ 
+-ICONDIR = "Icons"
++ICONDIR = idleConf.GetIconsDir()
+ 
+-# Look for Icons subdirectory in the same directory as this module
+-try:
+-    _icondir = os.path.join(os.path.dirname(__file__), ICONDIR)
+-except NameError:
+-    _icondir = ICONDIR
+-if os.path.isdir(_icondir):
+-    ICONDIR = _icondir
+-elif not os.path.isdir(ICONDIR):
++# Verify the icon dir
++if not os.path.isdir(ICONDIR):
+     raise RuntimeError, "can't find icon directory (%r)" % (ICONDIR,)
+ 
+ def listicons(icondir=ICONDIR):
+--- Python-2.7.2.orig/Lib/idlelib/configHandler.py
++++ Python-2.7.2.new/Lib/idlelib/configHandler.py
+@@ -22,6 +22,8 @@ import sys
+ import string
+ from idlelib import macosxSupport
+ from ConfigParser import ConfigParser, NoOptionError, NoSectionError
++from tempfile import mkdtemp
++from shutil import rmtree, copytree
+ 
+ class InvalidConfigType(Exception): pass
+ class InvalidConfigSet(Exception): pass
+@@ -66,7 +68,18 @@ class IdleConfParser(ConfigParser):
+         """
+         Load the configuration file from disk
+         """
+-        self.read(self.file)
++        if '.zip' in self.file:
++            try:
++                import zipfile
++                import io
++                zipPath, subPath = self.file.split('.zip')
++                with zipfile.ZipFile(zipPath + '.zip') as z:
++                    with io.TextIOWrapper(z.open(subPath.replace('\\', '/')[1:])) as fp:
++                        self.read_file(fp, source = self.file)
++            except Exception:
++                pass
++        else:
++            self.read(self.file)
+ 
+ class IdleUserConfParser(IdleConfParser):
+     """
+@@ -167,6 +180,7 @@ class IdleConf:
+         self.defaultCfg={}
+         self.userCfg={}
+         self.cfg={}
++        self.iconDir = None
+         self.CreateConfigHandlers()
+         self.LoadCfgFiles()
+         #self.LoadCfg()
+@@ -201,9 +215,14 @@ class IdleConf:
+         cfgDir = '.idlerc'
+         userDir = os.path.expanduser('~')
+         if userDir != '~': # expanduser() found user home dir
++            warn = None
+             if not os.path.exists(userDir):
+                 warn = ('\n Warning: os.path.expanduser("~") points to\n '+
+                         userDir+',\n but the path does not exist.\n')
++            elif not os.access(userDir, os.W_OK | os.R_OK):
++                warn = ('\n Warning: os.path.expanduser("~") points to\n ' +
++                                        userDir + ',\n but the path is not writable.')
++            if warn:
+                 try:
+                     sys.stderr.write(warn)
+                 except IOError:
+@@ -682,6 +701,30 @@ class IdleConf:
+         for key in self.userCfg.keys():
+             self.userCfg[key].Save()
+ 
++    def GetIconsDir(self):
++        "Get the path to the directory, where all icons our icons are."
++        if self.iconDir == None:
++            self.iconDir = os.path.join(os.path.dirname(__file__), 'Icons')
++            if '.zip' in self.iconDir:
++                # tk does not support loading from a zip
++                cachePath = os.environ.get('XDG_CACHE_HOME')
++                iconDir = os.path.join(cachePath, 'idleIcons')
++                if not os.path.exists(iconDir):
++                    tempPath = mkdtemp(suffix = '-idleIcons')
++                    try:
++                        import zipfile
++                        zipPath, subPath = self.iconDir.split('.zip')
++                        subPath = subPath
++                        with zipfile.ZipFile(zipPath + '.zip', 'r') as pyZip:
++                            pyZip.extractall(path = tempPath, members = [img.filename for img in pyZip.filelist if subPath[1:] in img.filename])
++                        copytree(tempPath + subPath, iconDir)
++                    except Exception:
++                        pass
++                    rmtree(tempPath, ignore_errors = True)
++                self.iconDir = iconDir
++        print('Getting Icon: ' + self.iconDir)
++        return self.iconDir
++
+ idleConf=IdleConf()
+ 
+ ### module test
+--- Python-2.7.2.orig/Lib/idlelib/textView.py
++++ Python-2.7.2.new/Lib/idlelib/textView.py
+@@ -62,7 +62,15 @@ def view_text(parent, title, text):
+ 
+ def view_file(parent, title, filename, encoding=None):
+     try:
+-        if encoding:
++        if '.zip' in filename:
++            import zipfile
++            zipPath, subPath = filename.split('.zip')
++            try:
++                with zipfile.ZipFile(zipPath + '.zip', 'r') as z:
++                    textFile = z.open(subPath.replace('\\', '/')[1:], 'r')
++            except BadZipfile:
++                raise IOError()
++        elif encoding:
+             import codecs
+             textFile = codecs.open(filename, 'r')
+         else:
 --- Python-2.7.2.orig/Lib/site.py
 +++ Python-2.7.2.new/Lib/site.py
 @@ -400,7 +400,17 @@ class _Printer(object):
