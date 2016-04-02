@@ -17,11 +17,11 @@
 "data": {
 "tclLibraries" : {
 "path": ["output/data/tclLibraries.zip", "bf1db5eb783ab651649249cca40dc458"],
-"dest": "files/data/tcl8.4"
+"dest": "data/tcl8.4"
 },
 "tkLibraries" : {
 "path": ["output/data/tkLibraries.zip", "367d54c8647c6d14a4b2223d5e544194"],
-"dest": "files/data/tcl8.4/library/tk8.6"
+"dest": "data/tcl8.4/library/tk8.6"
 }
 },
 "libraries": {
