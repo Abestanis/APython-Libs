@@ -469,16 +469,16 @@ class Builder(object):
         for lib, libData in self.config.additionalLibs.items():
             moduleNames = []
             if 'pyModuleReq' in libData.keys():
-                moduleNames = libData['pyModuleReq']
+                moduleNames += libData['pyModuleReq']
             if 'py3ModuleReq' in libData.keys():
-                moduleNames = libData['py3ModuleReq']
+                moduleNames += libData['py3ModuleReq']
             if len(moduleNames) < 1:
                 continue
             for moduleName in moduleNames:
                 if moduleName in moduleDeps:
-                    moduleDeps[moduleName].append(lib)
+                    moduleDeps[moduleName].append('libraries/' + lib)
                 else:
-                    moduleDeps[moduleName] = [lib]
+                    moduleDeps[moduleName] = ['libraries/' + lib]
         for moduleName, moduleDependencies in moduleDeps.iteritems():
             requirementData += '"pyModule/' + moduleName + '" : ["' + '", "'.join(moduleDependencies) + '"],\n'
         requirementData = requirementData[:-2] + '\n},\n'
