@@ -18,5 +18,6 @@ else
   LOCAL_CFLAGS += -D HAVE_SYS_TYPES_H -D HAVE_WAIT3
 endif
 
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/../{pythonDir}/Modules
 LOCAL_SHORT_COMMANDS = true
 include $(BUILD_SHARED_LIBRARY)

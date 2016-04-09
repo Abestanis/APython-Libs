@@ -392,6 +392,17 @@
  # define SYS_getdents64  __NR_getdents64
  #endif
  
+--- Python-3.4.3.orig/Modules/_tkinter.c
++++ Python-3.4.3.new/Modules/_tkinter.c
+@@ -530,6 +530,8 @@ Tcl_AppInit(Tcl_Interp *interp)
+
+     return TCL_OK;
+ }
++#else
++#  include "tkappinit.c"
+ #endif /* !WITH_APPINIT */
+
+
 --- Python-3.4.3.orig/Modules/ossaudiodev.c
 +++ Python-3.4.3.new/Modules/ossaudiodev.c
 @@ -30,7 +30,11 @@

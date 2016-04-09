@@ -371,6 +371,17 @@
      return Py_BuildValue("i", fd);
  }
  
+--- Python-2.7.2.orig/Modules/_tkinter.c
++++ Python-2.7.2.new/Modules/_tkinter.c
+@@ -589,6 +589,8 @@ Tcl_AppInit(Tcl_Interp *interp)
+
+     return TCL_OK;
+ }
++#else
++#  include "tkappinit.c"
+ #endif /* !WITH_APPINIT */
+
+
 --- Python-2.7.2.orig/Modules/ossaudiodev.c
 +++ Python-2.7.2.new/Modules/ossaudiodev.c
 @@ -30,7 +30,11 @@

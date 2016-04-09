@@ -197,7 +197,7 @@ class Builder(object):
                                                  dataSource + '. Skipping it.')
                             continue
                         if os.path.isdir(dataSrcPath):
-                            shutil.make_archive(os.path.join(self.config.outputDir, 'data', dataName), 'zip', root_dir = extractDir, base_dir = dataSource)
+                            shutil.make_archive(os.path.join(self.config.outputDir, 'data', dataName), 'zip', root_dir = dataSrcPath)
                         else:
                             shutil.copy(dataSrcPath, os.path.join(self.config.outputDir, 'data', dataName + os.path.splitext(dataSrcPath)[1]))
                 libs[libraryName] = extractDir
@@ -414,7 +414,8 @@ class Builder(object):
                 os.path.join(self.config.filesDir, 'module-Android.mk'),
                 os.path.join(moduleDir, 'Android.mk'),
                 moduleSourceWildcards = ' '.join(moduleWildcards),
-                libDependencies = ' '.join(moduleDependencies)
+                libDependencies = ' '.join(moduleDependencies),
+                pythonDir = pythonDir
             )
         # Compile
         self.config.log.info('Compiling Python ' + pythonVersion + '...')
