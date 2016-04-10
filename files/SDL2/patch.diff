@@ -150,7 +150,7 @@
  {
      int retval;
      const char *name = (*env)->GetStringUTFChars(env, device_name, NULL);
-@@ -192,45 +208,100 @@ int Java_org_libsdl_app_SDLActivity_nativeAddJoystick(
+@@ -192,45 +208,102 @@ int Java_org_libsdl_app_SDLActivity_nativeAddJoystick(
      retval = Android_AddJoystick(device_id, name, (SDL_bool) is_accelerometer, nbuttons, naxes, nhats, nballs);
  
      (*env)->ReleaseStringUTFChars(env, device_name, name);
@@ -227,8 +227,10 @@
 +        return;
 +    }
 +    SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESTORED, 0, 0);
-+    restore_egl_context_window = window;
++    restore_egl_context_window_id = SDL_GetWindowID(window);
 +}
++
++void Android_JNI_ShowTextInputOnWindow(SDL_Rect *inputRect, jobject androidWindow);
 +
 +jobject windowFocus = NULL;
 +SDL_Rect* storedShowInputRect = NULL;
@@ -265,7 +267,7 @@
  {
      /* We have to clear the current context and destroy the egl surface here
       * Otherwise there's BAD_NATIVE_WINDOW errors coming from eglCreateWindowSurface on resume
-@@ -238,46 +309,51 @@ void Java_org_libsdl_app_SDLActivity_onNativeSurfaceDestroyed(JNIEnv* env, jclas
+@@ -238,46 +311,51 @@ void Java_org_libsdl_app_SDLActivity_onNativeSurfaceDestroyed(JNIEnv* env, jclas
       */
      SDL_WindowData *data;
      SDL_VideoDevice *_this;
@@ -286,7 +288,7 @@
 -    
 +    data = (SDL_WindowData *) window->driverdata;
 +
-+    backup_egl_context_window = window;
++    backup_egl_context_window_id = SDL_GetWindowID(window);
 +
      if (data->egl_surface != EGL_NO_SURFACE) {
          SDL_EGL_MakeCurrent(_this, NULL, NULL);
@@ -333,7 +335,7 @@
  {
      /* Calling SDL_StopTextInput will take care of hiding the keyboard and cleaning up the DummyText widget */
      SDL_StopTextInput();
-@@ -285,18 +361,22 @@ void Java_org_libsdl_app_SDLActivity_onNativeKeyboardFocusLost(
+@@ -285,18 +363,22 @@ void Java_org_libsdl_app_SDLActivity_onNativeKeyboardFocusLost(
  
  
  /* Touch */
@@ -364,7 +366,7 @@
  {
      fLastAccelerometer[0] = x;
      fLastAccelerometer[1] = y;
-@@ -305,15 +385,13 @@ void Java_org_libsdl_app_SDLActivity_onNativeAccel(
+@@ -305,15 +387,13 @@ void Java_org_libsdl_app_SDLActivity_onNativeAccel(
  }
  
  /* Low memory */
@@ -382,7 +384,7 @@
  {
      /* Discard previous events. The user should have handled state storage
       * in SDL_APP_WILLENTERBACKGROUND. After nativeQuit() is called, no
-@@ -328,44 +406,32 @@ void Java_org_libsdl_app_SDLActivity_nativeQuit(
+@@ -328,44 +408,32 @@ void Java_org_libsdl_app_SDLActivity_nativeQuit(
  }
  
  /* Pause */
@@ -444,7 +446,7 @@
  {
      const char *utftext = (*env)->GetStringUTFChars(env, text, NULL);
  
-@@ -374,9 +440,8 @@ void Java_org_libsdl_app_SDLInputConnection_nativeCommitText(
+@@ -374,9 +442,8 @@ void Java_org_libsdl_app_SDLInputConnection_nativeCommitText(
      (*env)->ReleaseStringUTFChars(env, text, utftext);
  }
  
@@ -456,7 +458,7 @@
  {
      const char *utftext = (*env)->GetStringUTFChars(env, text, NULL);
  
-@@ -435,19 +500,37 @@ static void LocalReferenceHolder_Cleanup(struct LocalReferenceHolder *refholder)
+@@ -435,19 +502,37 @@ static void LocalReferenceHolder_Cleanup(struct LocalReferenceHolder *refholder)
  
  static SDL_bool LocalReferenceHolder_IsActive()
  {
@@ -498,7 +500,7 @@
      return anw;
  }
  
-@@ -457,18 +540,23 @@ void Android_JNI_SwapWindow()
+@@ -457,18 +542,23 @@ void Android_JNI_SwapWindow()
      (*mEnv)->CallStaticVoidMethod(mEnv, mActivityClass, midFlipBuffers);
  }
  
@@ -525,7 +527,7 @@
  SDL_bool Android_JNI_GetAccelerometerValues(float values[3])
  {
      int i;
-@@ -522,7 +610,8 @@ JNIEnv* Android_JNI_GetEnv(void)
+@@ -522,7 +612,8 @@ JNIEnv* Android_JNI_GetEnv(void)
       * called before the thread exits, and call DetachCurrentThread from there. (Use that key with pthread_setspecific
       * to store the JNIEnv in thread-local-storage; that way it'll be passed into your destructor as the argument.)
       * Note: The destructor is not called unless the stored value is != NULL
@@ -535,7 +537,7 @@
       *       (except for some lost CPU cycles)
       */
      pthread_setspecific(mThreadKey, (void*) env);
-@@ -700,6 +789,10 @@ static int Internal_Android_JNI_FileOpen(SDL_RWops* ctx)
+@@ -700,6 +791,10 @@ static int Internal_Android_JNI_FileOpen(SDL_RWops* ctx)
          goto failure;
      }
  
@@ -546,7 +548,7 @@
      fileNameJString = (jstring)ctx->hidden.androidio.fileNameRef;
      ctx->hidden.androidio.position = 0;
  
-@@ -769,7 +862,7 @@ fallback:
+@@ -769,7 +864,7 @@ fallback:
           * android/apis/content/ReadAsset.java imply that Android's
           * AssetInputStream.available() /will/ always return the total file size
          */
@@ -555,7 +557,7 @@
          /* size = inputStream.available(); */
          mid = (*mEnv)->GetMethodID(mEnv, (*mEnv)->GetObjectClass(mEnv, inputStream),
                  "available", "()I");
-@@ -817,7 +910,7 @@ failure:
+@@ -817,7 +912,7 @@ failure:
          }
  
      }
@@ -564,7 +566,7 @@
      LocalReferenceHolder_Cleanup(&refs);
      return result;
  }
-@@ -830,7 +923,7 @@ int Android_JNI_FileOpen(SDL_RWops* ctx,
+@@ -830,7 +925,7 @@ int Android_JNI_FileOpen(SDL_RWops* ctx,
      int retval;
  
      if (!LocalReferenceHolder_Init(&refs, mEnv)) {
@@ -573,7 +575,7 @@
          return -1;
      }
  
-@@ -879,7 +972,7 @@ size_t Android_JNI_FileRead(SDL_RWops* ctx, void* buffer,
+@@ -879,7 +974,7 @@ size_t Android_JNI_FileRead(SDL_RWops* ctx, void* buffer,
  
          JNIEnv *mEnv = Android_JNI_GetEnv();
          if (!LocalReferenceHolder_Init(&refs, mEnv)) {
@@ -582,7 +584,7 @@
              return 0;
          }
  
-@@ -892,7 +985,7 @@ size_t Android_JNI_FileRead(SDL_RWops* ctx, void* buffer,
+@@ -892,7 +987,7 @@ size_t Android_JNI_FileRead(SDL_RWops* ctx, void* buffer,
              int result = (*mEnv)->CallIntMethod(mEnv, readableByteChannel, readMethod, byteBuffer);
  
              if (Android_JNI_ExceptionOccurred(false)) {
@@ -591,7 +593,7 @@
                  return 0;
              }
  
-@@ -904,7 +997,7 @@ size_t Android_JNI_FileRead(SDL_RWops* ctx, void* buffer,
+@@ -904,7 +999,7 @@ size_t Android_JNI_FileRead(SDL_RWops* ctx, void* buffer,
              bytesRead += result;
              ctx->hidden.androidio.position += result;
          }
@@ -600,7 +602,7 @@
          return bytesRead / size;
      }
  }
-@@ -1139,7 +1232,7 @@ char* Android_JNI_GetClipboardText()
+@@ -1139,7 +1234,7 @@ char* Android_JNI_GetClipboardText()
          }
      }
  
@@ -609,7 +611,7 @@
  
      return SDL_strdup("");
  }
-@@ -1153,7 +1246,7 @@ SDL_bool Android_JNI_HasClipboardText()
+@@ -1153,7 +1248,7 @@ SDL_bool Android_JNI_HasClipboardText()
      (*env)->DeleteGlobalRef(env, clipboard);
  
      CLEANUP_CLIPBOARD();
@@ -618,7 +620,7 @@
      return has ? SDL_TRUE : SDL_FALSE;
  }
  
-@@ -1283,47 +1376,57 @@ int Android_JNI_GetTouchDeviceIds(int **ids) {
+@@ -1283,47 +1378,57 @@ int Android_JNI_GetTouchDeviceIds(int **ids) {
  void Android_JNI_PollInputDevices()
  {
      JNIEnv *env = Android_JNI_GetEnv();
@@ -753,6 +755,48 @@
 +
 +
 +#endif /* _SDL_ANDROID_CONFIG_H */
+--- SDL2.orig/src/video/SDL_egl.c
++++ SDL2.new/src/video/SDL_egl.c
+@@ -211,6 +211,7 @@ SDL_EGL_LoadLibrary(_THIS, const char *egl_path, NativeDisplayType native_displa
+     LOAD_FUNC(eglDestroySurface);
+     LOAD_FUNC(eglMakeCurrent);
+     LOAD_FUNC(eglSwapBuffers);
++    LOAD_FUNC(eglSurfaceAttrib);
+     LOAD_FUNC(eglSwapInterval);
+     LOAD_FUNC(eglWaitNative);
+     LOAD_FUNC(eglWaitGL);
+@@ -485,10 +486,15 @@ SDL_EGL_CreateSurface(_THIS, NativeWindowType nw)
+         return EGL_NO_SURFACE;
+     }
+     
+-    return _this->egl_data->eglCreateWindowSurface(
+-            _this->egl_data->egl_display,
+-            _this->egl_data->egl_config,
+-            nw, NULL);
++    EGLSurface* surface = _this->egl_data->eglCreateWindowSurface(
++        _this->egl_data->egl_display,
++        _this->egl_data->egl_config,
++        nw, NULL);
++    if (surface != EGL_NO_SURFACE) {
++        _this->egl_data->eglSurfaceAttrib(_this->egl_data->egl_display, surface,
++                                          EGL_SWAP_BEHAVIOR, EGL_BUFFER_PRESERVED);
++    }
++    return surface;
+ }
+ 
+ void
+--- SDL2.orig/src/video/SDL_egl_c.h
++++ SDL2.new/src/video/SDL_egl_c.h
+@@ -65,6 +65,9 @@ typedef struct SDL_EGL_VideoData
+                                  EGLSurface read, EGLContext ctx);
+     
+     EGLBoolean(EGLAPIENTRY *eglSwapBuffers) (EGLDisplay dpy, EGLSurface draw);
++
++    EGLBoolean(EGLAPIENTRY *eglSurfaceAttrib) (EGLDisplay display, EGLSurface surface,
++                                 EGLint attribute, EGLint value);
+     
+     EGLBoolean(EGLAPIENTRY *eglSwapInterval) (EGLDisplay dpy, EGLint interval);
+
 --- SDL2.orig/src/video/android/SDL_androidevents.c
 +++ SDL2.new/src/video/android/SDL_androidevents.c
 @@ -29,30 +29,11 @@
@@ -785,8 +829,8 @@
 -    /* We need to do this so the EGLSurface can be freed */
 -    SDL_GL_MakeCurrent(Android_Window, NULL);
 -}
-+SDL_Window* backup_egl_context_window = NULL;
-+SDL_Window* restore_egl_context_window = NULL;
++int backup_egl_context_window_id = -1;
++int restore_egl_context_window_id = -1;
  
  void
  Android_PumpEvents(_THIS)
@@ -794,13 +838,13 @@
      static int isPausing = 0;
  #endif
      /* No polling necessary */
-+    if (backup_egl_context_window) {
-+        Android_EGL_context_backup(backup_egl_context_window);
-+        backup_egl_context_window = NULL;
++    if (backup_egl_context_window_id != -1) {
++        Android_EGL_context_backup(SDL_GetWindowFromID(backup_egl_context_window_id));
++        backup_egl_context_window_id = -1;
 +    }
-+    if (restore_egl_context_window) {
-+        Android_EGL_context_restore(restore_egl_context_window);
-+        restore_egl_context_window = NULL;
++    if (restore_egl_context_window_id != -1) {
++        Android_EGL_context_restore(SDL_GetWindowFromID(restore_egl_context_window_id));
++        restore_egl_context_window_id = -1;
 +    }
  
      /*
@@ -839,15 +883,15 @@
  
  #include "SDL_androidvideo.h"
  
-+extern SDL_Window* backup_egl_context_window;
-+extern SDL_Window* restore_egl_context_window;
++extern int backup_egl_context_window_id;
++extern int restore_egl_context_window_id;
 +
  extern void Android_PumpEvents(_THIS);
  
  /* vi: set ts=4 sw=4 expandtab: */
 --- SDL2.orig/src/video/android/SDL_androidgl.c
 +++ SDL2.new/src/video/android/SDL_androidgl.c
-@@ -49,8 +49,38 @@ Android_GLES_SwapWindow(_THIS, SDL_Window * window)
+@@ -49,9 +49,36 @@ Android_GLES_SwapWindow(_THIS, SDL_Window * window)
  
  int
  Android_GLES_LoadLibrary(_THIS, const char *path) {
@@ -856,8 +900,9 @@
 +    }
      return SDL_EGL_LoadLibrary(_this, path, (NativeDisplayType) 0);
  }
-+#include "../../render/SDL_sysrender.h"
+ 
 +void Android_EGL_context_restore(SDL_Window* window) {
++    if (window == NULL) return;
 +    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
 +    fprintf(stderr, "Restoring gl context in %s, %s to %p\n", __FILE__, __func__, data->egl_context);
 +    if (!data->egl_context || SDL_GL_MakeCurrent(window, (SDL_GLContext) data->egl_context) < 0) {
@@ -867,14 +912,10 @@
 +        fprintf(stderr, "setting gl context in %s, %s to %p\n", __FILE__, __func__, data->egl_context);
 +        SDL_GL_MakeCurrent(window, (SDL_GLContext) data->egl_context);
 +    }
-+    SDL_Renderer* r = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-+    SDL_SetRenderDrawColor(r, 255, 0, 0, 255);
-+    SDL_RenderClear(r);
-+    SDL_RenderPresent(r);
-+    SDL_DestroyRenderer(r);
 +}
 +
 +void Android_EGL_context_backup(SDL_Window* window) {
++    if (window == NULL) return;
 +    /* Keep a copy of the EGL Context so we can try to restore it when we resume */
 +    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
 +    data->egl_context = SDL_GL_GetCurrentContext();
@@ -883,9 +924,10 @@
 +    fprintf(stderr, "Destroying gl context in %s, %s\n", __FILE__, __func__);
 +    SDL_GL_MakeCurrent(window, NULL);
 +}
- 
++
  #endif /* SDL_VIDEO_DRIVER_ANDROID */
  
+ /* vi: set ts=4 sw=4 expandtab: */
 --- SDL2.orig/src/video/android/SDL_androidtouch.c
 +++ SDL2.new/src/video/android/SDL_androidtouch.c
 @@ -41,12 +41,12 @@
