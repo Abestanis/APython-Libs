@@ -84,9 +84,10 @@ EXCLUDED_FILES += Modules/_ctypes/_ctypes_test.c \
 
 LOCAL_SRC_FILES := $(filter-out $(EXCLUDED_FILES), $(FILE_LIST:$(LOCAL_PATH)/%=%))
 
-# Filter out all modules that are sepperate in their own additional library
+# Filter out all modules that are separate in their own additional library
 EXCLUDED_FILES := $(LOCAL_PATH)/Modules/_ssl.c \
                   $(LOCAL_PATH)/Modules/_hashopenssl.c \
+                  $(LOCAL_PATH)/Modules/_hashlib.c \
                   $(LOCAL_PATH)/Modules/bz2module.c \
                   $(LOCAL_PATH)/Modules/_bz2module.c \
                   $(LOCAL_PATH)/Modules/_tkinter.c \

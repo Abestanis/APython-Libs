@@ -12,7 +12,7 @@ class Cache(object):
     
     def ensureCacheDir(self):
         '''>>> ensureCacheDir
-        Enshures, that the cache directory exists.
+        Ensures, that the cache directory exists.
         '''
         if not os.path.exists(self.cachePath):
             os.mkdir(self.cachePath)
@@ -20,7 +20,7 @@ class Cache(object):
     def download(self, url, destFile, logger):
         '''>>> download(url, destFile, logger) -> path or None
         Searches for a file in the cache and downloads it from 'url',
-        if it is not found in the chache. The retrieved file will be
+        if it is not found in the cache. The retrieved file will be
         saved in 'destFile'. If 'destFile' is a directory, the file
         is saved in this directory with the same name it had on the
         server. Progress information is written to the logs via
@@ -45,6 +45,6 @@ class Cache(object):
         '''>>> clear(ignore_errors = False)
         Clears the cache and deletes the cache directory.
         This Cache instance should not be used afterwards,
-        untill a call to ensureCacheDir.
+        until a call to ensureCacheDir.
         '''
         shutil.rmtree(self.cachePath, ignore_errors = ignore_errors)

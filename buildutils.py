@@ -76,7 +76,7 @@ def extract(sourceArchive, extractionDir, extractionFilter = None, allowedFileTy
     Extracts the archive located under 'sourceArchive'
     and puts its content under 'extractionDir'. If
     'extractionFilter' is specified as a list of filters
-    All files and direcories matching a filter won't
+    All files and directories matching a filter won't
     get extracted. If 'allowedFileTypes' is specified, only
     files with the given file ending are extracted. Returns
     the path to the first directory of the extracted content.
@@ -219,7 +219,7 @@ def escapeNDKParameter(parameter):
 def callSubprocessesMultiThreaded(subprocessArgs, logger):
     '''>>>callSubprocessesMultiThreaded(subprocessArgs, logger) -> success
     Executes the subprocesses constructed from the given 'subprocessArgs' in
-    parrallel. If one of them fail, the exitcode, stdout and stderr are written
+    parallel. If one of them fail, the exitcode, stdout and stderr are written
     to the logs via 'logger' and False is returned.
     '''
     pool = Pool(min(10, len(subprocessArgs)))

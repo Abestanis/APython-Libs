@@ -265,6 +265,10 @@
  
      # On AIX, there are wrong paths to the linker scripts in the Makefile
      # -- these paths are relative to the Python source, but when installed
+--- /dev/null
++++ Python-2.7.2.new/Modules/_hashlib.c
+@@ -0,0 +1 @@
++#include "_hashopenssl.c"
 --- Python-2.7.2.orig/Modules/_localemodule.c
 +++ Python-2.7.2.new/Modules/_localemodule.c
 @@ -206,7 +206,7 @@ static PyObject*

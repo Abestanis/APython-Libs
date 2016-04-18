@@ -328,7 +328,7 @@ class Builder(object):
         '''>>> downloadPythonSource(versionPath, downloadDir) -> path / None
         Download a Python source archive from the Python source server
         at the sub-path 'versionPath' and stores it in 'downloadDir'.
-        Returns the path to the downloaded archive on sucess or None
+        Returns the path to the downloaded archive on success or None
         on failure.
         '''
         self.config.log.info('Downloading Python source from "' + self.config.pythonServer + versionPath + '"...')
@@ -430,7 +430,7 @@ class Builder(object):
     
     def cleanup(self, sourcePath, outputDir):
         '''>>> cleanup(sourcePath, outputDir)
-        Remove unnecessary build artefacts in the 'outputDir'
+        Remove unnecessary build artifacts in the 'outputDir'
         and cleans the build directory located at 'sourcePath'
         from the last build, so another Python version can be
         compiled there.

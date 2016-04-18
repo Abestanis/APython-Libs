@@ -152,7 +152,7 @@ class Configuration(object):
             if 'min_android_sdk' in rawData.keys():
                 if not rawData['min_android_sdk'].isdigit():
                     self.log.warn('Module ' + libraryName + ' read from "' + path +
-                                  '" has a malformed (not nummeric) dataEntry "min_android_sdk": "' +
+                                  '" has a malformed (not numeric) dataEntry "min_android_sdk": "' +
                                   rawData['min_android_sdk'] + '" , ignoring it.')
                     continue
                 libData['minAndroidSdk'] = int(rawData['min_android_sdk'])

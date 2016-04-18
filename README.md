@@ -15,7 +15,7 @@ Currently these additional libraries are downloaded:
 * sdl2X11Emulation (from https://github.com/Abestanis/SDL2X11Emulation) for the library tk
 * SDL2 (from https://www.libsdl.org/release/SDL2-2.0.3.tar.gz) for the libraries sdl2X11Emulation, SDL2_ttf, SDL2_mixer, SDL2_image, SDL2_net
 * SDL2_ttf (from https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-2.0.12.tar.gz) for the library sdl2X11Emulation
-* openSSL (from http://www.openssl.org/source/old/1.0.2/openssl-1.0.2d.tar.gz) for the Python modules _ssl, _hashopenssl
+* openSSL (from http://www.openssl.org/source/old/1.0.2/openssl-1.0.2d.tar.gz) for the Python modules _ssl, _hashlib
 * tcl (from http://netix.dl.sourceforge.net/project/tcl/Tcl/8.6.4/tcl8.6.4-src.tar.gz) for the Python module _tkinter and for the library tk
 * SDL2_mixer (from https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-2.0.0.tar.gz)
 * tk (from http://freefr.dl.sourceforge.net/project/tcl/Tcl/8.6.4/tk8.6.4-src.tar.gz) for the Python module _tkinter

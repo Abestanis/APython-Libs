@@ -152,7 +152,7 @@
                  try:
                      print(warn, file=sys.stderr)
                  except OSError:
-@@ -681,6 +700,30 @@ class IdleConf:
+@@ -681,6 +700,29 @@ class IdleConf:
          for key in self.userCfg:
              self.userCfg[key].Save()
  
@@ -177,7 +177,6 @@
 +                        pass
 +                    rmtree(tempPath, ignore_errors = True)
 +                self.iconDir = iconDir
-+        print('Getting Icon: ' + self.iconDir)
 +        return self.iconDir
 +
  
@@ -296,6 +295,10 @@
  
  def _init_non_posix(vars):
      """Initialize the module as appropriate for NT"""
+--- /dev/null
++++ Python-3.4.3.new/Modules/_hashlib.c
+@@ -0,0 +1 @@
++#include "_hashopenssl.c"
 --- Python-3.4.3.orig/Modules/_localemodule.c
 +++ Python-3.4.3.new/Modules/_localemodule.c
 @@ -134,7 +134,7 @@ static PyObject*
