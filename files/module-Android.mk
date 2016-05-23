@@ -7,6 +7,15 @@ LOCAL_SRC_FILES := {moduleSourceWildcards}
 LOCAL_SHARED_LIBRARIES := pythonPatch python$(PYTHON_SHORT_VERSION) {libDependencies}
 LOCAL_MODULE_FILENAME := $(notdir $(LOCAL_PATH))
 
+LOCAL_CFLAGS := -D 'PLATFORM=\"android\"' \
+                -D 'VERSION=\"$(PYTHON_SHORT_VERSION)\"' \
+                -D HAVE_EXPAT_CONFIG_H \
+                -D 'SOABI=\"apython-$(TARGET_ARCH_ABI)\"' \
+                -D __ANDROID__ \
+                -D EXTRA_FUNCTIONALITY \
+                -D HAVE_UINT128_T \
+                -D crypt=DES_crypt \
+
 ifneq (,$(filter $(TARGET_ARCH), arm64 x86_64 mips64))
   LOCAL_CFLAGS += -D ABI_64_BIT -D CONFIG_64 -D HAVE_LINUX_CAN_H
 else

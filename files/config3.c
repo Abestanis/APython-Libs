@@ -96,6 +96,7 @@ extern PyObject* PyInit__tracemalloc(void);
 extern PyObject* PyInit_faulthandler(void);
 extern PyObject* PyInit_resource(void);
 extern PyObject* PyInit_syslog(void);
+extern PyObject* PyInit__decimal(void);
 
 struct _inittab _PyImport_Inittab[] = {
 
@@ -196,6 +197,7 @@ struct _inittab _PyImport_Inittab[] = {
     {"faulthandler", PyInit_faulthandler},
     {"resource", PyInit_resource},
     {"syslog", PyInit_syslog},
+    {"decimal", PyInit__decimal},
 
     /* Sentinel */
     {0, 0}

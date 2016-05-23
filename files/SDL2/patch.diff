@@ -37,7 +37,18 @@
  /*******************************************************************************
                   Functions called by JNI
  *******************************************************************************/
-@@ -116,75 +122,85 @@ void SDL_Android_Init(JNIEnv* mEnv, jclass cls)
+@@ -103,7 +109,9 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
+         __android_log_print(ANDROID_LOG_ERROR, "SDL", "Error initializing pthread key");
+     }
+     Android_JNI_SetupThread();
+-
++    
++    // TODO: Maybe implement some communication via sockets to the process which owns the vm
++    
+     return JNI_VERSION_1_4;
+ }
+ 
+@@ -116,75 +124,91 @@ void SDL_Android_Init(JNIEnv* mEnv, jclass cls)
  
      mActivityClass = (jclass)((*mEnv)->NewGlobalRef(mEnv, cls));
  
@@ -96,6 +107,12 @@
 +        return;
 +    }
 +    Android_SetWindowSurfaceResolution(window, width, height, format);
++}
++
++void NATIVE_FUNCTION(SDLWindowFragment_nativeDisplayResize)(JNIEnv* env, jobject obj,
++                                                            jint screenWidth, jint screenHeight)
++{
++    SDL_Android_SetScreenDimensions(screenWidth, screenHeight);
  }
  
  // Paddown
@@ -150,7 +167,7 @@
  {
      int retval;
      const char *name = (*env)->GetStringUTFChars(env, device_name, NULL);
-@@ -192,45 +208,102 @@ int Java_org_libsdl_app_SDLActivity_nativeAddJoystick(
+@@ -192,45 +216,102 @@ int Java_org_libsdl_app_SDLActivity_nativeAddJoystick(
      retval = Android_AddJoystick(device_id, name, (SDL_bool) is_accelerometer, nbuttons, naxes, nhats, nballs);
  
      (*env)->ReleaseStringUTFChars(env, device_name, name);
@@ -232,7 +249,7 @@
 +
 +void Android_JNI_ShowTextInputOnWindow(SDL_Rect *inputRect, jobject androidWindow);
 +
-+jobject windowFocus = NULL;
++jobject windowFocus = NULL; // TODO: Use SDL_GetKeyboardFocus
 +SDL_Rect* storedShowInputRect = NULL;
 +
 +void NATIVE_FUNCTION(SDLWindowFragment_onNativeWindowFocusChanged)(JNIEnv* env, jobject obj,
@@ -267,7 +284,7 @@
  {
      /* We have to clear the current context and destroy the egl surface here
       * Otherwise there's BAD_NATIVE_WINDOW errors coming from eglCreateWindowSurface on resume
-@@ -238,46 +311,51 @@ void Java_org_libsdl_app_SDLActivity_onNativeSurfaceDestroyed(JNIEnv* env, jclas
+@@ -238,46 +319,51 @@ void Java_org_libsdl_app_SDLActivity_onNativeSurfaceDestroyed(JNIEnv* env, jclas
       */
      SDL_WindowData *data;
      SDL_VideoDevice *_this;
@@ -335,7 +352,7 @@
  {
      /* Calling SDL_StopTextInput will take care of hiding the keyboard and cleaning up the DummyText widget */
      SDL_StopTextInput();
-@@ -285,18 +363,22 @@ void Java_org_libsdl_app_SDLActivity_onNativeKeyboardFocusLost(
+@@ -285,18 +371,22 @@ void Java_org_libsdl_app_SDLActivity_onNativeKeyboardFocusLost(
  
  
  /* Touch */
@@ -366,7 +383,7 @@
  {
      fLastAccelerometer[0] = x;
      fLastAccelerometer[1] = y;
-@@ -305,15 +387,13 @@ void Java_org_libsdl_app_SDLActivity_onNativeAccel(
+@@ -305,15 +395,13 @@ void Java_org_libsdl_app_SDLActivity_onNativeAccel(
  }
  
  /* Low memory */
@@ -384,7 +401,7 @@
  {
      /* Discard previous events. The user should have handled state storage
       * in SDL_APP_WILLENTERBACKGROUND. After nativeQuit() is called, no
-@@ -328,44 +408,32 @@ void Java_org_libsdl_app_SDLActivity_nativeQuit(
+@@ -328,44 +416,32 @@ void Java_org_libsdl_app_SDLActivity_nativeQuit(
  }
  
  /* Pause */
@@ -441,24 +458,24 @@
 -void Java_org_libsdl_app_SDLInputConnection_nativeCommitText(
 -                                    JNIEnv* env, jclass cls,
 -                                    jstring text, jint newCursorPosition)
-+void NATIVE_FUNCTION(SDLInputConnection_nativeCommitText)(JNIEnv* env, jclass cls, jstring text,
-+                                                          jint newCursorPosition)
++void NATIVE_FUNCTION(SDLWindowFragment_nativeCommitText)(JNIEnv* env, jobject obj, jstring text,
++                                                         jint newCursorPosition)
  {
      const char *utftext = (*env)->GetStringUTFChars(env, text, NULL);
  
-@@ -374,9 +442,8 @@ void Java_org_libsdl_app_SDLInputConnection_nativeCommitText(
+@@ -374,9 +450,8 @@ void Java_org_libsdl_app_SDLInputConnection_nativeCommitText(
      (*env)->ReleaseStringUTFChars(env, text, utftext);
  }
  
 -void Java_org_libsdl_app_SDLInputConnection_nativeSetComposingText(
 -                                    JNIEnv* env, jclass cls,
 -                                    jstring text, jint newCursorPosition)
-+void NATIVE_FUNCTION(SDLInputConnection_nativeSetComposingText)(JNIEnv* env, jclass cls,
++void NATIVE_FUNCTION(SDLWindowFragment_nativeSetComposingText)(JNIEnv* env, jclass cls,
 +                                                               jstring text, jint newCursorPosition)
  {
      const char *utftext = (*env)->GetStringUTFChars(env, text, NULL);
  
-@@ -435,19 +502,37 @@ static void LocalReferenceHolder_Cleanup(struct LocalReferenceHolder *refholder)
+@@ -435,19 +510,37 @@ static void LocalReferenceHolder_Cleanup(struct LocalReferenceHolder *refholder)
  
  static SDL_bool LocalReferenceHolder_IsActive()
  {
@@ -500,7 +517,7 @@
      return anw;
  }
  
-@@ -457,18 +542,23 @@ void Android_JNI_SwapWindow()
+@@ -457,18 +550,42 @@ void Android_JNI_SwapWindow()
      (*mEnv)->CallStaticVoidMethod(mEnv, mActivityClass, midFlipBuffers);
  }
  
@@ -519,6 +536,25 @@
      }
  }
  
++void Android_JNI_SetWindowIcon(SDL_Window* window, SDL_Surface* icon)
++{
++    jmethodID mid;
++    JNIEnv *mEnv = Android_JNI_GetEnv();
++    mid = (*mEnv)->GetMethodID(mEnv, mActivityClass, "setWindowIcon", "([III)V");
++    if (mid) {
++        if (icon != NULL) {
++            SDL_assert(icon->format->format == SDL_PIXELFORMAT_ARGB8888);
++            int size = icon->w * icon->h;
++            jintArray iconData = (*mEnv)->NewIntArray(mEnv, size);
++            (*mEnv)->SetIntArrayRegion(mEnv, iconData, 0, size, icon->pixels);
++            (*mEnv)->CallVoidMethod(mEnv, GET_ANDROID_WINDOW(window), mid, iconData, icon->w, icon->h);
++            (*mEnv)->DeleteLocalRef(mEnv, iconData);
++        } else {
++            (*mEnv)->CallVoidMethod(mEnv, GET_ANDROID_WINDOW(window), mid, NULL, -1, -1);
++        }
++    }
++}
++
 +void Android_JNI_SetPixelFormat(jobject android_window, int pixelFormat) {
 +    JNIEnv *mEnv = Android_JNI_GetEnv();
 +    (*mEnv)->CallVoidMethod(mEnv, android_window, midSetPixelFormat);
@@ -527,7 +563,20 @@
  SDL_bool Android_JNI_GetAccelerometerValues(float values[3])
  {
      int i;
-@@ -522,7 +612,8 @@ JNIEnv* Android_JNI_GetEnv(void)
+@@ -508,6 +625,12 @@ JNIEnv* Android_JNI_GetEnv(void)
+      * is a no-op.
+      * Note: You can call this function any number of times for the same thread, there's no harm in it
+      */
++     if (mJavaVM == NULL) {
++        LOGE("The current thread is not attached to any JVM!");
++        fprintf(stderr, "ERROR: The current thread is not attached to any JVM!\n");
++        fflush(stderr);
++        exit(1);
++     }
+ 
+     JNIEnv *env;
+     int status = (*mJavaVM)->AttachCurrentThread(mJavaVM, &env, NULL);
+@@ -522,7 +645,8 @@ JNIEnv* Android_JNI_GetEnv(void)
       * called before the thread exits, and call DetachCurrentThread from there. (Use that key with pthread_setspecific
       * to store the JNIEnv in thread-local-storage; that way it'll be passed into your destructor as the argument.)
       * Note: The destructor is not called unless the stored value is != NULL
@@ -537,7 +586,7 @@
       *       (except for some lost CPU cycles)
       */
      pthread_setspecific(mThreadKey, (void*) env);
-@@ -700,6 +791,10 @@ static int Internal_Android_JNI_FileOpen(SDL_RWops* ctx)
+@@ -700,6 +824,10 @@ static int Internal_Android_JNI_FileOpen(SDL_RWops* ctx)
          goto failure;
      }
  
@@ -548,7 +597,7 @@
      fileNameJString = (jstring)ctx->hidden.androidio.fileNameRef;
      ctx->hidden.androidio.position = 0;
  
-@@ -769,7 +864,7 @@ fallback:
+@@ -769,7 +897,7 @@ fallback:
           * android/apis/content/ReadAsset.java imply that Android's
           * AssetInputStream.available() /will/ always return the total file size
          */
@@ -557,7 +606,7 @@
          /* size = inputStream.available(); */
          mid = (*mEnv)->GetMethodID(mEnv, (*mEnv)->GetObjectClass(mEnv, inputStream),
                  "available", "()I");
-@@ -817,7 +912,7 @@ failure:
+@@ -817,7 +945,7 @@ failure:
          }
  
      }
@@ -566,7 +615,7 @@
      LocalReferenceHolder_Cleanup(&refs);
      return result;
  }
-@@ -830,7 +925,7 @@ int Android_JNI_FileOpen(SDL_RWops* ctx,
+@@ -830,7 +958,7 @@ int Android_JNI_FileOpen(SDL_RWops* ctx,
      int retval;
  
      if (!LocalReferenceHolder_Init(&refs, mEnv)) {
@@ -575,7 +624,7 @@
          return -1;
      }
  
-@@ -879,7 +974,7 @@ size_t Android_JNI_FileRead(SDL_RWops* ctx, void* buffer,
+@@ -879,7 +1007,7 @@ size_t Android_JNI_FileRead(SDL_RWops* ctx, void* buffer,
  
          JNIEnv *mEnv = Android_JNI_GetEnv();
          if (!LocalReferenceHolder_Init(&refs, mEnv)) {
@@ -584,7 +633,7 @@
              return 0;
          }
  
-@@ -892,7 +987,7 @@ size_t Android_JNI_FileRead(SDL_RWops* ctx, void* buffer,
+@@ -892,7 +1020,7 @@ size_t Android_JNI_FileRead(SDL_RWops* ctx, void* buffer,
              int result = (*mEnv)->CallIntMethod(mEnv, readableByteChannel, readMethod, byteBuffer);
  
              if (Android_JNI_ExceptionOccurred(false)) {
@@ -593,7 +642,7 @@
                  return 0;
              }
  
-@@ -904,7 +999,7 @@ size_t Android_JNI_FileRead(SDL_RWops* ctx, void* buffer,
+@@ -904,7 +1032,7 @@ size_t Android_JNI_FileRead(SDL_RWops* ctx, void* buffer,
              bytesRead += result;
              ctx->hidden.androidio.position += result;
          }
@@ -602,7 +651,7 @@
          return bytesRead / size;
      }
  }
-@@ -1139,7 +1234,7 @@ char* Android_JNI_GetClipboardText()
+@@ -1139,7 +1267,7 @@ char* Android_JNI_GetClipboardText()
          }
      }
  
@@ -611,7 +660,7 @@
  
      return SDL_strdup("");
  }
-@@ -1153,7 +1248,7 @@ SDL_bool Android_JNI_HasClipboardText()
+@@ -1153,7 +1281,7 @@ SDL_bool Android_JNI_HasClipboardText()
      (*env)->DeleteGlobalRef(env, clipboard);
  
      CLEANUP_CLIPBOARD();
@@ -620,7 +669,7 @@
      return has ? SDL_TRUE : SDL_FALSE;
  }
  
-@@ -1283,47 +1378,57 @@ int Android_JNI_GetTouchDeviceIds(int **ids) {
+@@ -1283,47 +1411,57 @@ int Android_JNI_GetTouchDeviceIds(int **ids) {
  void Android_JNI_PollInputDevices()
  {
      JNIEnv *env = Android_JNI_GetEnv();
@@ -705,7 +754,7 @@
  
  /* Set up for C function definitions, even when using C++ */
  #ifdef __cplusplus
-@@ -31,16 +32,22 @@ extern "C" {
+@@ -31,16 +32,23 @@ extern "C" {
  #include <android/native_window_jni.h>
  
  #include "SDL_rect.h"
@@ -722,6 +771,7 @@
  extern void Android_JNI_SwapWindow();
 -extern void Android_JNI_SetActivityTitle(const char *title);
 +extern void Android_JNI_SetWindowTitle(SDL_Window* window, const char *title);
++extern void Android_JNI_SetWindowIcon(SDL_Window* window, SDL_Surface* icon);
 +extern void Android_JNI_SetPixelFormat(jobject android_window, int pixelFormat);
  extern SDL_bool Android_JNI_GetAccelerometerValues(float values[3]);
  extern void Android_JNI_ShowTextInput(SDL_Rect *inputRect);
@@ -730,7 +780,7 @@
  
  /* Audio support */
  extern int Android_JNI_OpenAudioDevice(int sampleRate, int is16Bit, int channelCount, int desiredBufferFrames);
-@@ -78,7 +85,7 @@ JNIEnv *Android_JNI_GetEnv(void);
+@@ -78,7 +86,7 @@ JNIEnv *Android_JNI_GetEnv(void);
  int Android_JNI_SetupThread(void);
  
  /* Generic messages */
@@ -746,7 +796,7 @@
 +#define _SDL_ANDROID_CONFIG_H
 +
 +#ifndef ANDROID_JAVA_PACKAGE_PATH
-+#  define ANDROID_JAVA_PACKAGE_PATH com_apython_python_pythonhost_views_sdl
++#  define ANDROID_JAVA_PACKAGE_PATH org_libsdl_app
 +#endif
 +
 +#define CONCATENATE_NATIVE_FUNCTION_NAME(pkg, name) Java_ ## pkg ## _ ## name
@@ -1006,11 +1056,9 @@
  
  
 -/* These are filled in with real values in Android_SetScreenResolution on init (before SDL_main()) */
--int Android_ScreenWidth = 0;
--int Android_ScreenHeight = 0;
-+/* These are filled in with real values in Android_SetWindowSurfaceResolution on init (before SDL_main()) */
-+int Android_ScreenWidth = 480;//0; // FIXME: Find a real solution for this
-+int Android_ScreenHeight = 679;//0;
++/* These are filled in with real values in SDL_Android_SetScreenDimensions on init (before SDL_main()) */
+ int Android_ScreenWidth = 0;
+ int Android_ScreenHeight = 0;
  Uint32 Android_ScreenFormat = SDL_PIXELFORMAT_UNKNOWN;
  SDL_sem *Android_PauseSem = NULL, *Android_ResumeSem = NULL;
  
@@ -1033,8 +1081,12 @@
  static SDL_VideoDevice *
  Android_CreateDevice(int devindex)
  {
-@@ -112,6 +117,8 @@ Android_CreateDevice(int devindex)
+@@ -110,8 +115,12 @@ Android_CreateDevice(int devindex)
+ 
+     device->CreateWindow = Android_CreateWindow;
      device->SetWindowTitle = Android_SetWindowTitle;
++    device->SetWindowIcon = Android_SetWindowIcon;
++    device->SetWindowSize = Android_SetWindowSize;
      device->DestroyWindow = Android_DestroyWindow;
  
 +    device->SetDisplayMode = Android_SetDisplayMode;
@@ -1042,27 +1094,36 @@
      device->free = Android_DeleteDevice;
  
      /* GL pointers */
-@@ -179,15 +186,12 @@ Android_VideoQuit(_THIS)
+@@ -178,16 +187,20 @@ Android_VideoQuit(_THIS)
+ }
  
  /* This function gets called before VideoInit() */
- void
+-void
 -Android_SetScreenResolution(int width, int height, Uint32 format)
-+Android_SetWindowSurfaceResolution(SDL_Window* window, int width, int height, Uint32 format)
++void SDL_Android_SetScreenDimensions(int width, int height)
  {
      Android_ScreenWidth = width;
      Android_ScreenHeight = height;
-     Android_ScreenFormat = format;
--
+-    Android_ScreenFormat = format;
++}
+ 
 -    if (Android_Window) {
 -        SDL_SendWindowEvent(Android_Window, SDL_WINDOWEVENT_RESIZED, width, height);
 -    }
++void
++Android_SetWindowSurfaceResolution(SDL_Window* window, int width, int height, Uint32 format)
++{
++    Android_ScreenFormat = format;
++    ((SDL_WindowData*) window->driverdata)->surface_w = width;
++    ((SDL_WindowData*) window->driverdata)->surface_h = height;
++    fprintf(stderr, "Window %d size changing to %dx%d\n", SDL_GetWindowID(window), width, height);
 +    SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESIZED, width, height);
  }
  
  #endif /* SDL_VIDEO_DRIVER_ANDROID */
 --- SDL2.orig/src/video/android/SDL_androidvideo.h
 +++ SDL2.new/src/video/android/SDL_androidvideo.h
-@@ -27,8 +27,8 @@
+@@ -27,8 +27,9 @@
  #include "SDL_rect.h"
  #include "../SDL_sysvideo.h"
  
@@ -1070,10 +1131,11 @@
 -extern void Android_SetScreenResolution(int width, int height, Uint32 format);
 +/* Called by the JNI layer when a window surface changes size or format */
 +extern void Android_SetWindowSurfaceResolution(SDL_Window* window, int width, int height, Uint32 format);
++extern void SDL_Android_SetScreenDimensions(int width, int height);
  
  /* Private display data */
  
-@@ -41,7 +41,6 @@ extern int Android_ScreenWidth;
+@@ -41,7 +42,6 @@ extern int Android_ScreenWidth;
  extern int Android_ScreenHeight;
  extern Uint32 Android_ScreenFormat;
  extern SDL_sem *Android_PauseSem, *Android_ResumeSem;
@@ -1101,8 +1163,15 @@
      Android_PauseSem = SDL_CreateSemaphore(0);
      Android_ResumeSem = SDL_CreateSemaphore(0);
  
-@@ -51,7 +49,7 @@ Android_CreateWindow(_THIS, SDL_Window * window)
-     window->flags |= SDL_WINDOW_FULLSCREEN;     /* window is always fullscreen */
+@@ -46,12 +44,12 @@ Android_CreateWindow(_THIS, SDL_Window * window)
+     window->y = 0;
+     window->w = Android_ScreenWidth;
+     window->h = Android_ScreenHeight;
+-
++    
+     window->flags &= ~SDL_WINDOW_RESIZABLE;     /* window is NEVER resizeable */
+-    window->flags |= SDL_WINDOW_FULLSCREEN;     /* window is always fullscreen */
++    window->flags &= ~SDL_WINDOW_FULLSCREEN;     /* window is !not! always fullscreen (e.g. soft keyboard showing) */
      window->flags &= ~SDL_WINDOW_HIDDEN;
      window->flags |= SDL_WINDOW_SHOWN;          /* only one window on Android */
 -    window->flags |= SDL_WINDOW_INPUT_FOCUS;    /* always has input focus */
@@ -1110,16 +1179,20 @@
  
      /* One window, it always has focus */
      SDL_SetMouseFocus(window);
-@@ -61,14 +59,21 @@ Android_CreateWindow(_THIS, SDL_Window * window)
+@@ -61,24 +59,35 @@ Android_CreateWindow(_THIS, SDL_Window * window)
      if (!data) {
          return SDL_OutOfMemory();
      }
 -    
 -    data->native_window = Android_JNI_GetNativeWindow();
 -    
++    data->surface_w = Android_ScreenWidth;
++    data->surface_h = Android_ScreenHeight;
++    window->driverdata = data;
 +
 +    data->android_window = Android_JNI_CreateWindow(window);
 +    if (data->android_window == NULL) {
++        window->driverdata = NULL;
 +        SDL_free(data);
 +        return SDL_SetError("Failed to create Android window");
 +    }
@@ -1128,6 +1201,7 @@
 +    data->native_window = Android_JNI_GetNativeWindow(data->android_window);
 +
      if (!data->native_window) {
++        window->driverdata = NULL;
          SDL_free(data);
          return SDL_SetError("Could not fetch native window");
      }
@@ -1136,20 +1210,38 @@
      data->egl_surface = SDL_EGL_CreateSurface(_this, (NativeWindowType) data->native_window);
  
      if (data->egl_surface == EGL_NO_SURFACE) {
-@@ -78,7 +83,6 @@ Android_CreateWindow(_THIS, SDL_Window * window)
++        window->driverdata = NULL;
+         ANativeWindow_release(data->native_window);
+         SDL_free(data);
++        fprintf(stderr, "%s\n", SDL_GetError());
+         return SDL_SetError("Could not create GLES window surface");
      }
- 
-     window->driverdata = data;
+-
+-    window->driverdata = data;
 -    Android_Window = window;
      
      return 0;
  }
-@@ -86,32 +90,31 @@ Android_CreateWindow(_THIS, SDL_Window * window)
+@@ -86,32 +95,45 @@ Android_CreateWindow(_THIS, SDL_Window * window)
  void
  Android_SetWindowTitle(_THIS, SDL_Window * window)
  {
 -    Android_JNI_SetActivityTitle(window->title);
 +    Android_JNI_SetWindowTitle(window, window->title);
++}
++
++void
++Android_SetWindowIcon(_THIS, SDL_Window* window, SDL_Surface* icon) {
++    Android_JNI_SetWindowIcon(window, icon);
++}
++
++void
++Android_SetWindowSize(_THIS, SDL_Window* window) {
++    SDL_WindowData* data = window->driverdata;
++    if (window->w != data->surface_w || window->h != data->surface_h) {
++        window->w = data->surface_w;
++        window->h = data->surface_h;
++    }
  }
  
  void
@@ -1197,7 +1289,7 @@
  
 --- SDL2.orig/src/video/android/SDL_androidwindow.h
 +++ SDL2.new/src/video/android/SDL_androidwindow.h
-@@ -25,6 +25,8 @@
+@@ -25,9 +25,13 @@
  
  #include "../../core/android/SDL_android.h"
  #include "../SDL_egl_c.h"
@@ -1206,11 +1298,18 @@
  
  extern int Android_CreateWindow(_THIS, SDL_Window * window);
  extern void Android_SetWindowTitle(_THIS, SDL_Window * window);
-@@ -35,6 +37,7 @@ typedef struct
++extern void Android_SetWindowIcon(_THIS, SDL_Window* window, SDL_Surface* icon);
++extern void Android_SetWindowSize(_THIS, SDL_Window* window);
+ extern void Android_DestroyWindow(_THIS, SDL_Window * window);
+ 
+ typedef struct
+@@ -35,6 +39,9 @@ typedef struct
      EGLSurface egl_surface;
      EGLContext egl_context; /* We use this to preserve the context when losing focus */
      ANativeWindow* native_window;
 +    jobject android_window;
++    int surface_w;
++    int surface_h;
      
  } SDL_WindowData;
  

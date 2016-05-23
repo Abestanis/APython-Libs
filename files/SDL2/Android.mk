@@ -49,7 +49,7 @@ LOCAL_SRC_FILES := \
 
 #LOCAL_SRC_FILES += $(subst $(LOCAL_PATH)/,, $(wildcard $(LOCAL_PATH)/../SDL_Android/src/core/*.c))
 
-LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES
+LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DANDROID_JAVA_PACKAGE_PATH=com_apython_python_pythonhost_views_sdl
 LOCAL_LDLIBS := -ldl -lGLESv1_CM -lGLESv2 -llog -landroid
 LOCAL_SHARED_LIBRARIES := #pythonPatch
 

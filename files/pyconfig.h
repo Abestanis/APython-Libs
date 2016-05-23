@@ -24,7 +24,7 @@
 
 /* Define if C doubles are 64-bit IEEE 754 binary format, stored in ARM
    mixed-endian order (byte order 45670123) */
-/*#undef DOUBLE_IS_ARM_MIXED_ENDIAN_IEEE754 */
+/* #undef DOUBLE_IS_ARM_MIXED_ENDIAN_IEEE754 */
 
 #if __FLOAT_WORD_ORDER__ == __ORDER_BIG_ENDIAN__
 /* Define if C doubles are 64-bit IEEE 754 binary format, stored with the most
@@ -157,7 +157,7 @@
 
 /* Define to 1 if you have the declaration of `tzname', and to 0 if you don't.
    */
-/* #undef HAVE_DECL_TZNAME */
+#define HAVE_DECL_TZNAME
 
 /* Define to 1 if you have the device macros. */
 #define HAVE_DEVICE_MACROS 1
@@ -282,10 +282,10 @@
 #define HAVE_GETGROUPS 1
 
 /* Define to 1 if you have the `gethostbyname' function. */
-/* #undef HAVE_GETHOSTBYNAME */
+#define HAVE_GETHOSTBYNAME 1
 
 /* Define this if you have some version of gethostbyname_r() */
-/* undef HAVE_GETHOSTBYNAME_R */
+/* #undef HAVE_GETHOSTBYNAME_R */
 
 /* Define this if you have the 3-arg version of gethostbyname_r(). */
 /* #undef HAVE_GETHOSTBYNAME_R_3_ARG */
@@ -371,11 +371,14 @@
 /* Define to 1 if you have the `initgroups' function. */
 #define HAVE_INITGROUPS 1
 
+#define HAVE_INT32_T 1
+#define HAVE_UINT32_T 1
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
 /* Define to 1 if you have the <io.h> header file. */
-/* #undef HAVE_IO_H */
+#define HAVE_IO_H 1
 
 /* Define to 1 if you have the `kill' function. */
 #define HAVE_KILL 1
@@ -497,6 +500,18 @@
 /* Define to 1 if you have the `pause' function. */
 #define HAVE_PAUSE 1
 
+/* Define to 1 if you have the `sigpending' function. */
+#define HAVE_SIGPENDING 1
+
+/* Define to 1 if you have the `sigwait' function. */
+#define HAVE_SIGWAIT 1
+
+/* Define to 1 if you have the `sigwaitinfo' function. */
+#undef HAVE_SIGWAITINFO
+
+/* Define to 1 if you have the `sigtimedwait' function. */
+#undef HAVE_SIGTIMEDWAIT
+
 /* Define to 1 if you have the `plock' function. */
 /* #undef HAVE_PLOCK */
 
@@ -522,10 +537,13 @@
 #define HAVE_PTHREAD_H 1
 
 /* Define to 1 if you have the `pthread_init' function. */
-/* #undef HAVE_PTHREAD_INIT */
+#define HAVE_PTHREAD_INIT 1
 
 /* Define to 1 if you have the `pthread_sigmask' function. */
 #define HAVE_PTHREAD_SIGMASK 1
+
+/* Define to 1 if you have the `pthread_kill' function. */
+#define HAVE_PTHREAD_KILL 1
 
 /* Define to 1 if you have the <pty.h> header file. */
 /* #undef HAVE_PTY_H */
@@ -790,10 +808,10 @@
 #define HAVE_SYS_TIME_H 1
 
 /* Define to 1 if you have the <sys/types.h> header file. */
-#define HAVE_SYS_TYPES_H 1
+// #define HAVE_SYS_TYPES_H 1
 
 /* Define to 1 if you have the <sys/un.h> header file. */
-/* #undef HAVE_SYS_UN_H */
+#define HAVE_SYS_UN_H 1
 
 /* Define to 1 if you have the <sys/utsname.h> header file. */
 #define HAVE_SYS_UTSNAME_H 1
@@ -820,7 +838,7 @@
 #define HAVE_TGAMMA 1
 
 /* Define to 1 if you have the <thread.h> header file. */
-/* #undef HAVE_THREAD_H */
+#define HAVE_THREAD_H 1
 
 /* Define to 1 if you have the `timegm' function. */
 /* #undef HAVE_TIMEGM */
@@ -846,7 +864,7 @@
 
 /* Define to 1 if you don't have `tm_zone' but do have the external array
    `tzname'. */
-/* #undef HAVE_TZNAME */
+#define HAVE_TZNAME 1
 
 /* Define this if you have tcl and TCL_UTF_MAX==6 */
 /* #undef HAVE_UCS4_TCL */
@@ -878,10 +896,10 @@
 #define HAVE_UTIME_H 1
 
 /* Define to 1 if you have the `wait3' function. */
-//#define HAVE_WAIT3 1
+// #define HAVE_WAIT3 1
 
 /* Define to 1 if you have the `wait4' function. */
-/* #undef HAVE_WAIT4 */
+#define HAVE_WAIT4 1
 
 /* Define to 1 if you have the `waitpid' function. */
 #define HAVE_WAITPID 1
@@ -914,7 +932,7 @@
 
 /* Define to 1 if `major', `minor', and `makedev' are declared in
    <sysmacros.h>. */
-/* #undef MAJOR_IN_SYSMACROS */
+#define MAJOR_IN_SYSMACROS 1
 
 /* Define if mvwdelch in curses.h is an expression. */
 /* #undef MVWDELCH_IS_EXPRESSION */
@@ -941,7 +959,7 @@
 /* #undef POSIX_SEMAPHORES_NOT_ENABLED */
 
 /* Defined if PTHREAD_SCOPE_SYSTEM supported. */
-/* #undef PTHREAD_SYSTEM_SCHED_SUPPORTED */
+#define PTHREAD_SYSTEM_SCHED_SUPPORTED 1
 
 /* Define as the preferred size in bits of long digits */
 /* #undef PYLONG_BITS_IN_DIGIT */
@@ -1103,7 +1121,7 @@
 /* #undef VA_LIST_IS_ARRAY */
 
 /* Define if you want SIGFPE handled (see Include/pyfpe.h). */
-/* #undef WANT_SIGFPE_HANDLER */
+#define WANT_SIGFPE_HANDLER 1
 
 /* Define if you want wctype.h functions to be used instead of the one
    supplied by Python itself. (see Include/unicodectype.h). */
@@ -1238,11 +1256,11 @@
 
 /* Define to the type of a signed integer type of width exactly 32 bits if
    such a type exists and the standard includes do not define it. */
-#define int32_t int32_t
+/* #undef int32_t */
 
 /* Define to the type of a signed integer type of width exactly 64 bits if
    such a type exists and the standard includes do not define it. */
-#define int64_t int64_t
+/* #undef int64_t */
 
 /* Define to `int' if <sys/types.h> does not define. */
 /* #undef mode_t */
@@ -1267,11 +1285,11 @@
 
 /* Define to the type of an unsigned integer type of width exactly 32 bits if
    such a type exists and the standard includes do not define it. */
-#define uint32_t uint32_t
+/* #undef uint32_t */
 
 /* Define to the type of an unsigned integer type of width exactly 64 bits if
    such a type exists and the standard includes do not define it. */
-#define uint64_t uint64_t
+/* #undef uint64_t */
 
 /* Define to empty if the keyword does not work. */
 /* #undef volatile */

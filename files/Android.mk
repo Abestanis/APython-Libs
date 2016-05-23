@@ -2,14 +2,13 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := python$(PYTHON_SHORT_VERSION)
-FILE_LIST := $(wildcard $(LOCAL_PATH)/*/*.c) $(wildcard $(LOCAL_PATH)/*/*/*.c)
+FILE_LIST := $(wildcard $(LOCAL_PATH)/*/*.c) $(wildcard $(LOCAL_PATH)/*/*/*.c) $(wildcard $(LOCAL_PATH)/Modules/_decimal/libmpdec/*.c)
 
 # Filter out all modules that are not supported on Android
 EXCLUDED_FILES := Modules/almodule.c \
                   Modules/bsddbmodule.c \
                   Modules/cdmodule.c \
                   Modules/clmodule.c \
-                  Modules/cryptmodule.c \
                   Modules/dbmmodule.c \
                   Modules/expat/xmltok_impl.c \
                   Modules/expat/xmltok_ns.c \
@@ -30,12 +29,10 @@ EXCLUDED_FILES := Modules/almodule.c \
                   Modules/sunaudiodev.c \
                   Modules/svmodule.c \
                   Modules/_bsddb.c \
-                  Modules/_cryptmodule.c \
                   Modules/_ctypes/darwin/dlfcn_simple.c \
                   Modules/_curses_panel.c \
                   Modules/_cursesmodule.c \
                   Modules/_dbmmodule.c \
-                  Modules/_decimal/_decimal.c \
                   Modules/_gdbmmodule.c \
                   Modules/_lzmamodule.c \
                   Modules/_multiprocessing/pipe_connection.c \
@@ -63,6 +60,7 @@ EXCLUDED_FILES := Modules/almodule.c \
                   Python/dynload_os2.c \
                   Python/dynload_stub.c \
                   Python/dynload_win.c \
+                  Python/getcwd.c \
                   Python/mactoolboxglue.c \
                   Python/sigcheck.c \
 
@@ -92,6 +90,8 @@ EXCLUDED_FILES := $(LOCAL_PATH)/Modules/_ssl.c \
                   $(LOCAL_PATH)/Modules/_bz2module.c \
                   $(LOCAL_PATH)/Modules/_tkinter.c \
                   $(LOCAL_PATH)/Modules/tkappinit.c \
+                  $(LOCAL_PATH)/Modules/cryptmodule.c \
+                  $(LOCAL_PATH)/Modules/_cryptmodule.c \
                   $(wildcard $(LOCAL_PATH)/Modules/_ctypes/*) \
                   $(wildcard $(LOCAL_PATH)/Modules/_ctypes/*/*) \
 
@@ -102,6 +102,9 @@ LOCAL_CFLAGS := -D 'PLATFORM=\"android\"' \
                 -D HAVE_EXPAT_CONFIG_H \
                 -D 'SOABI=\"apython-$(TARGET_ARCH_ABI)\"' \
                 -D __ANDROID__ \
+                -D EXTRA_FUNCTIONALITY \
+                -D HAVE_UINT128_T \
+                -D crypt=DES_crypt \
 
 ifneq (,$(filter $(TARGET_ARCH), arm64 x86_64 mips64))
   LOCAL_CFLAGS += -D ABI_64_BIT -D CONFIG_64 -D HAVE_LINUX_CAN_H
@@ -114,7 +117,18 @@ else
   LOCAL_CFLAGS += -D HAVE_SYS_TYPES_H -D HAVE_WAIT3
 endif
 
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/Include $(LOCAL_PATH)/Modules $(LOCAL_PATH)/Modules/_io $(LOCAL_PATH)/Modules/expat $(LOCAL_PATH)/Modules/cjkcodecs $(LOCAL_PATH)Modules/_decimal/libmpdec
+ifneq (,$(filter $(TARGET_ARCH), arm arm64 mips64 mips))
+    LOCAL_CFLAGS += -D ANSI
+endif
+ifneq (,$(filter $(TARGET_ARCH), x86_64 x86))
+    LOCAL_CFLAGS += -D ASM
+endif
+
+ifeq ($(TARGET_ARCH), x86)
+    LOCAL_CFLAGS += -U CONFIG_64 -D PPRO
+endif
+
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/Include $(LOCAL_PATH)/Modules $(LOCAL_PATH)/Modules/_io $(LOCAL_PATH)/Modules/expat $(LOCAL_PATH)/Modules/cjkcodecs $(LOCAL_PATH)/Modules/_decimal $(LOCAL_PATH)/Modules/_decimal/libmpdec
 LOCAL_EXPORT_C_INCLUDES += $(LOCAL_PATH)/Include
 LOCAL_SHARED_LIBRARIES := pythonPatch
 LOCAL_LDLIBS := -lz

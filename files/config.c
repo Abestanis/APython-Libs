@@ -138,9 +138,9 @@ struct _inittab _PyImport_Inittab[] = {
     {"_sha512", init_sha512},
     {"strop", initstrop},
     {"time", inittime},
-#ifdef WITH_THREAD
+    #ifdef WITH_THREAD
     {"thread", initthread},
-#endif
+    #endif
     {"cStringIO", initcStringIO},
     {"cPickle", initcPickle},
     {"_locale", init_locale},

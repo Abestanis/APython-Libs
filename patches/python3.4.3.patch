@@ -295,6 +295,191 @@
  
  def _init_non_posix(vars):
      """Initialize the module as appropriate for NT"""
+--- Python-3.4.3.orig/Modules/_decimal/libmpdec/basearith.c
++++ Python-3.4.3.new/Modules/_decimal/libmpdec/basearith.c
+@@ -32,7 +32,7 @@
+ #include <string.h>
+ #include <assert.h>
+ #include "constants.h"
+-#include "memory.h"
++#include "mpmemory.h"
+ #include "typearith.h"
+ #include "basearith.h"
+ 
+--- Python-3.4.3.orig/Modules/_decimal/libmpdec/io.c
++++ Python-3.4.3.new/Modules/_decimal/libmpdec/io.c
+@@ -37,7 +37,7 @@
+ #include <locale.h>
+ #include "bits.h"
+ #include "constants.h"
+-#include "memory.h"
++#include "mpmemory.h"
+ #include "typearith.h"
+ #include "io.h"
+ 
+@@ -861,17 +861,17 @@ mpd_parse_fmt_str(mpd_spec_t *spec, const char *fmt, int caps)
+     }
+     else if (*cp == 'N' || *cp == 'n') {
+         /* locale specific conversion */
+-        struct lconv *lc;
++        //struct lconv *lc;
+         /* separator has already been specified */
+         if (*spec->sep) {
+             return 0;
+         }
+         spec->type = *cp++;
+         spec->type = (spec->type == 'N') ? 'G' : 'g';
+-        lc = localeconv();
+-        spec->dot = lc->decimal_point;
+-        spec->sep = lc->thousands_sep;
+-        spec->grouping = lc->grouping;
++        //lc = localeconv();
++        spec->dot = ".";//lc->decimal_point;
++        spec->sep = "";//lc->thousands_sep;
++        spec->grouping = "";//lc->grouping;
+         if (mpd_validate_lconv(spec) < 0) {
+             return 0; /* GCOV_NOT_REACHED */
+         }
+--- Python-3.4.3.orig/Modules/_decimal/libmpdec/memory.c
++++ Python-3.4.3.new/Modules/_decimal/libmpdec/memory.c
+@@ -30,7 +30,7 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include "typearith.h"
+-#include "memory.h"
++#include "mpmemory.h"
+ 
+ 
+ /* Guaranteed minimum allocation for a coefficient. May be changed once
+--- Python-3.4.3.orig/Modules/_decimal/libmpdec/memory.h
++++ /dev/null
+@@ -1,51 +0,0 @@
+-/*
+- * Copyright (c) 2008-2016 Stefan Krah. All rights reserved.
+- *
+- * Redistribution and use in source and binary forms, with or without
+- * modification, are permitted provided that the following conditions
+- * are met:
+- *
+- * 1. Redistributions of source code must retain the above copyright
+- *    notice, this list of conditions and the following disclaimer.
+- *
+- * 2. Redistributions in binary form must reproduce the above copyright
+- *    notice, this list of conditions and the following disclaimer in the
+- *    documentation and/or other materials provided with the distribution.
+- *
+- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS "AS IS" AND
+- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+- * SUCH DAMAGE.
+- */
+-
+-
+-#ifndef MEMORY_H
+-#define MEMORY_H
+-
+-
+-#include "mpdecimal.h"
+-
+-
+-/* Internal header file: all symbols have local scope in the DSO */
+-MPD_PRAGMA(MPD_HIDE_SYMBOLS_START)
+-
+-
+-int mpd_switch_to_dyn(mpd_t *result, mpd_ssize_t size, uint32_t *status);
+-int mpd_switch_to_dyn_zero(mpd_t *result, mpd_ssize_t size, uint32_t *status);
+-int mpd_realloc_dyn(mpd_t *result, mpd_ssize_t size, uint32_t *status);
+-
+-
+-MPD_PRAGMA(MPD_HIDE_SYMBOLS_END) /* restore previous scope rules */
+-
+-
+-#endif
+-
+-
+-
+--- Python-3.4.3.orig/Modules/_decimal/libmpdec/mpdecimal.c
++++ Python-3.4.3.new/Modules/_decimal/libmpdec/mpdecimal.c
+@@ -36,7 +36,7 @@
+ #include "bits.h"
+ #include "convolute.h"
+ #include "crt.h"
+-#include "memory.h"
++#include "mpmemory.h"
+ #include "typearith.h"
+ #include "umodarith.h"
+ 
+--- Python-3.4.3.orig/Modules/_decimal/libmpdec/mpdecimal.h
++++ Python-3.4.3.new/Modules/_decimal/libmpdec/mpdecimal.h
+@@ -372,6 +372,7 @@ void mpd_addstatus_raise(mpd_context_t *ctx, uint32_t flags);
+ #define MPD_CONST_DATA          ((uint8_t)128)
+ #define MPD_DATAFLAGS (MPD_STATIC_DATA|MPD_SHARED_DATA|MPD_CONST_DATA)
+ 
++
+ /* mpd_t */
+ typedef struct mpd_t {
+     uint8_t flags;
+--- /dev/null
++++ Python-3.4.3.new/Modules/_decimal/libmpdec/mpmemory.h
+@@ -0,0 +1,51 @@
++/*
++ * Copyright (c) 2008-2016 Stefan Krah. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
++ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
++ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
++ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
++ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
++ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
++ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
++ * SUCH DAMAGE.
++ */
++
++
++#ifndef MP_MEMORY_H
++#define MP_MEMORY_H
++
++
++#include "mpdecimal.h"
++
++
++/* Internal header file: all symbols have local scope in the DSO */
++MPD_PRAGMA(MPD_HIDE_SYMBOLS_START)
++
++
++int mpd_switch_to_dyn(mpd_t *result, mpd_ssize_t size, uint32_t *status);
++int mpd_switch_to_dyn_zero(mpd_t *result, mpd_ssize_t size, uint32_t *status);
++int mpd_realloc_dyn(mpd_t *result, mpd_ssize_t size, uint32_t *status);
++
++
++MPD_PRAGMA(MPD_HIDE_SYMBOLS_END) /* restore previous scope rules */
++
++
++#endif
++
++
++
 --- /dev/null
 +++ Python-3.4.3.new/Modules/_hashlib.c
 @@ -0,0 +1 @@

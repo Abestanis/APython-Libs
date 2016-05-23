@@ -93,7 +93,7 @@
 +                zipPath, subPath = self.file.split('.zip')
 +                with zipfile.ZipFile(zipPath + '.zip') as z:
 +                    with io.TextIOWrapper(z.open(subPath.replace('\\', '/')[1:])) as fp:
-+                        self.read_file(fp, source = self.file)
++                        self.readfp(fp, filename = self.file)
 +            except Exception:
 +                pass
 +        else:
@@ -124,7 +124,7 @@
                  try:
                      sys.stderr.write(warn)
                  except IOError:
-@@ -682,6 +701,30 @@ class IdleConf:
+@@ -682,6 +701,29 @@ class IdleConf:
          for key in self.userCfg.keys():
              self.userCfg[key].Save()
  
@@ -149,7 +149,6 @@
 +                        pass
 +                    rmtree(tempPath, ignore_errors = True)
 +                self.iconDir = iconDir
-+        print('Getting Icon: ' + self.iconDir)
 +        return self.iconDir
 +
  idleConf=IdleConf()
@@ -174,6 +173,21 @@
              import codecs
              textFile = codecs.open(filename, 'r')
          else:
+--- Python-2.7.2.orig/Lib/locale.py
++++ Python-2.7.2.new/Lib/locale.py
+@@ -555,7 +555,11 @@ else:
+         def getpreferredencoding(do_setlocale = True):
+             """Return the charset that the user is likely using,
+             by looking at environment variables."""
+-            return getdefaultlocale()[1]
++            res = getdefaultlocale()[1]
++            if res is None:
++                # LANG not set, default conservatively to ASCII
++                res = 'ascii'
++            return res
+     else:
+         def getpreferredencoding(do_setlocale = True):
+             """Return the charset that the user is likely using,
 --- Python-2.7.2.orig/Lib/site.py
 +++ Python-2.7.2.new/Lib/site.py
 @@ -400,7 +400,17 @@ class _Printer(object):
@@ -378,14 +392,46 @@
 --- Python-2.7.2.orig/Modules/_tkinter.c
 +++ Python-2.7.2.new/Modules/_tkinter.c
 @@ -589,6 +589,8 @@ Tcl_AppInit(Tcl_Interp *interp)
-
+ 
      return TCL_OK;
  }
 +#else
 +#  include "tkappinit.c"
  #endif /* !WITH_APPINIT */
-
-
+ 
+ 
+--- Python-2.7.2.orig/Modules/getpath.c
++++ Python-2.7.2.new/Modules/getpath.c
+@@ -125,6 +125,8 @@
+ #define LANDMARK "os.py"
+ #endif
+ 
++#define TK_PATH "/lib-tk"
++
+ static char prefix[MAXPATHLEN+1];
+ static char exec_prefix[MAXPATHLEN+1];
+ static char progpath[MAXPATHLEN+1];
+@@ -572,6 +574,8 @@ calculate_path(void)
+     }
+ 
+     bufsz += strlen(zip_path) + 1;
++    bufsz += strlen(zip_path) + strlen(TK_PATH) + 1;
++    
+     bufsz += strlen(exec_prefix) + 1;
+ 
+     /* This is the only malloc call in this file */
+@@ -621,6 +625,11 @@ calculate_path(void)
+             defpath = delim + 1;
+         }
+         strcat(buf, delimiter);
++        
++        /* Next is the lib-tk path */
++        strcat(buf, zip_path);
++        strcat(buf, TK_PATH);
++        strcat(buf, delimiter);
+ 
+         /* Finally, on goes the directory for dynamic-load modules */
+         strcat(buf, exec_prefix);
 --- Python-2.7.2.orig/Modules/ossaudiodev.c
 +++ Python-2.7.2.new/Modules/ossaudiodev.c
 @@ -30,7 +30,11 @@

@@ -39,14 +39,8 @@ int redirectedIOCtl(int fd, int request, ...) {
     }
 }
 
-void redirectedExit(int code) {
-    int *ret = malloc(sizeof(int));
-    if (ret == NULL) {
-        printf("Could not allocate memory for the return value (%d)!", code);
-    } else {
-        *ret = code;
-    }
-    pthread_exit(ret);
+void __inline__ redirectedExit(int code) {
+    pthread_exit((void*) code);
 }
 
 // because: https://github.com/awong-dev/ndk/blob/master/sources/android/support/src/locale/setlocale.c

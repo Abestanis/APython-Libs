@@ -563,7 +563,8 @@ class Builder(object):
             libList += '* ' + libraryName + ' (from ' + libraryData['url'] + ')'
             depList = [lib for lib, libData in self.config.additionalLibs.items() if libraryName in libData.get('dependencies', [])]
             if 'pyModuleReq' in libraryData.keys() or 'py3ModuleReq' in libraryData.keys():
-                moduleList = libraryData.get('pyModuleReq', []) + libraryData.get('py3ModuleReq', [])
+                moduleList = libraryData.get('pyModuleReq', [])
+                moduleList += [module for module in libraryData.get('py3ModuleReq', []) if module not in moduleList]
                 libList += ' for the Python module' + ('s' if len(moduleList) > 1 else '') + ' ' + ', '.join(moduleList)
                 if len(depList) > 0:
                     libList += ' and'
