@@ -586,7 +586,7 @@
       *       (except for some lost CPU cycles)
       */
      pthread_setspecific(mThreadKey, (void*) env);
-@@ -700,6 +824,10 @@ static int Internal_Android_JNI_FileOpen(SDL_RWops* ctx)
+@@ -700,12 +824,16 @@ static int Internal_Android_JNI_FileOpen(SDL_RWops* ctx)
          goto failure;
      }
  
@@ -596,6 +596,14 @@
 +
      fileNameJString = (jstring)ctx->hidden.androidio.fileNameRef;
      ctx->hidden.androidio.position = 0;
+ 
+-    /* context = SDLActivity.getContext(); */
++    /* context = SDLActivity.getStaticContext(); */
+     mid = (*mEnv)->GetStaticMethodID(mEnv, mActivityClass,
+-            "getContext","()Landroid/content/Context;");
++            "getStaticContext","()Landroid/content/Context;");
+     context = (*mEnv)->CallStaticObjectMethod(mEnv, mActivityClass, mid);
+ 
  
 @@ -769,7 +897,7 @@ fallback:
           * android/apis/content/ReadAsset.java imply that Android's
@@ -651,6 +659,24 @@
          return bytesRead / size;
      }
  }
+@@ -1074,7 +1202,7 @@ static jobject Android_JNI_GetSystemServiceObject(const char* name)
+ 
+     jmethodID mid;
+ 
+-    mid = (*env)->GetStaticMethodID(env, mActivityClass, "getContext", "()Landroid/content/Context;");
++    mid = (*env)->GetStaticMethodID(env, mActivityClass, "getStaticContext", "()Landroid/content/Context;");
+     jobject context = (*env)->CallStaticObjectMethod(env, mActivityClass, mid);
+ 
+     mid = (*env)->GetMethodID(env, mActivityClass, "getSystemServiceFromUiThread", "(Ljava/lang/String;)Ljava/lang/Object;");
+@@ -1114,7 +1242,7 @@ int Android_JNI_SetClipboardText(const char* text)
+     (*env)->DeleteLocalRef(env, string);
+ 
+     CLEANUP_CLIPBOARD();
+-
++    
+     return 0;
+ }
+ 
 @@ -1139,7 +1267,7 @@ char* Android_JNI_GetClipboardText()
          }
      }
@@ -669,6 +695,15 @@
      return has ? SDL_TRUE : SDL_FALSE;
  }
  
+@@ -1173,7 +1301,7 @@ int Android_JNI_GetPowerInfo(int* plugged, int* charged, int* battery, int* seco
+ 
+     jmethodID mid;
+ 
+-    mid = (*env)->GetStaticMethodID(env, mActivityClass, "getContext", "()Landroid/content/Context;");
++    mid = (*env)->GetStaticMethodID(env, mActivityClass, "getStaticContext", "()Landroid/content/Context;");
+     jobject context = (*env)->CallStaticObjectMethod(env, mActivityClass, mid);
+ 
+     jstring action = (*env)->NewStringUTF(env, "android.intent.action.BATTERY_CHANGED");
 @@ -1283,47 +1411,57 @@ int Android_JNI_GetTouchDeviceIds(int **ids) {
  void Android_JNI_PollInputDevices()
  {
@@ -744,6 +779,42 @@
  }
  
  /*
+@@ -1351,9 +1489,9 @@ void *SDL_AndroidGetActivity()
+         return NULL;
+     }
+ 
+-    /* return SDLActivity.getContext(); */
++    /* return SDLActivity.getStaticContext(); */
+     mid = (*env)->GetStaticMethodID(env, mActivityClass,
+-            "getContext","()Landroid/content/Context;");
++            "getStaticContext","()Landroid/content/Context;");
+     return (*env)->CallStaticObjectMethod(env, mActivityClass, mid);
+ }
+ 
+@@ -1375,9 +1513,9 @@ const char * SDL_AndroidGetInternalStoragePath()
+             return NULL;
+         }
+ 
+-        /* context = SDLActivity.getContext(); */
++        /* context = SDLActivity.getStaticContext(); */
+         mid = (*env)->GetStaticMethodID(env, mActivityClass,
+-                "getContext","()Landroid/content/Context;");
++                "getStaticContext","()Landroid/content/Context;");
+         context = (*env)->CallStaticObjectMethod(env, mActivityClass, mid);
+ 
+         /* fileObj = context.getFilesDir(); */
+@@ -1461,9 +1599,9 @@ const char * SDL_AndroidGetExternalStoragePath()
+             return NULL;
+         }
+ 
+-        /* context = SDLActivity.getContext(); */
++        /* context = SDLActivity.getStaticContext(); */
+         mid = (*env)->GetStaticMethodID(env, mActivityClass,
+-                "getContext","()Landroid/content/Context;");
++                "getStaticContext","()Landroid/content/Context;");
+         context = (*env)->CallStaticObjectMethod(env, mActivityClass, mid);
+ 
+         /* fileObj = context.getExternalFilesDir(); */
 --- SDL2.orig/src/core/android/SDL_android.h
 +++ SDL2.new/src/core/android/SDL_android.h
 @@ -19,6 +19,7 @@

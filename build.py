@@ -472,7 +472,7 @@ class Builder(object):
             if 'pyModuleReq' in libData.keys():
                 moduleNames += libData['pyModuleReq']
             if 'py3ModuleReq' in libData.keys():
-                moduleNames += libData['py3ModuleReq']
+                moduleNames += [module for module in libData['py3ModuleReq'] if module not in moduleNames]
             if len(moduleNames) < 1:
                 continue
             for moduleName in moduleNames:
