@@ -97,7 +97,7 @@ class Configuration(object):
         parser.optionxform = str
         path = self.resolvePath(path)
         if len(parser.read(path)) == 0:
-            self.log.warn('Failed to read the config from ' + path)
+            print('Failed to read the config from ' + path)
             return
         if parser.has_option('General', 'warnOnOutputOverwrite'):
             self.warnOnOutputOverwrite = parser.getboolean('General', 'warnOnOutputOverwrite')

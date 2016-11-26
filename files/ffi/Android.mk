@@ -14,6 +14,10 @@ endif
 ifeq ($(BUILD_TARGET), mips64)
   BUILD_TARGET := mips
 endif
+ifeq ($(BUILD_TARGET), mips)
+  # Fix missing cacheflush
+  LOCAL_CFLAGS += -D "cacheflush(start, end, flags)=__builtin___clear_cache((char *)start, (char *)end)"
+endif
 
 FILE_LIST := $(wildcard $(LOCAL_PATH)/src/*.c) $(wildcard $(LOCAL_PATH)/src/$(BUILD_TARGET)/*.c) $(wildcard $(LOCAL_PATH)/src/$(BUILD_TARGET)/*.S)
 EXCLUDED_FILES := src/dlmalloc.c src/x86/darwin64.S src/x86/darwin.S src/x86/freebsd.S src/x86/win64.S
