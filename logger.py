@@ -13,6 +13,7 @@ class Logger(object):
     def log(self, prefix, message):
         if self._output == None:
             print(prefix + ' ' + message)
+            sys.stdout.flush()
         else:
             self._output.write(prefix + ' ' + message + '\n')
             self._output.flush()
