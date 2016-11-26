@@ -6,17 +6,19 @@ LOCAL_MODULE := SDL2_image
 
 # Enable this if you want to support loading JPEG images
 # The library path should be a relative path to this directory.
-SUPPORT_JPG := true
+SUPPORT_JPG ?= true
 JPG_LIBRARY_PATH := external/jpeg-9
 
 # Enable this if you want to support loading PNG images
 # The library path should be a relative path to this directory.
-SUPPORT_PNG := true
+SUPPORT_PNG ?= true
 PNG_LIBRARY_PATH := external/libpng-1.6.2
 
 # Enable this if you want to support loading WebP images
 # The library path should be a relative path to this directory.
-SUPPORT_WEBP := true
+#
+# IMPORTANT: In order to enable this must have a symlink in your jni directory to external/libwebp-0.3.0.
+SUPPORT_WEBP ?= true
 WEBP_LIBRARY_PATH := external/libwebp-0.3.0
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)
@@ -31,10 +33,6 @@ LOCAL_STATIC_LIBRARIES :=
 LOCAL_SHARED_LIBRARIES := SDL2# pythonPatch
 
 ifeq ($(SUPPORT_JPG),true)
-    # the assembler is only for the ARM version, don't break the Linux sim
-    ifneq ($(TARGET_ARCH),arm)
-        ANDROID_JPEG_NO_ASSEMBLER := true
-    endif
     LOCAL_C_INCLUDES += $(LOCAL_PATH)/$(JPG_LIBRARY_PATH)
     LOCAL_CFLAGS += -DLOAD_JPG
     # We can include the sources directly so the user doesn't have to...
@@ -86,10 +84,12 @@ ifeq ($(SUPPORT_JPG),true)
         $(JPG_LIBRARY_PATH)/jutils.c \
         $(JPG_LIBRARY_PATH)/jmemmgr.c \
         $(JPG_LIBRARY_PATH)/jmem-android.c
-    ifeq ($(strip $(ANDROID_JPEG_NO_ASSEMBLER)),true)
-        LOCAL_SRC_FILES += $(JPG_LIBRARY_PATH)/jidctfst.c
-    else
+
+    # assembler support is available for arm
+    ifeq ($(TARGET_ARCH),arm)
         LOCAL_SRC_FILES += $(JPG_LIBRARY_PATH)/jidctfst.S
+    else
+        LOCAL_SRC_FILES += $(JPG_LIBRARY_PATH)/jidctfst.c
     endif
 endif
 

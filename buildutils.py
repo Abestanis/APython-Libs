@@ -247,6 +247,7 @@ def createCompileSubprocessArgs(ndkPath, tempDir, sourcePath, outputPath, abis, 
     args = [
         ndkPath,
         'NDK_OUT=' + escapeNDKParameter(tempDir),
+        '-C', escapeNDKParameter(sourcePath),
         'NDK_APPLICATION_MK=' + escapeNDKParameter(sourcePath) + '/Application.mk',
         'NDK_PROJECT_PATH=' + escapeNDKParameter(sourcePath),
         'NDK_APP_DST_DIR=' + escapeNDKParameter(outputPath) + '/$(TARGET_ARCH_ABI)',

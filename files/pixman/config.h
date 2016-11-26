@@ -12,6 +12,9 @@
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define HAVE_DLFCN_H 1
 
+/* Whether we have FE_DIVBYZERO */
+#define HAVE_FEDIVBYZERO 1
+
 /* Whether we have feenableexcept() */
 #define HAVE_FEENABLEEXCEPT 1
 
@@ -84,8 +87,7 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
 #define LT_OBJDIR "/"
 
 /* Name of package */
@@ -98,7 +100,7 @@
 #define PACKAGE_NAME "libpixman"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "libpixman.0.32.8"
+#define PACKAGE_STRING "libpixman.0.34.0"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME
@@ -107,10 +109,12 @@
 #define PACKAGE_URL "http://cairographics.org/releases/pixman-0.32.8.tar.gz"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "0.32.8"
+#define PACKAGE_VERSION "0.34.0"
 
 /* enable TIMER_BEGIN/TIMER_END macros */
-#define PIXMAN_TIMERS 1
+#if TARGET_ARCH == __X86__
+#  define PIXMAN_TIMERS 1
+#endif
 
 /* The size of `long', as computed by sizeof. */
 #define SIZEOF_LONG __sizeof_long__
@@ -169,7 +173,7 @@
 #endif
 
 /* Version number of package */
-#define VERSION "0.32.8"
+#define VERSION "0.34.0"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */

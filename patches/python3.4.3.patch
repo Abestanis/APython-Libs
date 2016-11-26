@@ -416,16 +416,6 @@
  #include "typearith.h"
  #include "umodarith.h"
  
---- Python-3.4.3.orig/Modules/_decimal/libmpdec/mpdecimal.h
-+++ Python-3.4.3.new/Modules/_decimal/libmpdec/mpdecimal.h
-@@ -372,6 +372,7 @@ void mpd_addstatus_raise(mpd_context_t *ctx, uint32_t flags);
- #define MPD_CONST_DATA          ((uint8_t)128)
- #define MPD_DATAFLAGS (MPD_STATIC_DATA|MPD_SHARED_DATA|MPD_CONST_DATA)
- 
-+
- /* mpd_t */
- typedef struct mpd_t {
-     uint8_t flags;
 --- /dev/null
 +++ Python-3.4.3.new/Modules/_decimal/libmpdec/mpmemory.h
 @@ -0,0 +1,51 @@
@@ -640,17 +630,6 @@
      SETS(setIndex++, p->pw_dir);
      SETS(setIndex++, p->pw_shell);
  
---- Python-3.4.3.orig/Modules/python.c
-+++ Python-3.4.3.new/Modules/python.c
-@@ -16,7 +16,7 @@ wmain(int argc, wchar_t **argv)
- #else
- 
- int
--main(int argc, char **argv)
-+oldPy_Main(int argc, char **argv)
- {
-     wchar_t **argv_copy;
-     /* We need a second copy, as Python might modify the first one. */
 --- Python-3.4.3.orig/Modules/socketmodule.c
 +++ Python-3.4.3.new/Modules/socketmodule.c
 @@ -260,6 +260,8 @@ if_indextoname(index) -- return the corresponding interface name\n\
@@ -746,16 +725,6 @@
      case LT_DEFAULT_LOCALE:
          locale_info->decimal_point = PyUnicode_FromOrdinal('.');
          locale_info->thousands_sep = PyUnicode_FromOrdinal(',');
---- Python-3.4.3.orig/Python/getversion.c
-+++ Python-3.4.3.new/Python/getversion.c
-@@ -13,3 +13,7 @@ Py_GetVersion(void)
- 		      PY_VERSION, Py_GetBuildInfo(), Py_GetCompiler());
- 	return version;
- }
-+
-+const char* Py_getVersionString(void) {
-+	return PY_VERSION;
-+}
 --- Python-3.4.3.orig/Python/pystrtod.c
 +++ Python-3.4.3.new/Python/pystrtod.c
 @@ -165,7 +165,7 @@ _PyOS_ascii_strtod(const char *nptr, char **endptr)

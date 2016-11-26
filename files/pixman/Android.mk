@@ -17,8 +17,7 @@ endif
 EXCLUDED_FILES := $(addprefix pixman/, $(EXCLUDED_FILES))
 LOCAL_SRC_FILES := $(filter-out $(EXCLUDED_FILES), $(FILE_LIST:$(LOCAL_PATH)/%=%))
 
-LOCAL_CFLAGS := -D HAVE_CONFIG_H -U ANDROID -U __ANDROID__
-LOCAL_CFLAGS += -D __ARM__=2 -D __X86__=3
+LOCAL_CFLAGS := -D HAVE_CONFIG_H -D __ARM__=2 -D __X86__=3
 
 ifeq ($(TARGET_ARCH), arm)
     LOCAL_CFLAGS += -D TARGET_ARCH=__ARM__
@@ -30,5 +29,8 @@ endif
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/pixman
 LOCAL_EXPORT_C_INCLUDES += $(LOCAL_PATH)/pixman
 #LOCAL_SHARED_LIBRARIES := pythonPatch
+LOCAL_STATIC_LIBRARIES := cpufeatures
 
 include $(BUILD_SHARED_LIBRARY)
+
+$(call import-module,android/cpufeatures)

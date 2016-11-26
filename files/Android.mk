@@ -127,6 +127,9 @@ endif
 ifeq ($(TARGET_ARCH), x86)
     LOCAL_CFLAGS += -U CONFIG_64 -D PPRO
 endif
+ifneq (,$(filter $(TARGET_ARCH_ABI), armeabi armeabi-v7a x86 mips))
+  LOCAL_CFLAGS += -U HAVE_WAIT3
+endif
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/Include $(LOCAL_PATH)/Modules $(LOCAL_PATH)/Modules/_io $(LOCAL_PATH)/Modules/expat $(LOCAL_PATH)/Modules/cjkcodecs $(LOCAL_PATH)/Modules/_decimal $(LOCAL_PATH)/Modules/_decimal/libmpdec
 LOCAL_EXPORT_C_INCLUDES += $(LOCAL_PATH)/Include
