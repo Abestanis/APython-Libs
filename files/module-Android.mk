@@ -3,6 +3,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := $(notdir $(LOCAL_PATH))Module
 LOCAL_SRC_FILES := {moduleSourceWildcards}
+LOCAL_SRC_FILES := $(LOCAL_SRC_FILES:$(LOCAL_PATH)/%=%)
 
 LOCAL_SHARED_LIBRARIES := pythonPatch python$(PYTHON_SHORT_VERSION) {libDependencies}
 LOCAL_MODULE_FILENAME := $(notdir $(LOCAL_PATH))
