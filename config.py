@@ -95,7 +95,10 @@ class Configuration(object):
     def parseConfigFile(self, path):
         parser = ConfigParser()
         parser.optionxform = str
-        parser.read(path)
+        path = self.resolvePath(path)
+        if len(parser.read(path)) == 0:
+            self.log.warn('Failed to read the config from ' + path)
+            return
         if parser.has_option('General', 'warnOnOutputOverwrite'):
             self.warnOnOutputOverwrite = parser.getboolean('General', 'warnOnOutputOverwrite')
         if parser.has_option('General', 'useMultiThreading'):
