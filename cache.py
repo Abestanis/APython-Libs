@@ -1,13 +1,14 @@
 import os
 import buildutils
 import shutil
+from tempfile import mkdtemp
 
 class Cache(object):
     
     cachePath = None
     
     def __init__(self, cachePath):
-        self.cachePath = cachePath
+        self.cachePath = cachePath or mkdtemp('tmp', 'ApythonLibs')
         self.ensureCacheDir()
     
     def ensureCacheDir(self):
