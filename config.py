@@ -6,7 +6,7 @@ from logger       import Logger
 class Configuration(object):
     
     ALL_CPU_ABIS = ['armeabi', 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64', 'mips', 'mips64']
-    DEFAULT_MIN_SKD_VERSION = 8
+    DEFAULT_MIN_SKD_VERSION = 9
     
     logFile = None
     log = None
@@ -29,7 +29,7 @@ class Configuration(object):
     #        'extractionFilter': [],                  # optional
     #        'pyModuleReq': [],                       # optional
     #        'py3ModuleReq': [],                      # optional
-    #        'minAndroidSdk': 8,                      # optional
+    #        'minAndroidSdk': 9,                      # optional
     #        'data': [['src', 'output_name', 'dest']] # optional
     #    }
     #}

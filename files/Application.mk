@@ -1,6 +1,6 @@
 LOCAL_PATH := $(call my-dir)
 
-# The minimum API version we support is 8
+# The minimum API version we support is 9
 APP_PLATFORM := android-{androidSdkVersion}
 
 PYTHON_SHORT_VERSION := {pyShortVersion}
