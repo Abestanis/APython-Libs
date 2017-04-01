@@ -6,7 +6,7 @@ The hosted libraries can be accessed with the information provided by the genera
 ##Usage
 
 The build.py script takes care of downloading and patching the source code, calling the [ndk](https://developer.android.com/tools/sdk/ndk/index.html) and generating the index.json file.
-For a list of all avaliable options type ```build.py -h``` or ```build.py --help```.
+For a list of all available options type ```build.py -h``` or ```build.py --help```.
 
 The script will also download and compile the source code from some additional libraries to allow the generation of some python modules which depend on these libraries (e.g. the _ssl module depends on openSSL).
 
