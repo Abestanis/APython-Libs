@@ -13,7 +13,7 @@ class Configuration:
     log = None
     warnOnOutputOverwrite = False
     ndkPath = None
-    patchPath = None
+    gitPath = 'git'
     currDir = None
     outputDir = None
     patchesDir = None
@@ -38,7 +38,7 @@ class Configuration:
     cpuABIs = ALL_CPU_ABIS[:]
     useMultiprocessing = True
     librariesDataPath = None
-    
+
     def __init__(self, args):
         super(Configuration, self).__init__()
         self.currDir = os.path.dirname(os.path.realpath(__file__))
@@ -52,7 +52,7 @@ class Configuration:
         self.outputDir = self.resolvePath(args.outputDir) or self.outputDir
         self.filesDir = self.resolvePath(args.filesDir) or self.filesDir
         self.cacheDir = self.resolvePath(args.cacheDir) or self.cacheDir
-        self.patchPath = self.resolvePath(args.gitPath) or self.patchPath
+        self.gitPath = self.resolvePath(args.gitPath) or self.gitPath
         self.ndkPath = self.resolvePath(args.ndkPath) or self.ndkPath
         self.pythonPatchDir = args.pythonPatchDir or self.pythonPatchDir
         if args.versions is not None and len(args.versions) != 0:
@@ -66,7 +66,7 @@ class Configuration:
         self.librariesDataPath = args.librariesDataFile or self.librariesDataPath
 
     def check(self) -> bool:
-        if self.patchPath is None or not os.path.isfile(self.patchPath):
+        if self.gitPath is None or os.system(self.gitPath + ' --version') != 0:
             self.log.error('The path to the git executable is not specified or incorrect.')
             return False
         if self.ndkPath is None or not os.path.isfile(self.ndkPath):
@@ -115,7 +115,7 @@ class Configuration:
         if parser.has_option('Paths', 'ndk_dir'):
             self.ndkPath = self.resolvePath(parser.get('Paths', 'ndk_dir'))
         if parser.has_option('Paths', 'patch_path'):
-            self.patchPath = self.resolvePath(parser.get('Paths', 'patch_path'))
+            self.gitPath = self.resolvePath(parser.get('Paths', 'git_path'))
         if parser.has_option('Paths', 'files_dir'):
             self.filesDir = self.resolvePath(parser.get('Paths', 'files_dir'))
         if parser.has_option('Paths', 'output_dir'):

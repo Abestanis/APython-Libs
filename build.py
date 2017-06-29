@@ -219,7 +219,7 @@ class Builder:
                 diffPath = os.path.join(self.config.filesDir, libraryName, 'patch.diff')
                 if os.path.exists(diffPath):
                     self.config.log.info('Patching {lib}...'.format(lib=libraryName))
-                    if not buildutils.applyPatch(self.config.patchPath, extractDir, diffPath,
+                    if not buildutils.applyPatch(self.config.gitPath, extractDir, diffPath,
                                                  self.config.log):
                         self.config.log.error('Applying patch ({path}) failed for library {name}, '
                                               'aborting!'.format(path=diffPath, name=libraryName))
@@ -438,7 +438,7 @@ class Builder:
         """>>> patchPythonSource(sourcePath, patchFilePath) -> success
         Apply the patch at 'patchFilePath' to the Python source at 'sourcePath'.
         """
-        return buildutils.applyPatch(self.config.patchPath, sourcePath,
+        return buildutils.applyPatch(self.config.gitPath, sourcePath,
                                      patchFilePath, self.config.log)
 
     def generateModulesZip(self, sourcePath: str, outputDir: str) -> bool:

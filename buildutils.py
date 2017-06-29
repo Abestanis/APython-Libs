@@ -250,7 +250,7 @@ def applyPatch(gitPath: str, sourcePath: str, patchFilePath: str, logger: Logger
     """>>> applyPatch(gitPath, sourcePath, patchFilePath, logger) -> success
     Apply the patch in the patchFile 'patchFilePath' to 'sourcePath'.
     """
-    args = [gitPath, '-t', '-p1', '-d', sourcePath, '-i', patchFilePath]
+    args = [gitPath, '-C', sourcePath, 'apply', '-p1', patchFilePath]
     logger.info('Patching the source code with {path}...'.format(path=patchFilePath))
     logger.debug(subprocess.list2cmdline(args))
     return subprocess.call(args, stdout=logger.getOutput(), stderr=logger.getOutput()) == 0
