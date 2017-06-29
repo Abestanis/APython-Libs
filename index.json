@@ -2,291 +2,261 @@
 "requirements": {
 "libraries/SDL2_gpu" : ["libraries/SDL2"],
 "libraries/sdl2X11Emulation" : ["libraries/SDL2", "libraries/SDL2_gpu", "libraries/SDL2_ttf", "libraries/pixman"],
-"libraries/SDL2" : ["androidSdk/9"],
-"libraries/SDL2_ttf" : ["libraries/SDL2"],
 "libraries/tcl" : ["data/tclLibraries"],
-"libraries/SDL2_mixer" : ["libraries/SDL2"],
+"libraries/SDL2" : ["androidSdk/9"],
 "libraries/tk" : ["libraries/sdl2X11Emulation", "libraries/tcl", "data/tkLibraries"],
-"libraries/SDL2_image" : ["libraries/SDL2"],
-"libraries/SDL2_net" : ["libraries/SDL2"],
-"pyModule/_bz2" : ["libraries/bzip"],
-"pyModule/bz2" : ["libraries/bzip"],
-"pyModule/_tkinter" : ["libraries/tcl", "libraries/tk"],
-"pyModule/_hashlib" : ["libraries/openSSL"],
+"libraries/SDL2_ttf" : ["libraries/SDL2"],
 "pyModule/crypt" : ["libraries/openSSL"],
+"pyModule/_hashlib" : ["libraries/openSSL"],
+"pyModule/_tkinter" : ["libraries/tcl", "libraries/tk"],
 "pyModule/_crypt" : ["libraries/openSSL"],
+"pyModule/bz2" : ["libraries/bzip"],
 "pyModule/_ctypes" : ["libraries/ffi"],
-"pyModule/_ssl" : ["libraries/openSSL"]
+"pyModule/_ssl" : ["libraries/openSSL"],
+"pyModule/_bz2" : ["libraries/bzip"]
 },
 "data": {
 "tclLibraries" : {
-"path": ["output/data/tclLibraries.zip", "98298f124d8d933dee5318f7db43244e"],
+"path": ["output/data/tclLibraries.zip", "e56adf1d3888bf306787fa685bb0f681"],
 "dest": "data/tcl8.6.4/library"
 },
 "tkLibraries" : {
-"path": ["output/data/tkLibraries.zip", "5b6cfeb2c894aa0df4a90cb8e549a993"],
+"path": ["output/data/tkLibraries.zip", "799c6ed12f8124bc77987f273908214b"],
 "dest": "data/tcl8.6.4/library/tk8.6"
 }
 },
 "libraries": {
-"SDL2_gpu": {
-"arm64-v8a": ["output/libraries/arm64-v8a/libSDL2_gpu.so", "3c14a1bbe830040a27ec83de67c7eb31"],
-"armeabi": ["output/libraries/armeabi/libSDL2_gpu.so", "a9a41dea8d8397fa1bdc6b4f7c58d898"],
-"armeabi-v7a": ["output/libraries/armeabi-v7a/libSDL2_gpu.so", "3e2de97213796f192bf5a26a16172703"],
-"mips": ["output/libraries/mips/libSDL2_gpu.so", "d8f5f02120af0ee1b41d1279dc42c2d0"],
-"mips64": ["output/libraries/mips64/libSDL2_gpu.so", "d9d2d4e7cc6e5fdd9b1739afbe8545fe"],
-"x86": ["output/libraries/x86/libSDL2_gpu.so", "ff373bee3c4bdd7efd0c170fe1d36296"],
-"x86_64": ["output/libraries/x86_64/libSDL2_gpu.so", "b054bcb24c9b996fd9a7743051c47250"]
-},
-"bzip": {
-"arm64-v8a": ["output/libraries/arm64-v8a/libbzip.so", "90f0ad4bf557468b93cfc50311f0de82"],
-"armeabi": ["output/libraries/armeabi/libbzip.so", "e6cf18bb7126a3b480b6ddb1a7214243"],
-"armeabi-v7a": ["output/libraries/armeabi-v7a/libbzip.so", "8de007fd25426d7802a8f014054271af"],
-"mips": ["output/libraries/mips/libbzip.so", "4f0061c498bf8e2a07b3e3224adde5a0"],
-"mips64": ["output/libraries/mips64/libbzip.so", "68ba5c6a39dc678bc465e9a2da3c316f"],
-"x86": ["output/libraries/x86/libbzip.so", "725f47c6803ab5583159cb1c1f6b494d"],
-"x86_64": ["output/libraries/x86_64/libbzip.so", "74be2d2a7a16e796e79849b2f6a6e67c"]
+"pythonPatch": {
+"arm64-v8a": ["output/libraries/arm64-v8a/libpythonPatch.so", "734be2b0b9b3736999ac7dbf0dc1b97f"],
+"armeabi": ["output/libraries/armeabi/libpythonPatch.so", "7a25502ffe4449e1a183e8bafd9d43e5"],
+"armeabi-v7a": ["output/libraries/armeabi-v7a/libpythonPatch.so", "01b822e11ed0661c3c4a959809a364d4"],
+"mips": ["output/libraries/mips/libpythonPatch.so", "a1fe7033d59f5d20d0349272600dc0d3"],
+"mips64": ["output/libraries/mips64/libpythonPatch.so", "d6cb5ce6a89916ab453b81b7c7c8bb92"],
+"x86": ["output/libraries/x86/libpythonPatch.so", "be731f5a576c1911df6722f4071a5a22"],
+"x86_64": ["output/libraries/x86_64/libpythonPatch.so", "13a3d60785d98c8db891d66ecc25f0e2"]
 },
 "sdl2X11Emulation": {
-"arm64-v8a": ["output/libraries/arm64-v8a/libsdl2X11Emulation.so", "b6396589a899d6cc9ee5bcf5e96b9665"],
-"armeabi": ["output/libraries/armeabi/libsdl2X11Emulation.so", "e36355ea2fc79e4aab999376f3541fd5"],
-"armeabi-v7a": ["output/libraries/armeabi-v7a/libsdl2X11Emulation.so", "4ae8934241dde4846d68a05d184950fc"],
-"mips": ["output/libraries/mips/libsdl2X11Emulation.so", "b405a8b7ae535c3d444affc679b58907"],
-"mips64": ["output/libraries/mips64/libsdl2X11Emulation.so", "4f7e22a648d76f0e329d4c686b26af61"],
-"x86": ["output/libraries/x86/libsdl2X11Emulation.so", "c011b311715cfa233ace35ec1e671b7c"],
-"x86_64": ["output/libraries/x86_64/libsdl2X11Emulation.so", "104cb6fabe40e9b411e6b154a24f01e2"]
-},
-"SDL2": {
-"arm64-v8a": ["output/libraries/arm64-v8a/libSDL2.so", "909c77d0a458709bbc509177d8b82499"],
-"armeabi": ["output/libraries/armeabi/libSDL2.so", "9f90017656cea92c9ec6952e0a25a249"],
-"armeabi-v7a": ["output/libraries/armeabi-v7a/libSDL2.so", "de3161b2e256465a1d5222f1157860cc"],
-"mips": ["output/libraries/mips/libSDL2.so", "5691edc9d889e4ac1e04828f66faf07a"],
-"mips64": ["output/libraries/mips64/libSDL2.so", "4598c21701292836fac3143a78100f1d"],
-"x86": ["output/libraries/x86/libSDL2.so", "3a1d63a483bf8f4efe5dfdfcd95b5943"],
-"x86_64": ["output/libraries/x86_64/libSDL2.so", "399185fa1bb69d96e4a4786572874f05"]
-},
-"SDL2_ttf": {
-"arm64-v8a": ["output/libraries/arm64-v8a/libSDL2_ttf.so", "533944cdde75eaf54fcec21a6d05e3fb"],
-"armeabi": ["output/libraries/armeabi/libSDL2_ttf.so", "a9fa0c5064b89d20dd9dffecf09bb041"],
-"armeabi-v7a": ["output/libraries/armeabi-v7a/libSDL2_ttf.so", "9e3b6b4cf1ecf75232063a7d81fcda6f"],
-"mips": ["output/libraries/mips/libSDL2_ttf.so", "128575e515d617a7c04adc641118de57"],
-"mips64": ["output/libraries/mips64/libSDL2_ttf.so", "accf2ff4ecc6e2205a0797cd12ac4395"],
-"x86": ["output/libraries/x86/libSDL2_ttf.so", "bb2379ebbee58b2a2b2c7a09a664fcdd"],
-"x86_64": ["output/libraries/x86_64/libSDL2_ttf.so", "8f8ddd7d2f681b60221e295d56be5d60"]
-},
-"openSSL": {
-"arm64-v8a": ["output/libraries/arm64-v8a/libopenSSL.so", "4c656797b078dae1f1c87920afbeb439"],
-"armeabi": ["output/libraries/armeabi/libopenSSL.so", "6d24ba3e35fa3043a9ac2228ebda287a"],
-"armeabi-v7a": ["output/libraries/armeabi-v7a/libopenSSL.so", "93a06e4f869ffa96b94c88061c1494f5"],
-"mips": ["output/libraries/mips/libopenSSL.so", "08b3b3e10027dbd05ef206ebbbc616cf"],
-"mips64": ["output/libraries/mips64/libopenSSL.so", "55ed4ab454e7c305eb6ed7a224cd494c"],
-"x86": ["output/libraries/x86/libopenSSL.so", "b021cabb7757144e0fcbcba4eb448071"],
-"x86_64": ["output/libraries/x86_64/libopenSSL.so", "79fb09337dd0adf084f8c877ba75290f"]
-},
-"SDL2_net": {
-"arm64-v8a": ["output/libraries/arm64-v8a/libSDL2_net.so", "33847bc6d19facad0b609293fa963972"],
-"armeabi": ["output/libraries/armeabi/libSDL2_net.so", "bfae5fe21b36e7f3fb911deaf3f7d101"],
-"armeabi-v7a": ["output/libraries/armeabi-v7a/libSDL2_net.so", "0050ce78eafdd3b5e035c2ad60c11be4"],
-"mips": ["output/libraries/mips/libSDL2_net.so", "2dabc93c691e54bc242e7d33c3b1fffc"],
-"mips64": ["output/libraries/mips64/libSDL2_net.so", "07683d81bd98bb030b2bb66cb509ec01"],
-"x86": ["output/libraries/x86/libSDL2_net.so", "3ea7839e0a2e28c2a550b8103c0b27a7"],
-"x86_64": ["output/libraries/x86_64/libSDL2_net.so", "c648fbe3617f91d01e3964b792367f14"]
-},
-"tcl": {
-"arm64-v8a": ["output/libraries/arm64-v8a/libtcl.so", "7b446d6454c0ffee27fe8ac2b91bbb3d"],
-"armeabi": ["output/libraries/armeabi/libtcl.so", "d16398f16bce3bf6387b4dbd9188fd56"],
-"armeabi-v7a": ["output/libraries/armeabi-v7a/libtcl.so", "5c23b72ae8990b4507327bda9a98ad47"],
-"mips": ["output/libraries/mips/libtcl.so", "30821255c25996bab6e964172e20d3f4"],
-"mips64": ["output/libraries/mips64/libtcl.so", "31fab0233c44a83ac24432a3893596f0"],
-"x86": ["output/libraries/x86/libtcl.so", "c2418c9ce47747b3ad1cd87731f20e4d"],
-"x86_64": ["output/libraries/x86_64/libtcl.so", "915ee025feb6a6d43138288701a5753a"]
-},
-"SDL2_mixer": {
-"arm64-v8a": ["output/libraries/arm64-v8a/libSDL2_mixer.so", "3057e1fb9cac8c8aaccbac4c24de7b4f"],
-"armeabi": ["output/libraries/armeabi/libSDL2_mixer.so", "493204fe933e07b474c47bc4d8916036"],
-"armeabi-v7a": ["output/libraries/armeabi-v7a/libSDL2_mixer.so", "1e116b2a48326850a4470c447dd4cd4d"],
-"mips": ["output/libraries/mips/libSDL2_mixer.so", "07b7c2a4b1194e0bcb87c34bfcbac6ed"],
-"mips64": ["output/libraries/mips64/libSDL2_mixer.so", "2efa05852e01e7fe49b86381d8734f48"],
-"x86": ["output/libraries/x86/libSDL2_mixer.so", "e8017b249416f015b60d7c2d47c21bd2"],
-"x86_64": ["output/libraries/x86_64/libSDL2_mixer.so", "7c47cc8e3f8d37a759deb23cf950b653"]
+"arm64-v8a": ["output/libraries/arm64-v8a/libsdl2X11Emulation.so", "27c42eac8f4520f3c2ff5c58c943bb64"],
+"armeabi": ["output/libraries/armeabi/libsdl2X11Emulation.so", "a2a9df073e6bc06c75979a62f2b33b6b"],
+"armeabi-v7a": ["output/libraries/armeabi-v7a/libsdl2X11Emulation.so", "54d11dcd9016396778a80cf779efdb2e"],
+"mips": ["output/libraries/mips/libsdl2X11Emulation.so", "fbd814e92c0fd2b5057a0cb3bfb2ef61"],
+"mips64": ["output/libraries/mips64/libsdl2X11Emulation.so", "801033f437c08ecec871ab8758e165b0"],
+"x86": ["output/libraries/x86/libsdl2X11Emulation.so", "13b787121e05ae78f6133b30f79a52b9"],
+"x86_64": ["output/libraries/x86_64/libsdl2X11Emulation.so", "2b9a6f0b1c7da7cb4eebdda4220105e8"]
 },
 "tk": {
-"arm64-v8a": ["output/libraries/arm64-v8a/libtk.so", "733cbc8368290086faacb8d932179bb4"],
-"armeabi": ["output/libraries/armeabi/libtk.so", "d05910af594d409e8a85d0d907ab573e"],
-"armeabi-v7a": ["output/libraries/armeabi-v7a/libtk.so", "077a77532f514291ad4312ff255bcea1"],
-"mips": ["output/libraries/mips/libtk.so", "2f85ba7c3ac6d921f8946dcb3eb20c2d"],
-"mips64": ["output/libraries/mips64/libtk.so", "341a21327866abfb900a0e3428d726d4"],
-"x86": ["output/libraries/x86/libtk.so", "c57e323cfbecbdec0b6abe6c88e06404"],
-"x86_64": ["output/libraries/x86_64/libtk.so", "93afad519d9f7fa23bfb5f325188b492"]
-},
-"ffi": {
-"arm64-v8a": ["output/libraries/arm64-v8a/libffi.so", "24249e3185cda51862b3cd0e9b0b78b4"],
-"armeabi": ["output/libraries/armeabi/libffi.so", "c8bdc2fcff066a865ba383811325e179"],
-"armeabi-v7a": ["output/libraries/armeabi-v7a/libffi.so", "366bb0256c1642c334a5724dd269e7dd"],
-"mips": ["output/libraries/mips/libffi.so", "38f0edd5f8bd61dbadaa57944ae09d99"],
-"mips64": ["output/libraries/mips64/libffi.so", "07479bec601b0f4f6fa569f12c990b13"],
-"x86": ["output/libraries/x86/libffi.so", "4e6d2ee2cc54c72c26e0610a2aae9065"],
-"x86_64": ["output/libraries/x86_64/libffi.so", "7c019a1368e761b0dd44744e898dde4f"]
-},
-"SDL2_image": {
-"arm64-v8a": ["output/libraries/arm64-v8a/libSDL2_image.so", "9594e74afa7e0c7c900a74c39ad1423d"],
-"armeabi": ["output/libraries/armeabi/libSDL2_image.so", "15633f57ce7973dc5775af68bc34b187"],
-"armeabi-v7a": ["output/libraries/armeabi-v7a/libSDL2_image.so", "5b0c54b737cbf73c8f5e39349d059813"],
-"mips": ["output/libraries/mips/libSDL2_image.so", "cf78afc37286e4f268a53da1e09c01a9"],
-"mips64": ["output/libraries/mips64/libSDL2_image.so", "da08414aa6fe4eb16d13b89c5243b924"],
-"x86": ["output/libraries/x86/libSDL2_image.so", "70333916cec0a5bc532939d1e9d4dbee"],
-"x86_64": ["output/libraries/x86_64/libSDL2_image.so", "44eff28791238552be9ba29708e4516f"]
-},
-"pythonPatch": {
-"arm64-v8a": ["output/libraries/arm64-v8a/libpythonPatch.so", "0cace52e2b78e3ffd88aeb90583a288f"],
-"armeabi": ["output/libraries/armeabi/libpythonPatch.so", "8d82c10504784bcd000fc28aa64ff08b"],
-"armeabi-v7a": ["output/libraries/armeabi-v7a/libpythonPatch.so", "326c3907568dd5397a3bc710b76f7d5b"],
-"mips": ["output/libraries/mips/libpythonPatch.so", "f712981f087fc260b11c6de8d3bbfede"],
-"mips64": ["output/libraries/mips64/libpythonPatch.so", "f5d4f7cd60fd04a2d14ac796668d1323"],
-"x86": ["output/libraries/x86/libpythonPatch.so", "26a1b017530c4defd2ca6085ff101bc2"],
-"x86_64": ["output/libraries/x86_64/libpythonPatch.so", "3d65aa46d235622a9622e2bd631dd2bd"]
+"arm64-v8a": ["output/libraries/arm64-v8a/libtk.so", "b360e81c3f731cbf380699eeee399451"],
+"armeabi": ["output/libraries/armeabi/libtk.so", "877d1dabcb7f1136d6679ac1530d18f6"],
+"armeabi-v7a": ["output/libraries/armeabi-v7a/libtk.so", "3f983d30f409a0466ab6b891a4a17501"],
+"mips": ["output/libraries/mips/libtk.so", "50acb67dc89191f1b67a2377c790c378"],
+"mips64": ["output/libraries/mips64/libtk.so", "d0e0065909a8d43a1ab143902f4a27b7"],
+"x86": ["output/libraries/x86/libtk.so", "cabe4780057bfcdfe76e71d77edd0171"],
+"x86_64": ["output/libraries/x86_64/libtk.so", "eb1448ed3583f44ebeecc03adc38bf94"]
 },
 "pixman": {
-"arm64-v8a": ["output/libraries/arm64-v8a/libpixman.so", "e8d138f54736840f6943d844efdfb2f5"],
-"armeabi": ["output/libraries/armeabi/libpixman.so", "c6bcc4481f62cca925020a81399c32ed"],
-"armeabi-v7a": ["output/libraries/armeabi-v7a/libpixman.so", "f9b09cff3c8e7d58a85f49accf641fb3"],
-"mips": ["output/libraries/mips/libpixman.so", "aed6d9b9c7cd9f6bb02caf712125015e"],
-"mips64": ["output/libraries/mips64/libpixman.so", "3434626596e4e0691ae3a05090b99454"],
-"x86": ["output/libraries/x86/libpixman.so", "df417d0a51f26db419db4a4becbaface"],
-"x86_64": ["output/libraries/x86_64/libpixman.so", "9de987c86a7e23df070ca277e077574d"]
+"arm64-v8a": ["output/libraries/arm64-v8a/libpixman.so", "5e99401128c8cd115789bccbd5c25648"],
+"armeabi": ["output/libraries/armeabi/libpixman.so", "6476a1d4ca4763ebdc17d63409c1b1b7"],
+"armeabi-v7a": ["output/libraries/armeabi-v7a/libpixman.so", "cdafcdec10fecb79d3cab4f08d0fc250"],
+"mips": ["output/libraries/mips/libpixman.so", "3fd8ba4b7fa81b2cabf41ab8a354a317"],
+"mips64": ["output/libraries/mips64/libpixman.so", "2919b0ab2b144830e39a2964e60e3553"],
+"x86": ["output/libraries/x86/libpixman.so", "2443a4a92c20ebb5e809b048c5581747"],
+"x86_64": ["output/libraries/x86_64/libpixman.so", "c58790a5218dd727cd49dc7109b72642"]
+},
+"SDL2_ttf": {
+"arm64-v8a": ["output/libraries/arm64-v8a/libSDL2_ttf.so", "78c92f0c1bfe44f1e3ca6033ef33450f"],
+"armeabi": ["output/libraries/armeabi/libSDL2_ttf.so", "5f8f5bee38078defdc6f162a51d19545"],
+"armeabi-v7a": ["output/libraries/armeabi-v7a/libSDL2_ttf.so", "5f2fb999c84995af2838da2b6fd54e83"],
+"mips": ["output/libraries/mips/libSDL2_ttf.so", "311c6c8884f463d9e0431143fee68e6c"],
+"mips64": ["output/libraries/mips64/libSDL2_ttf.so", "24ae56284b15138720c6dae33c460890"],
+"x86": ["output/libraries/x86/libSDL2_ttf.so", "e39d805b1b10f3e32cc74dc3dfa9802d"],
+"x86_64": ["output/libraries/x86_64/libSDL2_ttf.so", "916736e6638bd69bd2eccb1ebe62da9c"]
+},
+"openSSL": {
+"arm64-v8a": ["output/libraries/arm64-v8a/libopenSSL.so", "5c1f7dac4b4b5595eea8109c01cd196a"],
+"armeabi": ["output/libraries/armeabi/libopenSSL.so", "59efbb22454f8f8acb9118a1b3b3d7ff"],
+"armeabi-v7a": ["output/libraries/armeabi-v7a/libopenSSL.so", "f778206c8384bd3d03828f9c8d96443a"],
+"mips": ["output/libraries/mips/libopenSSL.so", "90f1dae0b7537a370d7862b992e456ac"],
+"mips64": ["output/libraries/mips64/libopenSSL.so", "0cd0f68c8833332729e38c33f9b3bcdc"],
+"x86": ["output/libraries/x86/libopenSSL.so", "a644f0d8d5851fc037df3d7df3414361"],
+"x86_64": ["output/libraries/x86_64/libopenSSL.so", "4a08ffebc5573b418f68480f41048de1"]
+},
+"bzip": {
+"arm64-v8a": ["output/libraries/arm64-v8a/libbzip.so", "4ae8c3328d315e4ab70a03011c2ad211"],
+"armeabi": ["output/libraries/armeabi/libbzip.so", "8d6121c8b452782f80e5e959d61ad04c"],
+"armeabi-v7a": ["output/libraries/armeabi-v7a/libbzip.so", "5343cd7fef743a20e3032c16d3ac7ed1"],
+"mips": ["output/libraries/mips/libbzip.so", "6987c825aa1baba3d44e8f8bd0aff7c4"],
+"mips64": ["output/libraries/mips64/libbzip.so", "77da088b02284c2eeb98ca6a97f917bb"],
+"x86": ["output/libraries/x86/libbzip.so", "d37b2c4f6c013c08b5e941ceda0f177e"],
+"x86_64": ["output/libraries/x86_64/libbzip.so", "761173fa82f8eb17eef5e4ac264391e0"]
+},
+"ffi": {
+"arm64-v8a": ["output/libraries/arm64-v8a/libffi.so", "3cf1060883ad72106ed8251e756bedd7"],
+"armeabi": ["output/libraries/armeabi/libffi.so", "523e654e0aa9b4c6fd753a33441e816f"],
+"armeabi-v7a": ["output/libraries/armeabi-v7a/libffi.so", "6b13f052cc70bc5ec1e92a723d260ecb"],
+"mips": ["output/libraries/mips/libffi.so", "3b5ad34d82000072af4e821fe729d2e2"],
+"mips64": ["output/libraries/mips64/libffi.so", "6ea7affeba042212e311fa86438d5892"],
+"x86": ["output/libraries/x86/libffi.so", "cecc6d1c71bb123e355590890219fc91"],
+"x86_64": ["output/libraries/x86_64/libffi.so", "ec1f2867b1a1cd800cbaad5f15021c77"]
+},
+"tcl": {
+"arm64-v8a": ["output/libraries/arm64-v8a/libtcl.so", "4a7750b23cb61652c21a4445b1617485"],
+"armeabi": ["output/libraries/armeabi/libtcl.so", "c00b54001ca491c721d25848aecdce83"],
+"armeabi-v7a": ["output/libraries/armeabi-v7a/libtcl.so", "2b60337e8193cd9d5be6495ad9dfee24"],
+"mips": ["output/libraries/mips/libtcl.so", "f3702393f77e04a3dc1f53d0fbfdb00e"],
+"mips64": ["output/libraries/mips64/libtcl.so", "8eab40466e8b76dcf076993bd4c2a493"],
+"x86": ["output/libraries/x86/libtcl.so", "c83c4b9398a7bfb6ad822e78166bf9ff"],
+"x86_64": ["output/libraries/x86_64/libtcl.so", "ad5ea17e76494abb5e914fe399f77359"]
+},
+"SDL2": {
+"arm64-v8a": ["output/libraries/arm64-v8a/libSDL2.so", "5f0380e0fafc844c0285316324d74c2f"],
+"armeabi": ["output/libraries/armeabi/libSDL2.so", "55ca1e989589d7f1e42108a0c68e719b"],
+"armeabi-v7a": ["output/libraries/armeabi-v7a/libSDL2.so", "485be94fb8fa8251e4326e6c9a5cc44b"],
+"mips": ["output/libraries/mips/libSDL2.so", "6a67bc1bf7b2c65e3f1a3faecfd9d194"],
+"mips64": ["output/libraries/mips64/libSDL2.so", "6d29419ccb164ccd89abd78d50bb1777"],
+"x86": ["output/libraries/x86/libSDL2.so", "dcc527bcca607911bfc4cb491293e6e7"],
+"x86_64": ["output/libraries/x86_64/libSDL2.so", "fe8496dbccaf742a241ca9b2ac6209cb"]
+},
+"SDL2_gpu": {
+"arm64-v8a": ["output/libraries/arm64-v8a/libSDL2_gpu.so", "455c6375a1e8f9b91c8afcb7c5b91519"],
+"armeabi": ["output/libraries/armeabi/libSDL2_gpu.so", "ea41be10658f97c216e2d3ad9e143630"],
+"armeabi-v7a": ["output/libraries/armeabi-v7a/libSDL2_gpu.so", "d31e84fef5dd97e4f155555f3bedb3a4"],
+"mips": ["output/libraries/mips/libSDL2_gpu.so", "040dc1e1b702588951603f7c45fc2337"],
+"mips64": ["output/libraries/mips64/libSDL2_gpu.so", "f789e3ce453f28efdb035f83d4192c43"],
+"x86": ["output/libraries/x86/libSDL2_gpu.so", "aaea3b68bac342bb1c9d72c43da40427"],
+"x86_64": ["output/libraries/x86_64/libSDL2_gpu.so", "fe70f8709bd43245a994307398d6a691"]
 }
 },
 "2.7.2": {
 "arm64-v8a": {
-"bz2": ["output/Python2.7.2/arm64-v8a/bz2.so", "b8a7b90a644b7b89b93e04dd42eb1c4f"],
-"crypt": ["output/Python2.7.2/arm64-v8a/crypt.so", "f5859ea0c3c28595980b74a890fc2bb0"],
-"pythonLib": ["output/Python2.7.2/arm64-v8a/libpython2.7.so", "c8e443fdabcf7c748a03eb9214b7ca23"],
-"_ctypes": ["output/Python2.7.2/arm64-v8a/_ctypes.so", "5fd0ce2290e3822af69752652f3a811a"],
-"_hashlib": ["output/Python2.7.2/arm64-v8a/_hashlib.so", "cf29cde24167f713674d5c3ce97c6c12"],
-"_ssl": ["output/Python2.7.2/arm64-v8a/_ssl.so", "5968a62f68819547633fd64eedf33132"],
-"_tkinter": ["output/Python2.7.2/arm64-v8a/_tkinter.so", "7cbd86608cd932b3976497f389277597"]
+"bz2": ["output/Python2.7.2/arm64-v8a/bz2.so", "9e94b08d13708f4c8be67f8153eae362"],
+"crypt": ["output/Python2.7.2/arm64-v8a/crypt.so", "fcad926b937053b5f88526773a528312"],
+"pythonLib": ["output/Python2.7.2/arm64-v8a/libpython2.7.so", "eed82a4894294abaeb24c15873603600"],
+"_ctypes": ["output/Python2.7.2/arm64-v8a/_ctypes.so", "3aaa13a91c99797933bba1415b158453"],
+"_hashlib": ["output/Python2.7.2/arm64-v8a/_hashlib.so", "8b34f0bf89aacc7d08fea0fbddf58201"],
+"_ssl": ["output/Python2.7.2/arm64-v8a/_ssl.so", "e020ba609dd56173c2201f9520ec4a86"],
+"_tkinter": ["output/Python2.7.2/arm64-v8a/_tkinter.so", "7bdd30a64de237ab3d4b7b410d71ff87"]
 },
 "armeabi": {
-"bz2": ["output/Python2.7.2/armeabi/bz2.so", "3e9a260d17e1cce1e53ce747c1125b98"],
-"crypt": ["output/Python2.7.2/armeabi/crypt.so", "e67d24ceceb0597b0bf9e6edc323efa0"],
-"pythonLib": ["output/Python2.7.2/armeabi/libpython2.7.so", "a6623209a096e90b343f0b2904246dce"],
-"_ctypes": ["output/Python2.7.2/armeabi/_ctypes.so", "f9040b56c44e3d330bcff1a7b919a8c0"],
-"_hashlib": ["output/Python2.7.2/armeabi/_hashlib.so", "10a3be09bc8742a99302364d2218c0f2"],
-"_ssl": ["output/Python2.7.2/armeabi/_ssl.so", "b1107cbf989ac87fa3c55fb8600fc46e"],
-"_tkinter": ["output/Python2.7.2/armeabi/_tkinter.so", "375948841fdb3ae0e5cbd6fe8ad26793"]
+"bz2": ["output/Python2.7.2/armeabi/bz2.so", "da78a6e75936c69eb44b48b31ad706f9"],
+"crypt": ["output/Python2.7.2/armeabi/crypt.so", "6f63eced54fb36678e5bb6fe75dd999d"],
+"pythonLib": ["output/Python2.7.2/armeabi/libpython2.7.so", "c588a8aae82edb6dcbc311742b3f0f3f"],
+"_ctypes": ["output/Python2.7.2/armeabi/_ctypes.so", "254b997ba70b16800dc878a06df4765c"],
+"_hashlib": ["output/Python2.7.2/armeabi/_hashlib.so", "a17269177fc3319eb86be24c80850f9b"],
+"_ssl": ["output/Python2.7.2/armeabi/_ssl.so", "6387382092e89327dbfe06b879d07010"],
+"_tkinter": ["output/Python2.7.2/armeabi/_tkinter.so", "f59a583ffb6ba992ade57bef70c7e00e"]
 },
 "armeabi-v7a": {
-"bz2": ["output/Python2.7.2/armeabi-v7a/bz2.so", "713c46b239de534a4e319124937ab6c2"],
-"crypt": ["output/Python2.7.2/armeabi-v7a/crypt.so", "1d29a1748995326d404eb065e6af3f2f"],
-"pythonLib": ["output/Python2.7.2/armeabi-v7a/libpython2.7.so", "dc7969190ee07e97298e7483f106b08b"],
-"_ctypes": ["output/Python2.7.2/armeabi-v7a/_ctypes.so", "493a04d48e3b38e78f8f6b48337d6a0c"],
-"_hashlib": ["output/Python2.7.2/armeabi-v7a/_hashlib.so", "e106706b31e1357a27e3dffa8d358cc2"],
-"_ssl": ["output/Python2.7.2/armeabi-v7a/_ssl.so", "c9c1bfda9c8ef0e1d2765758620c4d90"],
-"_tkinter": ["output/Python2.7.2/armeabi-v7a/_tkinter.so", "0d923f5dc811469f7dedcd9352796a18"]
+"bz2": ["output/Python2.7.2/armeabi-v7a/bz2.so", "86cbaeacafc39b7fe65d4f31cd38f996"],
+"crypt": ["output/Python2.7.2/armeabi-v7a/crypt.so", "9d8bd548746a348e9126a321caabb77f"],
+"pythonLib": ["output/Python2.7.2/armeabi-v7a/libpython2.7.so", "431103b5b20f0ee7da78a74c55676253"],
+"_ctypes": ["output/Python2.7.2/armeabi-v7a/_ctypes.so", "186b5a7dac71ddf194bd0311c8db2123"],
+"_hashlib": ["output/Python2.7.2/armeabi-v7a/_hashlib.so", "a8b55e490721118ad53251ef1cff97de"],
+"_ssl": ["output/Python2.7.2/armeabi-v7a/_ssl.so", "87db9e99a000369d6fb8221309be1b41"],
+"_tkinter": ["output/Python2.7.2/armeabi-v7a/_tkinter.so", "775b9ce587813e226f7c699b7b9403c8"]
 },
 "mips": {
-"bz2": ["output/Python2.7.2/mips/bz2.so", "efe36f03b739b590a146786f6515655e"],
-"crypt": ["output/Python2.7.2/mips/crypt.so", "81e13b84a8b01065275cbc03e6cabc89"],
-"pythonLib": ["output/Python2.7.2/mips/libpython2.7.so", "9d90efaaea34a3370e081c5b012684d4"],
-"_ctypes": ["output/Python2.7.2/mips/_ctypes.so", "3803709e33e22a2f787a8a7cc4e17255"],
-"_hashlib": ["output/Python2.7.2/mips/_hashlib.so", "c587886640787c3777bfb2a8c87065f2"],
-"_ssl": ["output/Python2.7.2/mips/_ssl.so", "733554dd0d6c77025216f4bcc162c266"],
-"_tkinter": ["output/Python2.7.2/mips/_tkinter.so", "a7021db1ba6189965b4737267e459ffc"]
+"bz2": ["output/Python2.7.2/mips/bz2.so", "1770b349cbd8e57053a4e05d07720761"],
+"crypt": ["output/Python2.7.2/mips/crypt.so", "d63ff684a785420ac40333e4f8820c7f"],
+"pythonLib": ["output/Python2.7.2/mips/libpython2.7.so", "93046a6659a4c00a4a27e5ce78c76a9f"],
+"_ctypes": ["output/Python2.7.2/mips/_ctypes.so", "93867815c7f597e708ede7c8ea2d7583"],
+"_hashlib": ["output/Python2.7.2/mips/_hashlib.so", "fe9d9f33950b891a367a840f2eafb5d0"],
+"_ssl": ["output/Python2.7.2/mips/_ssl.so", "8adc54d7bd0843daf646ef81e99f167b"],
+"_tkinter": ["output/Python2.7.2/mips/_tkinter.so", "49dcba8b326599d981a35c7b400ed0e6"]
 },
 "mips64": {
-"bz2": ["output/Python2.7.2/mips64/bz2.so", "e550c633f0bf52133d6a08b2a4311fc3"],
-"crypt": ["output/Python2.7.2/mips64/crypt.so", "a6057210330af2f760ecf43e46c808e1"],
-"pythonLib": ["output/Python2.7.2/mips64/libpython2.7.so", "86b61aa54479547b35ec54ff6e72af83"],
-"_ctypes": ["output/Python2.7.2/mips64/_ctypes.so", "8c00d01e39882c38e1cac03e37e565c2"],
-"_hashlib": ["output/Python2.7.2/mips64/_hashlib.so", "f0acb7376862cba68b15466ec99d9081"],
-"_ssl": ["output/Python2.7.2/mips64/_ssl.so", "b842e29371e91622f1c508d7e6497b04"],
-"_tkinter": ["output/Python2.7.2/mips64/_tkinter.so", "b9f3dbebe50652b5b7311a63e9b37a4c"]
+"bz2": ["output/Python2.7.2/mips64/bz2.so", "c6c61850c0cad6a810800451f6dd72de"],
+"crypt": ["output/Python2.7.2/mips64/crypt.so", "79fbbb3aa7cce779c937737c00a9782e"],
+"pythonLib": ["output/Python2.7.2/mips64/libpython2.7.so", "e59b97b6b5053371380b90cffb289150"],
+"_ctypes": ["output/Python2.7.2/mips64/_ctypes.so", "79377e0d6f8ba4f2d45787f22b87c341"],
+"_hashlib": ["output/Python2.7.2/mips64/_hashlib.so", "d3d2460d2188660438e72b50e453c9e2"],
+"_ssl": ["output/Python2.7.2/mips64/_ssl.so", "85c2a2a9b8eb9ab6978b2be4acba1976"],
+"_tkinter": ["output/Python2.7.2/mips64/_tkinter.so", "504b69e182f02806c659033602daeb97"]
 },
 "x86": {
-"bz2": ["output/Python2.7.2/x86/bz2.so", "690840085072fd0be99f0afc9c6aa753"],
-"crypt": ["output/Python2.7.2/x86/crypt.so", "1d02c251f32d837e08afb37fa1c00f2f"],
-"pythonLib": ["output/Python2.7.2/x86/libpython2.7.so", "092737fef3dc666f6fb0e387e87b542b"],
-"_ctypes": ["output/Python2.7.2/x86/_ctypes.so", "b652ed51d1d808bdd5a93c16daeca0f1"],
-"_hashlib": ["output/Python2.7.2/x86/_hashlib.so", "f2c2a76ea662bfd3d3b419778b086901"],
-"_ssl": ["output/Python2.7.2/x86/_ssl.so", "3e32ce7aab7b00022f4e75c9dda5eeee"],
-"_tkinter": ["output/Python2.7.2/x86/_tkinter.so", "237f717bdcd088d30e7b7014fc4c5748"]
+"bz2": ["output/Python2.7.2/x86/bz2.so", "8db8f58d036c0011fdad03d410f1c4e7"],
+"crypt": ["output/Python2.7.2/x86/crypt.so", "8f1e69cd7c04e722c3f82b68f3005b60"],
+"pythonLib": ["output/Python2.7.2/x86/libpython2.7.so", "47aede4480acf2f9c0752fc81872c996"],
+"_ctypes": ["output/Python2.7.2/x86/_ctypes.so", "0abd49f0cc7b483cf552cd52633f3dd5"],
+"_hashlib": ["output/Python2.7.2/x86/_hashlib.so", "7f2069744f1e477e45e63946a86b4911"],
+"_ssl": ["output/Python2.7.2/x86/_ssl.so", "f3ecbf6a5289dc6e14d9a28ed1798c95"],
+"_tkinter": ["output/Python2.7.2/x86/_tkinter.so", "2e3834df79b70fedda1fb3ba049b6a44"]
 },
 "x86_64": {
-"bz2": ["output/Python2.7.2/x86_64/bz2.so", "d4ba9d2f52981d2bdd7149f5a198bf3e"],
-"crypt": ["output/Python2.7.2/x86_64/crypt.so", "1962db1564344c47360ed60564625886"],
-"pythonLib": ["output/Python2.7.2/x86_64/libpython2.7.so", "505a379391d41cf4d34243ced8c3c90a"],
-"_ctypes": ["output/Python2.7.2/x86_64/_ctypes.so", "cbf445ae6e78d9364c812f086f908a96"],
-"_hashlib": ["output/Python2.7.2/x86_64/_hashlib.so", "8ef4506222b7c3b1023bd6bc934f95c3"],
-"_ssl": ["output/Python2.7.2/x86_64/_ssl.so", "bc0ffb5fe9d3830db81157b8cc135d99"],
-"_tkinter": ["output/Python2.7.2/x86_64/_tkinter.so", "bd1aba108d6848ba69df81464ab98f07"]
+"bz2": ["output/Python2.7.2/x86_64/bz2.so", "6685dc9c73be93755d3394b18d20e2d2"],
+"crypt": ["output/Python2.7.2/x86_64/crypt.so", "e4bf5af94ab2c188cb49b9bab8e94fc8"],
+"pythonLib": ["output/Python2.7.2/x86_64/libpython2.7.so", "807b17885e4917f908ea78590f09d1b7"],
+"_ctypes": ["output/Python2.7.2/x86_64/_ctypes.so", "ab94265b9f00bc77dd45b71b464e099d"],
+"_hashlib": ["output/Python2.7.2/x86_64/_hashlib.so", "72f459c772232e849af8ace4410c7618"],
+"_ssl": ["output/Python2.7.2/x86_64/_ssl.so", "642cee7f055e9f31ff23ee3da157af00"],
+"_tkinter": ["output/Python2.7.2/x86_64/_tkinter.so", "c1ee41458fa8ca11534f9d1b87ff51f4"]
 },
-"lib": ["output/Python2.7.2/lib.zip", "826d309d34ef9d422f9493aba12227bd"]
+"lib": ["output/Python2.7.2/lib.zip", "6c3403b85ee2c4df61f735eabd79cee5"]
 },
 "3.4.3": {
 "arm64-v8a": {
-"pythonLib": ["output/Python3.4.3/arm64-v8a/libpython3.4.so", "6f79d9ce4dbe02f11b9a8ac76f209391"],
-"_bz2": ["output/Python3.4.3/arm64-v8a/_bz2.so", "86935a9162d72bd7a88b4aab65698657"],
-"_crypt": ["output/Python3.4.3/arm64-v8a/_crypt.so", "fef2005c1d19056cd1605461e0246554"],
-"_ctypes": ["output/Python3.4.3/arm64-v8a/_ctypes.so", "b72e4b87deaa56b7df45d440a3cfa88c"],
-"_hashlib": ["output/Python3.4.3/arm64-v8a/_hashlib.so", "500883c45c6ab2d4c2f105ccfebc552c"],
-"_ssl": ["output/Python3.4.3/arm64-v8a/_ssl.so", "93d659f84c2e1f6e07f5557d07675145"],
-"_tkinter": ["output/Python3.4.3/arm64-v8a/_tkinter.so", "8c9a6dc261d1f29b62e055f6bc934523"]
+"pythonLib": ["output/Python3.4.3/arm64-v8a/libpython3.4.so", "2dacca10cae734ff6bf06b50cf362405"],
+"_bz2": ["output/Python3.4.3/arm64-v8a/_bz2.so", "51b384b220029bbe34dfca76e7abc1fd"],
+"_crypt": ["output/Python3.4.3/arm64-v8a/_crypt.so", "3252bd8d6bfb371b438eed99a745df60"],
+"_ctypes": ["output/Python3.4.3/arm64-v8a/_ctypes.so", "4d49bcace0b370e9f98b8cf22be04f19"],
+"_hashlib": ["output/Python3.4.3/arm64-v8a/_hashlib.so", "3b7ebe8cc16bf5605383f928d2bbff79"],
+"_ssl": ["output/Python3.4.3/arm64-v8a/_ssl.so", "69ee4ed17e30e299e3140f803ddd5c80"],
+"_tkinter": ["output/Python3.4.3/arm64-v8a/_tkinter.so", "de05d5b369ac3171e1f3b399dfeb1450"]
 },
 "armeabi": {
-"pythonLib": ["output/Python3.4.3/armeabi/libpython3.4.so", "bc7f966b0b9f84a3a73059a82a96acb0"],
-"_bz2": ["output/Python3.4.3/armeabi/_bz2.so", "b48f6225c21e374bbca1a7ef61ddc77f"],
-"_crypt": ["output/Python3.4.3/armeabi/_crypt.so", "32377bf9380096354c6cd27d06cc314c"],
-"_ctypes": ["output/Python3.4.3/armeabi/_ctypes.so", "fda73256c44b15a6ca53b48e73480fc3"],
-"_hashlib": ["output/Python3.4.3/armeabi/_hashlib.so", "94d4d67c3ffeb6ad51c184e1851b47a7"],
-"_ssl": ["output/Python3.4.3/armeabi/_ssl.so", "58bdb7ae14383dae891a92455a7368e4"],
-"_tkinter": ["output/Python3.4.3/armeabi/_tkinter.so", "4e3012b72b418678e728053ca0d673c9"]
+"pythonLib": ["output/Python3.4.3/armeabi/libpython3.4.so", "81644132d58efbdbbef117c2f945c881"],
+"_bz2": ["output/Python3.4.3/armeabi/_bz2.so", "9d94aeb640d9bbbec9efd4be96cf339e"],
+"_crypt": ["output/Python3.4.3/armeabi/_crypt.so", "71d001447886c8c5533d5f256493e2b0"],
+"_ctypes": ["output/Python3.4.3/armeabi/_ctypes.so", "6d3173d2a932133ec552b8d06fc189a7"],
+"_hashlib": ["output/Python3.4.3/armeabi/_hashlib.so", "593ba613247f9386686367e4b8742ea9"],
+"_ssl": ["output/Python3.4.3/armeabi/_ssl.so", "8d8beb538d30de628cf14324752bab3a"],
+"_tkinter": ["output/Python3.4.3/armeabi/_tkinter.so", "337bc95154c5ce0c0ea5d4ab6338507c"]
 },
 "armeabi-v7a": {
-"pythonLib": ["output/Python3.4.3/armeabi-v7a/libpython3.4.so", "2ab1ed8ad05bd00c52eb2daae8ff8450"],
-"_bz2": ["output/Python3.4.3/armeabi-v7a/_bz2.so", "8f3aad1ff349c07248b797c59cadc8de"],
-"_crypt": ["output/Python3.4.3/armeabi-v7a/_crypt.so", "0d52510fc3e355d89b825e78c2a91bc3"],
-"_ctypes": ["output/Python3.4.3/armeabi-v7a/_ctypes.so", "d7d24e3da6017bd57b38e61bc7b03b7a"],
-"_hashlib": ["output/Python3.4.3/armeabi-v7a/_hashlib.so", "a2fdaee9e74c2f7027d334031be60d1e"],
-"_ssl": ["output/Python3.4.3/armeabi-v7a/_ssl.so", "890c6a13c98e71d6a61974718a1dbe99"],
-"_tkinter": ["output/Python3.4.3/armeabi-v7a/_tkinter.so", "dbabd1b23fa4f351ad22424a91d7a36b"]
+"pythonLib": ["output/Python3.4.3/armeabi-v7a/libpython3.4.so", "29d784ed017dbda7f131e7e000f748b4"],
+"_bz2": ["output/Python3.4.3/armeabi-v7a/_bz2.so", "f23180f77530da962f9e1aabdd818a0f"],
+"_crypt": ["output/Python3.4.3/armeabi-v7a/_crypt.so", "9050353ed5ecaabed94c2c6202d08f34"],
+"_ctypes": ["output/Python3.4.3/armeabi-v7a/_ctypes.so", "9dcc6519a9d820d7d667cf8a11f39a8a"],
+"_hashlib": ["output/Python3.4.3/armeabi-v7a/_hashlib.so", "0d41933c33fce0af83ee83434b0ee203"],
+"_ssl": ["output/Python3.4.3/armeabi-v7a/_ssl.so", "047e83391725325dacb2edfad1bb00e2"],
+"_tkinter": ["output/Python3.4.3/armeabi-v7a/_tkinter.so", "8ecbbcf5b0eb0213f51fcd0351b45279"]
 },
 "mips": {
-"pythonLib": ["output/Python3.4.3/mips/libpython3.4.so", "aa50bc8be0e5db943e2006fe4a687ece"],
-"_bz2": ["output/Python3.4.3/mips/_bz2.so", "68f7147b8a260914609bcda365e34361"],
-"_crypt": ["output/Python3.4.3/mips/_crypt.so", "5fbe00f4a3b4f8e5b4f16abbb1f89364"],
-"_ctypes": ["output/Python3.4.3/mips/_ctypes.so", "32bc9a78f88123208217bba4ec371886"],
-"_hashlib": ["output/Python3.4.3/mips/_hashlib.so", "7f4ca9bd127d7427cc889b28732e3565"],
-"_ssl": ["output/Python3.4.3/mips/_ssl.so", "08a678a6218fd3be53d0178f10179e4b"],
-"_tkinter": ["output/Python3.4.3/mips/_tkinter.so", "05809b731a2bd39eefa7a1bd3346371c"]
+"pythonLib": ["output/Python3.4.3/mips/libpython3.4.so", "1194cd1ea8ee6f4beb01572a224256e6"],
+"_bz2": ["output/Python3.4.3/mips/_bz2.so", "fec854bc0a281be8580a229a46e3064e"],
+"_crypt": ["output/Python3.4.3/mips/_crypt.so", "f02845170c07c726eeddca6753dcce5d"],
+"_ctypes": ["output/Python3.4.3/mips/_ctypes.so", "18b2183cc1f00f35d7e3aeaec1cf75b3"],
+"_hashlib": ["output/Python3.4.3/mips/_hashlib.so", "93168a31f9a600229d43f658bf2078ef"],
+"_ssl": ["output/Python3.4.3/mips/_ssl.so", "e27d886064ba24736533c29ccf188d7d"],
+"_tkinter": ["output/Python3.4.3/mips/_tkinter.so", "83de5652b32a7e2379c62cad022ca7d2"]
 },
 "mips64": {
-"pythonLib": ["output/Python3.4.3/mips64/libpython3.4.so", "c0919fec470f434728b767aafa14743b"],
-"_bz2": ["output/Python3.4.3/mips64/_bz2.so", "19625a41e1bc408f0eae99deb4c20ead"],
-"_crypt": ["output/Python3.4.3/mips64/_crypt.so", "be74e151efd99e4b4fbd47179fc4b410"],
-"_ctypes": ["output/Python3.4.3/mips64/_ctypes.so", "0becf347165741a93f4761a8073831a0"],
-"_hashlib": ["output/Python3.4.3/mips64/_hashlib.so", "b01a50fca24d7b472f98cc25ac754dc9"],
-"_ssl": ["output/Python3.4.3/mips64/_ssl.so", "c6a75fa16bc2ba28ed58687bdf88fbf6"],
-"_tkinter": ["output/Python3.4.3/mips64/_tkinter.so", "ae64fd43bd985bde173ab68f2dd7b63a"]
+"pythonLib": ["output/Python3.4.3/mips64/libpython3.4.so", "edd04c3e46f05e4dbde25a565162afa6"],
+"_bz2": ["output/Python3.4.3/mips64/_bz2.so", "1e05c872118fc9f22d220000ab6d8919"],
+"_crypt": ["output/Python3.4.3/mips64/_crypt.so", "50854a2dd056d3978f8b5d19e593124c"],
+"_ctypes": ["output/Python3.4.3/mips64/_ctypes.so", "a106d69852e04388ddf7669321588780"],
+"_hashlib": ["output/Python3.4.3/mips64/_hashlib.so", "d8a33116f0ce21d2652d95157c24fe51"],
+"_ssl": ["output/Python3.4.3/mips64/_ssl.so", "ef23059e416e4cb55159570364ea23be"],
+"_tkinter": ["output/Python3.4.3/mips64/_tkinter.so", "5e77048ca21eda0b799ca309d74864d9"]
 },
 "x86": {
-"pythonLib": ["output/Python3.4.3/x86/libpython3.4.so", "0e95362c75f3da0b775fec03333e5ffc"],
-"_bz2": ["output/Python3.4.3/x86/_bz2.so", "abac1d83a29701dd2b962532ebefbf86"],
-"_crypt": ["output/Python3.4.3/x86/_crypt.so", "3048d7e66262ec335b9b63008b72fef1"],
-"_ctypes": ["output/Python3.4.3/x86/_ctypes.so", "8b9f7a9fff14b155c3dfe3745bf735aa"],
-"_hashlib": ["output/Python3.4.3/x86/_hashlib.so", "9c139ffc49920cc92f046ad10905d6d8"],
-"_ssl": ["output/Python3.4.3/x86/_ssl.so", "326390a6886044df6389cca87e26c1b8"],
-"_tkinter": ["output/Python3.4.3/x86/_tkinter.so", "9a39a12c5b8129b04e287a5c2ac071bc"]
+"pythonLib": ["output/Python3.4.3/x86/libpython3.4.so", "f5691d67baf15ec0d5e51c59e8e9cf0d"],
+"_bz2": ["output/Python3.4.3/x86/_bz2.so", "e7745579a52746012120b40304ae0b9d"],
+"_crypt": ["output/Python3.4.3/x86/_crypt.so", "b85bdf275be2392752d7f784dc03c479"],
+"_ctypes": ["output/Python3.4.3/x86/_ctypes.so", "7ca9219d5f2a272710d419229b426074"],
+"_hashlib": ["output/Python3.4.3/x86/_hashlib.so", "ddf681dd4f2987f67ffeb51676655f78"],
+"_ssl": ["output/Python3.4.3/x86/_ssl.so", "ed7e7e69a2594a844b2499765a259867"],
+"_tkinter": ["output/Python3.4.3/x86/_tkinter.so", "c9a15ddc90c6ef7538bb03301c54eef9"]
 },
 "x86_64": {
-"pythonLib": ["output/Python3.4.3/x86_64/libpython3.4.so", "9a70da321661a61131acf5793624e01b"],
-"_bz2": ["output/Python3.4.3/x86_64/_bz2.so", "5bb7e94baab8378fe5c42935cd749598"],
-"_crypt": ["output/Python3.4.3/x86_64/_crypt.so", "f6f356c75b13c21db462b11525f0c96c"],
-"_ctypes": ["output/Python3.4.3/x86_64/_ctypes.so", "26ed237c31772a46a2783357ed7029db"],
-"_hashlib": ["output/Python3.4.3/x86_64/_hashlib.so", "e2af87adc5f9cb8f1c9ef3423d37a632"],
-"_ssl": ["output/Python3.4.3/x86_64/_ssl.so", "790ba83361cd82c54cf55e6c5fbbd606"],
-"_tkinter": ["output/Python3.4.3/x86_64/_tkinter.so", "001cc7f500d134b596ba759a1a29b7ca"]
+"pythonLib": ["output/Python3.4.3/x86_64/libpython3.4.so", "c6f8524d93cd8836c94c42cc4fdf24b5"],
+"_bz2": ["output/Python3.4.3/x86_64/_bz2.so", "6ce1b8153e22d46c72c63e4f47d2989c"],
+"_crypt": ["output/Python3.4.3/x86_64/_crypt.so", "bcb25c9bb08f79e73e0e666b01e00ec8"],
+"_ctypes": ["output/Python3.4.3/x86_64/_ctypes.so", "d231d1c6f96763dfd363f1504d127fdb"],
+"_hashlib": ["output/Python3.4.3/x86_64/_hashlib.so", "adf2c7a39353b85b1cb0141bd81f6f25"],
+"_ssl": ["output/Python3.4.3/x86_64/_ssl.so", "420fb5fd158f52fdacfb6415e06e6235"],
+"_tkinter": ["output/Python3.4.3/x86_64/_tkinter.so", "9e3c02efda4081c3311ed3fba885883b"]
 },
-"lib": ["output/Python3.4.3/lib.zip", "80ea0f6e7c9a018ff662f5b8110a2425"]
+"lib": ["output/Python3.4.3/lib.zip", "faa63309ff37f4b07129b889d12bdeef"]
 },
 "__version__": 1
 }
