@@ -457,11 +457,6 @@ class Builder:
             androidMK.write('include $(call all-subdir-makefiles)')
         # Copy the Android.mk and configuration files
         shutil.copy(os.path.join(self.config.filesDir, 'Android.mk'), sourcePath)
-        shutil.copy(os.path.join(self.config.filesDir,
-                                 'config3.c' if int(pythonVersion[0]) >= 3 else 'config.c'),
-                    os.path.join(sourcePath, 'Modules', 'config.c'))
-        shutil.copy(os.path.join(self.config.filesDir, 'pyconfig.h'),
-                    os.path.join(sourcePath, 'Include'))
         # Setup module libraries
         moduleDependencies = {}
         for lib, libData in self.config.additionalLibs.items():
