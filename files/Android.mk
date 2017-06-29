@@ -82,7 +82,7 @@ EXCLUDED_FILES += Modules/_ctypes/_ctypes_test.c \
 
 LOCAL_SRC_FILES := $(filter-out $(EXCLUDED_FILES), $(FILE_LIST:$(LOCAL_PATH)/%=%))
 
-# Filter out all modules that are separate in their own additional library
+# Excluded files because they are in their own separate module
 EXCLUDED_FILES := $(LOCAL_PATH)/Modules/_ssl.c \
                   $(LOCAL_PATH)/Modules/_hashopenssl.c \
                   $(LOCAL_PATH)/Modules/_hashlib.c \
@@ -95,26 +95,22 @@ EXCLUDED_FILES := $(LOCAL_PATH)/Modules/_ssl.c \
                   $(wildcard $(LOCAL_PATH)/Modules/_ctypes/*) \
                   $(wildcard $(LOCAL_PATH)/Modules/_ctypes/*/*) \
 
+
 LOCAL_SRC_FILES := $(filter-out $(EXCLUDED_FILES:$(LOCAL_PATH)/%=%), $(LOCAL_SRC_FILES))
 
 LOCAL_CFLAGS := -D 'PLATFORM=\"android\"' \
                 -D 'VERSION=\"$(PYTHON_SHORT_VERSION)\"' \
                 -D HAVE_EXPAT_CONFIG_H \
                 -D 'SOABI=\"apython-$(TARGET_ARCH_ABI)\"' \
-                -D __ANDROID__ \
                 -D EXTRA_FUNCTIONALITY \
                 -D HAVE_UINT128_T \
                 -D crypt=DES_crypt \
+                -D NDEBUG \
 
 ifneq (,$(filter $(TARGET_ARCH), arm64 x86_64 mips64))
-  LOCAL_CFLAGS += -D ABI_64_BIT -D CONFIG_64 -D HAVE_LINUX_CAN_H
+  LOCAL_CFLAGS += -D ABI_64_BIT -D CONFIG_64
 else
-  LOCAL_CFLAGS += -U ABI_64_BIT -D CONFIG_32 -U HAVE_LINUX_CAN_H
-endif
-ifneq (,$(filter $(TARGET_ARCH_ABI), arm64-v8a x86_64 mips64))
-  LOCAL_CFLAGS += -U HAVE_FTIME -U HAVE_WAIT3
-else
-  LOCAL_CFLAGS += -D HAVE_SYS_TYPES_H -D HAVE_WAIT3
+  LOCAL_CFLAGS += -U ABI_64_BIT -D CONFIG_32
 endif
 
 ifneq (,$(filter $(TARGET_ARCH), arm arm64 mips64 mips))
@@ -126,9 +122,6 @@ endif
 
 ifeq ($(TARGET_ARCH), x86)
     LOCAL_CFLAGS += -U CONFIG_64 -D PPRO
-endif
-ifneq (,$(filter $(TARGET_ARCH_ABI), armeabi armeabi-v7a x86 mips))
-  LOCAL_CFLAGS += -U HAVE_WAIT3
 endif
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/Include $(LOCAL_PATH)/Modules $(LOCAL_PATH)/Modules/_io $(LOCAL_PATH)/Modules/expat $(LOCAL_PATH)/Modules/cjkcodecs $(LOCAL_PATH)/Modules/_decimal $(LOCAL_PATH)/Modules/_decimal/libmpdec

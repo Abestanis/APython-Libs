@@ -1,7 +1,9 @@
+diff --git Tcl.new/unix/tclConfig.h Tcl.new/unix/tclConfig.h
+new file mode 100644
 --- /dev/null
-+++ tcl.new/unix/tclConfig.h
-@@ -0,0 +1,532 @@
-+/* ../unix/tclConfig.h.in.  */
++++ Tcl.new/unix/tclConfig.h
+@@ -0,0 +1,534 @@
++/* ../unix/tclConfig.h  */
 +
 +#ifndef _TCLCONFIG
 +#define _TCLCONFIG
@@ -215,7 +217,9 @@
 +#define HAVE_STRUCT_SOCKADDR_STORAGE 1
 +
 +/* Is 'struct stat64' in <sys/stat.h>? */
++#if __ANDROID_API__ >= 21
 +#define HAVE_STRUCT_STAT64 1
++#endif /* __ANDROID_API__ >= 21 */
 +
 +/* Define to 1 if `st_blksize' is member of `struct stat'. */
 +#define HAVE_STRUCT_STAT_ST_BLKSIZE 1
@@ -533,8 +537,9 @@
 +/* override */ #undef PACKAGE_STRING
 +/* override */ #undef PACKAGE_TARNAME
 +#endif /* _TCLCONFIG */
+diff --git tcl.orig/unix/tclUnixChan.c Tcl.new/unix/tclUnixChan.c
 --- tcl.orig/unix/tclUnixChan.c
-+++ tcl.new/unix/tclUnixChan.c
++++ Tcl.new/unix/tclUnixChan.c
 @@ -1582,7 +1582,11 @@ TclpGetDefaultStdChannel(
       * Set up the normal channel options for stdio handles.
       */

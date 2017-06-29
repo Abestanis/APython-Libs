@@ -1,7 +1,9 @@
+diff --git Tk.new/unix/tkConfig.h Tk.new/unix/tkConfig.h
+new file mode 100644
 --- /dev/null
-+++ tk.new/unix/tkConfig.h
-@@ -0,0 +1,262 @@
-+/* ../unix/tkConfig.h */
++++ Tk.new/unix/tkConfig.h
+@@ -0,0 +1,265 @@
++/* ../unix/tkConfig.h.in. */
 +
 +#ifndef _TKCONFIG
 +#define _TKCONFIG
@@ -46,7 +48,7 @@
 +#define HAVE_PTHREAD_ATTR_SETSTACKSIZE 1
 +
 +/* Does struct password have a pw_gecos field? */
-+#define HAVE_PW_GECOS 1
++#undef HAVE_PW_GECOS
 +
 +/* Define to 1 if you have the <stdint.h> header file. */
 +#define HAVE_STDINT_H 1
@@ -91,13 +93,13 @@
 +#define HAVE_WEAK_IMPORT 1
 +
 +/* Have we turned on XFT (antialiased fonts)? */
-+#define HAVE_XFT 1
++#undef HAVE_XFT
 +
 +/* Do we have XkbKeycodeToKeysym? */
-+#define HAVE_XKBKEYCODETOKEYSYM 1
++#undef HAVE_XKBKEYCODETOKEYSYM
 +
 +/* Is XScreenSaver available? */
-+#define HAVE_XSS 1
++#undef HAVE_XSS
 +
 +/* Is this a Mac I see before me? */
 +#undef MAC_OSX_TCL
@@ -116,6 +118,9 @@
 +
 +/* Do we have fd_set? */
 +#undef NO_FD_SET
++
++/* Do we have fd_mask? */
++#define NO_FD_MASK 1
 +
 +/* Do we have <limits.h>? */
 +#undef NO_LIMITS_H
@@ -263,34 +268,16 @@
 +/* override */ #undef PACKAGE_STRING
 +/* override */ #undef PACKAGE_TARNAME
 +#endif /* _TKCONFIG */
---- tk.orig/xlib/xutil.c
-+++ tk.new/xlib/xutil.c
-@@ -33,17 +33,17 @@
-  *----------------------------------------------------------------------
-  */
+diff --git tk.orig/unix/tkUnixPort.h Tk.new/unix/tkUnixPort.h
+--- tk.orig/unix/tkUnixPort.h
++++ Tk.new/unix/tkUnixPort.h
+@@ -75,6 +75,9 @@
  
--Atom
--XInternAtom(
--    Display *display,
--    _Xconst char *atom_name,
--    Bool only_if_exists)
--{
--    static Atom atom = XA_LAST_PREDEFINED;
--
--    display->request++;
--    return ++atom;
--}
-+//Atom
-+//XInternAtom(
-+//    Display *display,
-+//    _Xconst char *atom_name,
-+//    Bool only_if_exists)
-+//{
-+//    static Atom atom = XA_LAST_PREDEFINED;
-+//
-+//    display->request++;
-+//    return ++atom;
-+//}
- 
- /*
-  *----------------------------------------------------------------------
+ #ifndef NO_FD_SET
+ #   define SELECT_MASK fd_set
++#   ifdef NO_FD_MASK
++    typedef long fd_mask; 
++#   endif
+ #else
+ #   ifndef _AIX
+ 	typedef long fd_mask;

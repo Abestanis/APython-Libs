@@ -32,5 +32,4 @@ LOCAL_EXPORT_C_INCLUDES += $(LOCAL_PATH)/pixman
 LOCAL_STATIC_LIBRARIES := cpufeatures
 
 include $(BUILD_SHARED_LIBRARY)
-
-$(call import-module,android/cpufeatures)
+$(call import-module, android/cpufeatures)

@@ -3,13 +3,16 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := tcl
 
-FILE_LIST := $(wildcard $(LOCAL_PATH)/generic/*.c) $(wildcard $(LOCAL_PATH)/unix/*.c) $(wildcard $(LOCAL_PATH)/libtommath/*.c)
+FILE_LIST := $(wildcard $(LOCAL_PATH)/generic/*.c) \
+             $(wildcard $(LOCAL_PATH)/unix/*.c) \
+             $(wildcard $(LOCAL_PATH)/libtommath/*.c)
 
 EXCLUDED_FILES := unix/tclLoadAix.c \
                   unix/tclLoadDyld.c \
                   unix/tclLoadNext.c \
                   unix/tclLoadOSF.c \
                   unix/tclLoadShl.c \
+                  unix/tclUnixTest.c \
                   unix/tclXtNotify.c \
                   unix/tclXtTest.c \
                   generic/regc_color.c \
@@ -19,6 +22,10 @@ EXCLUDED_FILES := unix/tclLoadAix.c \
                   generic/regc_nfa.c \
                   generic/rege_dfa.c \
                   generic/tclLoadNone.c \
+                  generic/tclTest.c \
+                  generic/tclTestObj.c \
+                  generic/tclTestProcBodyObj.c \
+                  generic/tclThreadTest.c \
                   generic/regfronts.c \
 
 LOCAL_SRC_FILES := $(filter-out $(EXCLUDED_FILES), $(FILE_LIST:$(LOCAL_PATH)/%=%))

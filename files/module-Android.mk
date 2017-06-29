@@ -12,21 +12,27 @@ LOCAL_CFLAGS := -D 'PLATFORM=\"android\"' \
                 -D 'VERSION=\"$(PYTHON_SHORT_VERSION)\"' \
                 -D HAVE_EXPAT_CONFIG_H \
                 -D 'SOABI=\"apython-$(TARGET_ARCH_ABI)\"' \
-                -D __ANDROID__ \
                 -D EXTRA_FUNCTIONALITY \
                 -D HAVE_UINT128_T \
                 -D crypt=DES_crypt \
+                -D NDEBUG \
 
 ifneq (,$(filter $(TARGET_ARCH), arm64 x86_64 mips64))
-  LOCAL_CFLAGS += -D ABI_64_BIT -D CONFIG_64 -D HAVE_LINUX_CAN_H
+  LOCAL_CFLAGS += -D ABI_64_BIT -D CONFIG_64
 else
-  LOCAL_CFLAGS += -U ABI_64_BIT -D CONFIG_32 -U HAVE_LINUX_CAN_H
+  LOCAL_CFLAGS += -U ABI_64_BIT -D CONFIG_32
 endif
-ifneq (,$(filter $(TARGET_ARCH_ABI), arm64-v8a x86_64 mips64))
-  LOCAL_CFLAGS += -U HAVE_FTIME -U HAVE_WAIT3
-else
-  LOCAL_CFLAGS += -D HAVE_SYS_TYPES_H -D HAVE_WAIT3
+
+ifneq (,$(filter $(TARGET_ARCH), arm arm64 mips64 mips))
+    LOCAL_CFLAGS += -D ANSI
 endif
+ifneq (,$(filter $(TARGET_ARCH), x86_64 x86))
+    LOCAL_CFLAGS += -D ASM
+endif
+ifeq ($(TARGET_ARCH), x86)
+    LOCAL_CFLAGS += -U CONFIG_64 -D PPRO
+endif
+
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../{pythonDir}/Modules
 LOCAL_SHORT_COMMANDS = true

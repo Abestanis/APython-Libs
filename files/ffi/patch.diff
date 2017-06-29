@@ -1,5 +1,7 @@
+diff --git FFI.new/include/ffi.h FFI.new/include/ffi.h
+new file mode 100644
 --- /dev/null
-+++ ffi.new/include/ffi.h
++++ FFI.new/include/ffi.h
 @@ -0,0 +1,487 @@
 +/* -----------------------------------------------------------------*-C-*-
 +   libffi @VERSION@ - Copyright (c) 2011, 2014 Anthony Green
@@ -488,9 +490,11 @@
 +#endif
 +
 +#endif
+diff --git FFI.new/include/fficonfig.h FFI.new/include/fficonfig.h
+new file mode 100644
 --- /dev/null
-+++ ffi.new/include/fficonfig.h
-@@ -0,0 +1,214 @@
++++ FFI.new/include/fficonfig.h
+@@ -0,0 +1,215 @@
 +/* fficonfig.h.in.  Generated from configure.ac by autoheader.  */
 +
 +/* Define if building universal (internal helper macro) */
@@ -520,6 +524,7 @@
 +#undef FFI_MMAP_EXEC_WRIT
 +
 +/* Define this if you do not want support for the raw API. */
++//TODO: Look at these
 +#define FFI_NO_RAW_API 1
 +
 +/* Define this if you do not want support for aggregate types. */
@@ -705,3 +710,16 @@
 +#endif
 +#endif
 +
+diff --git ffi.orig/src/mips/ffitarget.h FFI.new/src/mips/ffitarget.h
+--- ffi.orig/src/mips/ffitarget.h
++++ FFI.new/src/mips/ffitarget.h
+@@ -33,7 +33,8 @@
+ #endif
+ 
+ #ifdef linux
+-# include <asm/sgidefs.h>
++//# include <asm/sgidefs.h> // TODO: This is a NDK bug
++# include <mipsel-linux-android/asm/sgidefs.h>
+ #elif defined(__rtems__)
+ /*
+  * Subprogram calling convention - copied from sgidefs.h

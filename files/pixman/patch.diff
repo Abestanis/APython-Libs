@@ -1,5 +1,7 @@
+diff --git Pixman.new/pixman/config.h Pixman.new/pixman/config.h
+new file mode 100644
 --- /dev/null
-+++ pixman.new/pixman/config.h
++++ Pixman.new/pixman/config.h
 @@ -0,0 +1,197 @@
 +/* config.h  */
 +

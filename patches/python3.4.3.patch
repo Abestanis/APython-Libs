@@ -1,5 +1,1672 @@
---- Python-3.4.3.orig/Lib/_sitebuiltins.py
-+++ Python-3.4.3.new/Lib/_sitebuiltins.py
+diff --git Python3.4.3.new/Include/pyconfig.h Python3.4.3.new/Include/pyconfig.h
+new file mode 100644
+--- /dev/null
++++ Python3.4.3.new/Include/pyconfig.h
+@@ -0,0 +1,1661 @@
++/* pyconfig.h.  Generated from pyconfig.h.in by configure.  */
++/* pyconfig.h.in.  Generated from configure.in by autoheader.  */
++
++
++#ifndef Py_PYCONFIG_H
++#define Py_PYCONFIG_H
++
++
++/* Define if building universal (internal helper macro) */
++/* #undef AC_APPLE_UNIVERSAL_BUILD */
++
++/* Define for AIX if your compiler is a genuine IBM xlC/xlC_r and you want
++   support for AIX C++ shared extension modules. */
++/* #undef AIX_GENUINE_CPLUSPLUS */
++
++/* Define this if you have AtheOS threads. */
++/* #undef ATHEOS_THREADS */
++
++/* Define this if you have BeOS threads. */
++/* #undef BEOS_THREADS */
++
++/* Define if you have the Mach cthreads package */
++/* #undef C_THREADS */
++
++/* Define if C doubles are 64-bit IEEE 754 binary format, stored in ARM
++   mixed-endian order (byte order 45670123) */
++/* #undef DOUBLE_IS_ARM_MIXED_ENDIAN_IEEE754 */
++
++#if __FLOAT_WORD_ORDER__ == __ORDER_BIG_ENDIAN__
++/* Define if C doubles are 64-bit IEEE 754 binary format, stored with the most
++   significant byte first */
++#define DOUBLE_IS_BIG_ENDIAN_IEEE754
++
++#elif __FLOAT_WORD_ORDER__ == __ORDER_LITTLE_ENDIAN__
++/* Define if C doubles are 64-bit IEEE 754 binary format, stored with the
++   least significant byte first */
++#define DOUBLE_IS_LITTLE_ENDIAN_IEEE754
++#endif
++
++/* Define if --enable-ipv6 is specified */
++#define ENABLE_IPV6  1
++
++/* Define if flock needs to be linked with bsd library. */
++/* #undef FLOCK_NEEDS_LIBBSD */
++
++/* Define if getpgrp() must be called as getpgrp(0). */
++/* #undef GETPGRP_HAVE_ARG */
++
++/* Define if gettimeofday() does not have second (timezone) argument This is
++   the case on Motorola V4 (R40V4.2) */
++/* #undef GETTIMEOFDAY_NO_TZ */
++
++/* Define to 1 if you have the `accept4' function. */
++#if __ANDROID_API__ >= 21
++#define HAVE_ACCEPT4 1
++#else
++/* #undef HAVE_ACCEPT4 */
++#endif /* __ANDROID_API__ >= 21 */
++
++/* Define to 1 if you have the `acosh' function. */
++#define HAVE_ACOSH 1
++
++/* struct addrinfo (netdb.h) */
++#define HAVE_ADDRINFO 1
++
++/* Define to 1 if you have the `alarm' function. */
++#define HAVE_ALARM 1
++
++/* Define if aligned memory access is required */
++/* #undef HAVE_ALIGNED_REQUIRED */
++
++/* Define to 1 if you have the <alloca.h> header file. */
++#define HAVE_ALLOCA_H 1
++
++/* Define this if your time.h defines altzone. */
++/* #undef HAVE_ALTZONE */
++
++/* Define to 1 if you have the `asinh' function. */
++#define HAVE_ASINH 1
++
++/* Define to 1 if you have the <asm/types.h> header file. */
++#define HAVE_ASM_TYPES_H 1
++
++/* Define to 1 if you have the `atanh' function. */
++#define HAVE_ATANH 1
++
++/* Define if GCC supports __attribute__((format(PyArg_ParseTuple, 2, 3))) */
++/* #undef HAVE_ATTRIBUTE_FORMAT_PARSETUPLE */
++
++/* Define to 1 if you have the `bind_textdomain_codeset' function. */
++/* #undef HAVE_BIND_TEXTDOMAIN_CODESET */
++
++/* Define to 1 if you have the <bluetooth/bluetooth.h> header file. */
++/* #undef HAVE_BLUETOOTH_BLUETOOTH_H */
++
++/* Define to 1 if you have the <bluetooth.h> header file. */
++/* #undef HAVE_BLUETOOTH_H */
++
++/* Define if mbstowcs(NULL, "text", 0) does not return the number of wide
++   chars that would be converted. */
++/* #undef HAVE_BROKEN_MBSTOWCS */ // This is fixed in redirects.c
++
++/* Define if nice() returns success/failure instead of the new priority. */
++/* #undef HAVE_BROKEN_NICE */
++
++/* Define if the system reports an invalid PIPE_BUF value. */
++/* #undef HAVE_BROKEN_PIPE_BUF */
++
++/* Define if poll() sets errno on invalid file descriptors. */
++/* #undef HAVE_BROKEN_POLL */
++
++/* Define if the Posix semaphores do not work on your system */
++/* #undef HAVE_BROKEN_POSIX_SEMAPHORES */
++
++/* Define if pthread_sigmask() does not work on your system. */
++/* #undef HAVE_BROKEN_PTHREAD_SIGMASK */
++
++/* define to 1 if your sem_getvalue is broken. */
++/* #undef HAVE_BROKEN_SEM_GETVALUE */
++
++/* Define if `unsetenv` does not return an int. */
++/* #undef HAVE_BROKEN_UNSETENV */
++
++/* Define this if you have the type _Bool. */
++#define HAVE_C99_BOOL 1
++
++/* Define to 1 if you have the 'chflags' function. */
++/* #undef HAVE_CHFLAGS */
++
++/* Define to 1 if you have the `chown' function. */
++#define HAVE_CHOWN 1
++
++/* Define if you have the 'chroot' function. */
++#define HAVE_CHROOT 1
++
++/* Define to 1 if you have the `clock' function. */
++#define HAVE_CLOCK 1
++
++/* Define to 1 if you have the `clock_getres' function. */
++#define HAVE_CLOCK_GETRES 1
++
++/* Define to 1 if you have the `clock_gettime' function. */
++#define HAVE_CLOCK_GETTIME 1
++
++/* Define if the C compiler supports computed gotos. */
++#define HAVE_COMPUTED_GOTOS 1
++
++/* Define to 1 if you have the `confstr' function. */
++/* #undef HAVE_CONFSTR */
++
++/* Define to 1 if you have the <conio.h> header file. */
++/* #undef HAVE_CONIO_H */
++
++/* Define to 1 if you have the `copysign' function. */
++#define HAVE_COPYSIGN 1
++
++/* Define to 1 if you have the `ctermid' function. */
++/* #undef HAVE_CTERMID */
++
++/* Define if you have the 'ctermid_r' function. */
++/* #undef HAVE_CTERMID_R */
++
++/* Define to 1 if you have the <curses.h> header file. */
++#define HAVE_CURSES_H 1
++
++/* Define if you have the 'is_term_resized' function. */
++#define HAVE_CURSES_IS_TERM_RESIZED 1
++
++/* Define if you have the 'resizeterm' function. */
++#define HAVE_CURSES_RESIZETERM 1
++
++/* Define if you have the 'resize_term' function. */
++#define HAVE_CURSES_RESIZE_TERM 1
++
++/* Define to 1 if you have the declaration of `isfinite', and to 0 if you
++   don't. */
++#define HAVE_DECL_ISFINITE 1
++
++/* Define to 1 if you have the declaration of `isinf', and to 0 if you don't.
++   */
++#define HAVE_DECL_ISINF 1
++
++/* Define to 1 if you have the declaration of `isnan', and to 0 if you don't.
++   */
++#define HAVE_DECL_ISNAN 1
++
++/* Define to 1 if you have the declaration of `tzname', and to 0 if you don't.
++   */
++#define HAVE_DECL_TZNAME 1
++
++/* Define to 1 if you have the device macros. */
++#define HAVE_DEVICE_MACROS 1
++
++/* Define to 1 if you have the /dev/ptc device file. */
++/* #undef HAVE_DEV_PTC */
++
++/* Define to 1 if you have the /dev/ptmx device file. */
++#define HAVE_DEV_PTMX 1
++
++/* Define to 1 if you have the <direct.h> header file. */
++/* #undef HAVE_DIRECT_H */
++
++/* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
++   */
++#define HAVE_DIRENT_H 1
++
++/* Define if you have the 'dirfd' function or macro. */
++#define HAVE_DIRFD 1
++
++/* Define to 1 if you have the <dlfcn.h> header file. */
++#define HAVE_DLFCN_H 1
++
++/* Define to 1 if you have the `dlopen' function. */
++#define HAVE_DLOPEN 1
++
++/* Define to 1 if you have the `dup2' function. */
++#define HAVE_DUP2 1
++
++/* Define to 1 if you have the `dup3' function. */
++#if __ANDROID_API__ >= 21
++#  define HAVE_DUP3 1
++#else
++/* #undef HAVE_DUP3 */
++#endif /* __ANDROID_API__ >= 21 */
++
++/* Defined when any dynamic module loading is enabled. */
++#define HAVE_DYNAMIC_LOADING 1
++
++/* Define to 1 if you have the <endian.h> header file. */
++#define HAVE_ENDIAN_H 1
++
++/* Define if you have the 'epoll' functions. */
++#define HAVE_EPOLL 1
++
++/* Define if you have the 'epoll_create1' function. */
++#if __ANDROID_API__ >= 21
++#  define HAVE_EPOLL_CREATE1 1
++#else
++/* #undef HAVE_EPOLL_CREATE */
++#endif /* __ANDROID_API__ >= 21 */
++
++/* Define to 1 if you have the `erf' function. */
++#define HAVE_ERF 1
++
++/* Define to 1 if you have the `erfc' function. */
++#define HAVE_ERFC 1
++
++/* Define to 1 if you have the <errno.h> header file. */
++#define HAVE_ERRNO_H 1
++
++/* Define to 1 if you have the `execv' function. */
++#define HAVE_EXECV 1
++
++/* Define to 1 if you have the `expm1' function. */
++#define HAVE_EXPM1 1
++
++/* Define to 1 if you have the `faccessat' function. */
++/* #undef HAVE_FACCESSAT */
++
++/* Define if you have the 'fchdir' function. */
++#define HAVE_FCHDIR 1
++
++/* Define to 1 if you have the `fchmod' function. */
++#define HAVE_FCHMOD 1
++
++/* Define to 1 if you have the `fchmodat' function. */
++#define HAVE_FCHMODAT 1
++
++/* Define to 1 if you have the `fchown' function. */
++#define HAVE_FCHOWN 1
++
++/* Define to 1 if you have the `fchownat' function. */
++#define HAVE_FCHOWNAT 1
++
++/* Define to 1 if you have the <fcntl.h> header file. */
++#define HAVE_FCNTL_H 1
++
++/* Define if you have the 'fdatasync' function. */
++/* #undef HAVE_FDATASYNC */
++
++/* Define to 1 if you have the `fdopendir' function. */
++#define HAVE_FDOPENDIR 1
++
++/* Define to 1 if you have the `fexecve' function. */
++/* #undef HAVE_FEXECVE */
++
++/* Define to 1 if you have the `finite' function. */
++#define HAVE_FINITE 1
++
++/* Define to 1 if you have the `flock' function. */
++#define HAVE_FLOCK 1
++
++/* Define to 1 if you have the `fork' function. */
++#define HAVE_FORK 1
++
++/* Define to 1 if you have the `forkpty' function. */
++/* #undef HAVE_FORKPTY */
++
++/* Define to 1 if you have the `fpathconf' function. */
++#define HAVE_FPATHCONF 1
++
++/* Define to 1 if you have the `fseek64' function. */
++/* #undef HAVE_FSEEK64 */
++
++/* Define to 1 if you have the `fseeko' function. */
++#define HAVE_FSEEKO 1
++
++/* Define to 1 if you have the `fstatat' function. */
++#define HAVE_FSTATAT 1
++
++/* Define to 1 if you have the `fstatvfs' function. */
++/* #undef HAVE_FSTATVFS */
++
++/* Define if you have the 'fsync' function. */
++#define HAVE_FSYNC 1
++
++/* Define to 1 if you have the `ftell64' function. */
++/* #undef HAVE_FTELL64 */
++
++/* Define to 1 if you have the `ftello' function. */
++#define HAVE_FTELLO 1
++
++/* Define to 1 if you have the `ftime' function. */
++/* #undef HAVE_FTIME */
++
++/* Define to 1 if you have the `ftruncate' function. */
++#define HAVE_FTRUNCATE 1
++
++/* Define to 1 if you have the `futimens' function. */
++#if __ANDROID_API__ >= 19
++#  define HAVE_FUTIMENS 1
++#else
++/* #undef HAVE_FUTIMENS */
++#endif /* __ANDROID_API__ >= 19 */
++
++/* Define to 1 if you have the `futimes' function. */
++/* #undef HAVE_FUTIMES */
++
++/* Define to 1 if you have the `futimesat' function. */
++/* #undef HAVE_FUTIMESAT */
++
++/* Define to 1 if you have the `gai_strerror' function. */
++#define HAVE_GAI_STRERROR 1
++
++/* Define to 1 if you have the `gamma' function. */
++#define HAVE_GAMMA 1
++
++/* Define if we can use x64 gcc inline assembler */
++/* #undef HAVE_GCC_ASM_FOR_X64 */
++
++/* Define if we can use gcc inline assembler to get and set x87 control word
++   */
++/* #undef HAVE_GCC_ASM_FOR_X87 */
++
++/* Define if your compiler provides __uint128_t */
++#define HAVE_GCC_UINT128_T 1
++
++/* Define if you have the getaddrinfo function. */
++#define HAVE_GETADDRINFO 1
++
++/* Define to 1 if you have the `getcwd' function. */
++#define HAVE_GETCWD 1
++
++/* Define this if you have flockfile(), getc_unlocked(), and funlockfile() */
++#define HAVE_GETC_UNLOCKED 1
++
++/* Define to 1 if you have the `getentropy' function. */
++/* #undef HAVE_GETENTROPY */
++
++/* Define to 1 if you have the `getgrouplist' function. */
++#define HAVE_GETGROUPLIST 1
++
++/* Define to 1 if you have the `getgroups' function. */
++#define HAVE_GETGROUPS 1
++
++/* Define to 1 if you have the `gethostbyname' function. */
++#define HAVE_GETHOSTBYNAME 1
++
++/* Define this if you have some version of gethostbyname_r() */
++/* #undef HAVE_GETHOSTBYNAME_R */
++
++/* Define this if you have the 3-arg version of gethostbyname_r(). */
++/* #undef HAVE_GETHOSTBYNAME_R_3_ARG */
++
++/* Define this if you have the 5-arg version of gethostbyname_r(). */
++/* #undef HAVE_GETHOSTBYNAME_R_5_ARG */
++
++/* Define this if you have the 6-arg version of gethostbyname_r(). */
++#define HAVE_GETHOSTBYNAME_R_6_ARG 1
++
++/* Define to 1 if you have the `getitimer' function. */
++#define HAVE_GETITIMER 1
++
++/* Define to 1 if you have the `getloadavg' function. */
++/* #undef HAVE_GETLOADAVG */
++
++/* Define to 1 if you have the `getlogin' function. */
++#define HAVE_GETLOGIN 1
++
++/* Define to 1 if you have the `getnameinfo' function. */
++#define HAVE_GETNAMEINFO 1
++
++/* Define if you have the 'getpagesize' function. */
++#define HAVE_GETPAGESIZE 1
++
++/* Define to 1 if you have the `getpeername' function. */
++#define HAVE_GETPEERNAME 1
++
++/* Define to 1 if you have the `getpgid' function. */
++#define HAVE_GETPGID 1
++
++/* Define to 1 if you have the `getpgrp' function. */
++#define HAVE_GETPGRP 1
++
++/* Define to 1 if you have the `getpid' function. */
++#define HAVE_GETPID 1
++
++/* Define to 1 if you have the `getpriority' function. */
++#define HAVE_GETPRIORITY 1
++
++/* Define to 1 if you have the `getpwent' function. */
++/* #undef HAVE_GETPWENT */
++
++/* Define to 1 if you have the `getresgid' function. */
++#define HAVE_GETRESGID 1
++
++/* Define to 1 if you have the `getresuid' function. */
++#define HAVE_GETRESUID 1
++
++/* Define to 1 if you have the `getsid' function. */
++/* #undef HAVE_GETSID */
++
++/* Define to 1 if you have the `getspent' function. */
++/* #undef HAVE_GETSPENT */
++
++/* Define to 1 if you have the `getspnam' function. */
++/* #undef HAVE_GETSPNAM */
++
++/* Define to 1 if you have the `gettimeofday' function. */
++#define HAVE_GETTIMEOFDAY 1
++
++/* Define to 1 if you have the `getwd' function. */
++/* #undef HAVE_GETWD */
++
++/* Define if glibc has incorrect _FORTIFY_SOURCE wrappers for memmove and
++   bcopy. */
++/* #undef HAVE_GLIBC_MEMMOVE_BUG */
++
++/* Define to 1 if you have the <grp.h> header file. */
++#define HAVE_GRP_H 1
++
++/* Define if you have the 'hstrerror' function. */
++#define HAVE_HSTRERROR 1
++
++/* Define this if you have le64toh() */
++#define HAVE_HTOLE64 1
++
++/* Define to 1 if you have the `hypot' function. */
++#define HAVE_HYPOT 1
++
++/* Define to 1 if you have the <ieeefp.h> header file. */
++/* #undef HAVE_IEEEFP_H */
++
++/* Define to 1 if you have the `if_nameindex' function. */
++#if __ANDROID_API__ >= 24
++#  define HAVE_IF_NAMEINDEX 1
++#else
++/* #undef HAVE_IF_NAMEINDEX */
++#endif /* __ANDROID_API__ >= 24 */
++
++/* Define if you have the 'inet_aton' function. */
++#define HAVE_INET_ATON 1
++
++/* Define if you have the 'inet_pton' function. */
++#define HAVE_INET_PTON 1
++
++/* Define to 1 if you have the `initgroups' function. */
++#define HAVE_INITGROUPS 1
++
++/* Define if your compiler provides int32_t. */
++#define HAVE_INT32_T 1
++
++/* Define if your compiler provides int64_t. */
++#define HAVE_INT64_T 1
++
++/* Define to 1 if you have the <inttypes.h> header file. */
++#define HAVE_INTTYPES_H 1
++
++/* Define to 1 if you have the <io.h> header file. */
++#define HAVE_IO_H 1
++
++/* Define if gcc has the ipa-pure-const bug. */
++/* #undef HAVE_IPA_PURE_CONST_BUG */
++
++/* Define to 1 if you have the `kill' function. */
++#define HAVE_KILL 1
++
++/* Define to 1 if you have the `killpg' function. */
++#define HAVE_KILLPG 1
++
++/* Define if you have the 'kqueue' functions. */
++/* #undef HAVE_KQUEUE */
++
++/* Define to 1 if you have the <langinfo.h> header file. */
++/* #undef HAVE_LANGINFO_H */
++
++/* Defined to enable large file support when an off_t is bigger than a long
++   and long long is available and at least as big as an off_t. You may need to
++   add some flags for configuration and compilation to enable this mode. (For
++   Solaris and Linux, the necessary defines are already defined.) */
++#define HAVE_LARGEFILE_SUPPORT 1
++
++/* Define to 1 if you have the 'lchflags' function. */
++/* #undef HAVE_LCHFLAGS */
++
++/* Define to 1 if you have the `lchmod' function. */
++/* #undef HAVE_LCHMOD */
++
++/* Define to 1 if you have the `lchown' function. */
++#define HAVE_LCHOWN 1
++
++/* Define to 1 if you have the `lgamma' function. */
++#define HAVE_LGAMMA 1
++
++/* Define to 1 if you have the `dl' library (-ldl). */
++#define HAVE_LIBDL 1
++
++/* Define to 1 if you have the `dld' library (-ldld). */
++/* #undef HAVE_LIBDLD */
++
++/* Define to 1 if you have the `ieee' library (-lieee). */
++/* #undef HAVE_LIBIEEE */
++
++/* Define to 1 if you have the <libintl.h> header file. */
++/* #undef HAVE_LIBINTL_H */
++
++/* Define if you have the readline library (-lreadline). */
++#define HAVE_LIBREADLINE 1
++
++/* Define to 1 if you have the `resolv' library (-lresolv). */
++/* #undef HAVE_LIBRESOLV */
++
++/* Define to 1 if you have the `sendfile' library (-lsendfile). */
++/* #undef HAVE_LIBSENDFILE */
++
++/* Define to 1 if you have the <libutil.h> header file. */
++/* #undef HAVE_LIBUTIL_H */
++
++/* Define if you have the 'link' function. */
++#define HAVE_LINK 1
++
++/* Define to 1 if you have the `linkat' function. */
++#if __ANDROID_API__ >= 21
++#  define HAVE_LINKAT 1
++#else
++/* #undef HAVE_LINKAT */
++#endif /* __ANDROID_API__ >= 21 */
++
++/* Define to 1 if you have the <linux/can/bcm.h> header file. */
++#if __ANDROID_API__ >= 21
++#  define HAVE_LINUX_CAN_BCM_H 1
++#else
++/* #undef HAVE_LINUX_CAN_BCM_H */
++#endif /* __ANDROID_API__ >= 24 */
++
++/* Define to 1 if you have the <linux/can.h> header file. */
++#define HAVE_LINUX_CAN_H 1
++
++/* Define to 1 if you have the <linux/can/raw.h> header file. */
++/* #undef HAVE_LINUX_CAN_RAW_H */
++
++/* Define to 1 if you have the <linux/netlink.h> header file. */
++#define HAVE_LINUX_NETLINK_H 1
++
++/* Define to 1 if you have the <linux/tipc.h> header file. */
++/* #undef HAVE_LINUX_TIPC_H */
++
++/* Define to 1 if you have the `lockf' function. */
++#if __ANDROID_API__ >= 24
++#  define HAVE_LOCKF 1
++#else
++/* #undef HAVE_LOCKF */
++#endif /* __ANDROID_API__ >= 24 */
++
++/* Define to 1 if you have the `log1p' function. */
++#define HAVE_LOG1P 1
++
++/* Define to 1 if you have the `log2' function. */
++#if __ANDROID_API__ >= 18
++#  define HAVE_LOG2 1
++#else
++/* #undef HAVE_LOG2 */
++#endif /* __ANDROID_API__ >= 18 */
++
++/* Define this if you have the type long double. */
++#define HAVE_LONG_DOUBLE 1
++
++/* Define this if you have the type long long. */
++#define HAVE_LONG_LONG 1
++
++/* Define to 1 if you have the `lstat' function. */
++#define HAVE_LSTAT 1
++
++/* Define to 1 if you have the `lutimes' function. */
++/* #undef HAVE_LUTIMES */
++
++/* Define this if you have the makedev macro. */
++#define HAVE_MAKEDEV 1
++
++/* Define to 1 if you have the `mbrtowc' function. */
++#define HAVE_MBRTOWC 1
++
++/* Define to 1 if you have the `memmove' function. */
++#define HAVE_MEMMOVE 1
++
++/* Define to 1 if you have the <memory.h> header file. */
++#define HAVE_MEMORY_H 1
++
++/* Define to 1 if you have the `memrchr' function. */
++#define HAVE_MEMRCHR 1
++
++/* Define to 1 if you have the `mkdirat' function. */
++#define HAVE_MKDIRAT 1
++
++/* Define to 1 if you have the `mkfifo' function. */
++/* #undef HAVE_MKFIFO */
++
++/* Define to 1 if you have the `mkfifoat' function. */
++#define HAVE_MKFIFOAT 1
++
++/* Define to 1 if you have the `mknod' function. */
++#define HAVE_MKNOD 1
++
++/* Define to 1 if you have the `mknodat' function. */
++#if __ANDROID_API__ >= 21
++#  define HAVE_MKNODAT 1
++#else
++/* #undef HAVE_MKNODAT */
++#endif /* __ANDROID_API__ >= 21 */
++
++/* Define to 1 if you have the `mktime' function. */
++#define HAVE_MKTIME 1
++
++/* Define to 1 if you have the `mmap' function. */
++#define HAVE_MMAP 1
++
++/* Define to 1 if you have the `mremap' function. */
++#define HAVE_MREMAP 1
++
++/* Define to 1 if you have the <ncurses.h> header file. */
++#define HAVE_NCURSES_H 1
++
++/* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
++/* #undef HAVE_NDIR_H */
++
++/* Define to 1 if you have the <netpacket/packet.h> header file. */
++#define HAVE_NETPACKET_PACKET_H 1
++
++/* Define to 1 if you have the <net/if.h> header file. */
++#define HAVE_NET_IF_H 1
++
++/* Define to 1 if you have the `nice' function. */
++#define HAVE_NICE 1
++
++/* Define to 1 if you have the `openat' function. */
++#define HAVE_OPENAT 1
++
++/* Define to 1 if you have the `openpty' function. */
++/* #undef HAVE_OPENPTY */
++
++/* Define if compiling using MacOS X 10.5 SDK or later. */
++/* #undef HAVE_OSX105_SDK */
++
++/* Define to 1 if you have the `pathconf' function. */
++#define HAVE_PATHCONF 1
++
++/* Define to 1 if you have the `pause' function. */
++#define HAVE_PAUSE 1
++
++/* Define to 1 if you have the `pipe2' function. */
++#define HAVE_PIPE2 1
++
++/* Define to 1 if you have the `sigpending' function. */
++#define HAVE_SIGPENDING 1
++
++/* Define to 1 if you have the `sigwait' function. */
++#define HAVE_SIGWAIT 1
++
++/* Define to 1 if you have the `plock' function. */
++/* #undef HAVE_PLOCK */
++
++/* Define to 1 if you have the `poll' function. */
++#define HAVE_POLL 1
++
++/* Define to 1 if you have the <poll.h> header file. */
++#define HAVE_POLL_H 1
++
++/* Define to 1 if you have the `posix_fadvise' function. */
++#if __ANDROID_API__ >= 21
++#  define HAVE_POSIX_FADVISE 1
++#else
++/* #undef HAVE_POSIX_FADVISE */
++#endif /* __ANDROID_API__ >= 21 */
++
++/* Define to 1 if you have the `posix_fallocate' function. */
++#if __ANDROID_API__ >= 21
++#  define HAVE_POSIX_FALLOCATE 1
++#else
++/* #undef HAVE_POSIX_FALLOCATE */
++#endif /* __ANDROID_API__ >= 21 */
++
++/* Define to 1 if you have the `pread' function. */
++#define HAVE_PREAD 1
++
++/* Define if you have the 'prlimit' functions. */
++#if (!defined(__LP64__) && __ANDROID_API__ >= 24) || (defined(__LP64__))
++#  define HAVE_PRLIMIT 1
++#else
++/* #undef HAVE_PRLIMIT */
++#endif /* (!defined(__LP64__) && __ANDROID_API__ >= 24) || (defined(__LP64__)) */
++
++/* Define to 1 if you have the <process.h> header file. */
++/* #undef HAVE_PROCESS_H */
++
++/* Define if your compiler supports function prototype */
++#define HAVE_PROTOTYPES 1
++
++/* Define if you have GNU PTH threads. */
++/* #undef HAVE_PTH */
++
++/* Defined for Solaris 2.6 bug in pthread header. */
++/* #undef HAVE_PTHREAD_DESTRUCTOR */
++
++/* Define to 1 if you have the <pthread.h> header file. */
++#define HAVE_PTHREAD_H 1
++
++/* Define to 1 if you have the `pthread_init' function. */
++#define HAVE_PTHREAD_INIT 1
++
++/* Define to 1 if you have the `pthread_kill' function. */
++#define HAVE_PTHREAD_KILL 1
++
++/* Define to 1 if you have the `pthread_sigmask' function. */
++#define HAVE_PTHREAD_SIGMASK 1
++
++/* Define to 1 if you have the <pty.h> header file. */
++/* #undef HAVE_PTY_H */
++
++/* Define to 1 if you have the `putenv' function. */
++#define HAVE_PUTENV 1
++
++/* Define to 1 if you have the `pwrite' function. */
++#define HAVE_PWRITE 1
++
++/* Define if the libcrypto has RAND_egd */
++#define HAVE_RAND_EGD 1
++
++/* Define to 1 if you have the `readlink' function. */
++#define HAVE_READLINK 1
++
++/* Define to 1 if you have the `readlinkat' function. */
++#if __ANDROID_API__ >= 21
++#  define HAVE_READLINKAT 1
++#else
++/* #undef HAVE_READLINKAT */
++#endif /* __ANDROID_API__ >= 21 */
++
++/* Define to 1 if you have the `readv' function. */
++#define HAVE_READV 1
++
++/* Define to 1 if you have the `realpath' function. */
++#define HAVE_REALPATH 1
++
++/* Define to 1 if you have the `renameat' function. */
++#define HAVE_RENAMEAT 1
++
++/* Define if you have readline 2.1 */
++#define HAVE_RL_CALLBACK 1
++
++/* Define if you can turn off readline's signal handling. */
++#define HAVE_RL_CATCH_SIGNAL 1
++
++/* Define if you have readline 2.2 */
++#define HAVE_RL_COMPLETION_APPEND_CHARACTER 1
++
++/* Define if you have readline 4.0 */
++#define HAVE_RL_COMPLETION_DISPLAY_MATCHES_HOOK 1
++
++/* Define if you have readline 4.2 */
++#define HAVE_RL_COMPLETION_MATCHES 1
++
++/* Define if you have rl_completion_suppress_append */
++#define HAVE_RL_COMPLETION_SUPPRESS_APPEND 1
++
++/* Define if you have readline 4.0 */
++#define HAVE_RL_PRE_INPUT_HOOK 1
++
++/* Define to 1 if you have the `round' function. */
++#define HAVE_ROUND 1
++
++/* Define to 1 if you have the `sched_get_priority_max' function. */
++#define HAVE_SCHED_GET_PRIORITY_MAX 1
++
++/* Define to 1 if you have the <sched.h> header file. */
++#define HAVE_SCHED_H 1
++
++/* Define to 1 if you have the `sched_rr_get_interval' function. */
++#define HAVE_SCHED_RR_GET_INTERVAL 1
++
++/* Define to 1 if you have the `sched_setaffinity' function. */
++#define HAVE_SCHED_SETAFFINITY 1
++
++/* Define to 1 if you have the `sched_setparam' function. */
++#define HAVE_SCHED_SETPARAM 1
++
++/* Define to 1 if you have the `sched_setscheduler' function. */
++#define HAVE_SCHED_SETSCHEDULER 1
++
++/* Define to 1 if you have the `select' function. */
++#define HAVE_SELECT 1
++
++/* Define to 1 if you have the `sem_getvalue' function. */
++#define HAVE_SEM_GETVALUE 1
++
++/* Define to 1 if you have the `sem_open' function. */
++#define HAVE_SEM_OPEN 1
++
++/* Define to 1 if you have the `sem_timedwait' function. */
++#define HAVE_SEM_TIMEDWAIT 1
++
++/* Define to 1 if you have the `sem_unlink' function. */
++#define HAVE_SEM_UNLINK 1
++
++/* Define to 1 if you have the `sendfile' function. */
++#define HAVE_SENDFILE 1
++
++/* Define to 1 if you have the `setegid' function. */
++#define HAVE_SETEGID 1
++
++/* Define to 1 if you have the `seteuid' function. */
++#define HAVE_SETEUID 1
++
++/* Define to 1 if you have the `setgid' function. */
++#define HAVE_SETGID 1
++
++/* Define if you have the 'setgroups' function. */
++#define HAVE_SETGROUPS 1
++
++/* Define to 1 if you have the `sethostname' function. */
++#if __ANDROID_API__ >= 23
++#  define HAVE_SETHOSTNAME 1
++#else
++/* #undef HAVE_SETHOSTNAME */
++#endif /* __ANDROID_API__ >= 23 */
++
++/* Define to 1 if you have the `setitimer' function. */
++#define HAVE_SETITIMER 1
++
++/* Define to 1 if you have the `setlocale' function. */
++#define HAVE_SETLOCALE 1
++
++/* Define to 1 if you have the `setpgid' function. */
++#define HAVE_SETPGID 1
++
++/* Define to 1 if you have the `setpgrp' function. */
++#define HAVE_SETPGRP 1
++
++/* Define to 1 if you have the `setpriority' function. */
++#define HAVE_SETPRIORITY 1
++
++/* Define to 1 if you have the `setregid' function. */
++#define HAVE_SETREGID 1
++
++/* Define to 1 if you have the `setresgid' function. */
++#define HAVE_SETRESGID 1
++
++/* Define to 1 if you have the `setresuid' function. */
++#define HAVE_SETRESUID 1
++
++/* Define to 1 if you have the `setreuid' function. */
++#define HAVE_SETREUID 1
++
++/* Define to 1 if you have the `setsid' function. */
++#define HAVE_SETSID 1
++
++/* Define to 1 if you have the `setuid' function. */
++#define HAVE_SETUID 1
++
++/* Define to 1 if you have the `setvbuf' function. */
++#define HAVE_SETVBUF 1
++
++/* Define to 1 if you have the <shadow.h> header file. */
++/* #undef HAVE_SHADOW_H */
++
++/* Define to 1 if you have the `sigaction' function. */
++#define HAVE_SIGACTION 1
++
++/* Define to 1 if you have the `sigaltstack' function. */
++#define HAVE_SIGALTSTACK 1
++
++/* Define to 1 if you have the `siginterrupt' function. */
++#define HAVE_SIGINTERRUPT 1
++
++/* Define to 1 if you have the <signal.h> header file. */
++#define HAVE_SIGNAL_H 1
++
++/* Define to 1 if you have the `sigpending' function. */
++#define HAVE_SIGPENDING 1
++
++/* Define to 1 if you have the `sigrelse' function. */
++/* #undef HAVE_SIGRELSE */
++
++/* Define to 1 if you have the `sigtimedwait' function. */
++#if __ANDROID_API__ >= 23
++#  define HAVE_SIGTIMEDWAIT 1
++#else
++/* #undef HAVE_SIGTIMEDWAIT */
++#endif /* __ANDROID_API__ >= 23 */
++
++/* Define to 1 if you have the `sigwait' function. */
++#define HAVE_SIGWAIT 1
++
++/* Define to 1 if you have the `sigwaitinfo' function. */
++#if __ANDROID_API__ >= 23
++#  define HAVE_SIGWAITINFO 1
++#else
++/* #undef HAVE_SIGWAITINFO */
++#endif /* __ANDROID_API__ >= 23 */
++
++/* Define to 1 if you have the `snprintf' function. */
++#define HAVE_SNPRINTF 1
++
++/* Define if sockaddr has sa_len member */
++/* #undef HAVE_SOCKADDR_SA_LEN */
++
++/* struct sockaddr_storage (sys/socket.h) */
++#define HAVE_SOCKADDR_STORAGE 1
++
++/* Define if you have the 'socketpair' function. */
++#define HAVE_SOCKETPAIR 1
++
++/* Define to 1 if you have the <spawn.h> header file. */
++/* #undef HAVE_SPAWN_H */
++
++/* Define if your compiler provides ssize_t */
++#define HAVE_SSIZE_T 1
++
++/* Define to 1 if you have the `statvfs' function. */
++/* #undef HAVE_STATVFS */
++
++/* Define if you have struct stat.st_mtim.tv_nsec */
++/* #undef HAVE_STAT_TV_NSEC */
++
++/* Define if you have struct stat.st_mtimensec */
++/* #undef HAVE_STAT_TV_NSEC2 */
++
++/* Define if your compiler supports variable length function prototypes (e.g.
++   void fprintf(FILE *, char *, ...);) *and* <stdarg.h> */
++#define HAVE_STDARG_PROTOTYPES 1
++
++/* Define to 1 if you have the <stdint.h> header file. */
++#define HAVE_STDINT_H 1
++
++/* Define to 1 if you have the <stdlib.h> header file. */
++#define HAVE_STDLIB_H 1
++
++/* Define to 1 if you have the `strdup' function. */
++#define HAVE_STRDUP 1
++
++/* Define to 1 if you have the `strftime' function. */
++#define HAVE_STRFTIME 1
++
++/* Define to 1 if you have the <strings.h> header file. */
++#define HAVE_STRINGS_H 1
++
++/* Define to 1 if you have the <string.h> header file. */
++#define HAVE_STRING_H 1
++
++/* Define to 1 if you have the `strlcpy' function. */
++#define HAVE_STRLCPY 1
++
++/* Define to 1 if you have the <stropts.h> header file. */
++/* #undef HAVE_STROPTS_H */
++
++/* Define to 1 if `st_birthtime' is a member of `struct stat'. */
++/* #undef HAVE_STRUCT_STAT_ST_BIRTHTIME */
++
++/* Define to 1 if `st_blksize' is a member of `struct stat'. */
++#define HAVE_STRUCT_STAT_ST_BLKSIZE 1
++
++/* Define to 1 if `st_blocks' is a member of `struct stat'. */
++#define HAVE_STRUCT_STAT_ST_BLOCKS 1
++
++/* Define to 1 if `st_flags' is a member of `struct stat'. */
++/* #undef HAVE_STRUCT_STAT_ST_FLAGS */
++
++/* Define to 1 if `st_gen' is a member of `struct stat'. */
++/* #undef HAVE_STRUCT_STAT_ST_GEN */
++
++/* Define to 1 if `st_rdev' is a member of `struct stat'. */
++#define HAVE_STRUCT_STAT_ST_RDEV 1
++
++/* Define to 1 if `tm_zone' is a member of `struct tm'. */
++#define HAVE_STRUCT_TM_TM_ZONE 1
++
++/* Define to 1 if your `struct stat' has `st_blocks'. Deprecated, use
++   `HAVE_STRUCT_STAT_ST_BLOCKS' instead. */
++#define HAVE_ST_BLOCKS 1
++
++/* Define if you have the 'symlink' function. */
++#define HAVE_SYMLINK 1
++
++/* Define to 1 if you have the `symlinkat' function. */
++#if __ANDROID_API__ >= 21
++#  define HAVE_SYMLINKAT 1
++#else
++/* #undef HAVE_SYMLINKAT */
++#endif /* __ANDROID_API__ >= 21 */
++
++/* Define to 1 if you have the `sync' function. */
++#define HAVE_SYNC 1
++
++/* Define to 1 if you have the `sysconf' function. */
++#define HAVE_SYSCONF 1
++
++/* Define to 1 if you have the <sysexits.h> header file. */
++/* #undef HAVE_SYSEXITS_H */
++
++/* Define to 1 if you have the <sys/audioio.h> header file. */
++/* #undef HAVE_SYS_AUDIOIO_H */
++
++/* Define to 1 if you have the <sys/bsdtty.h> header file. */
++/* #undef HAVE_SYS_BSDTTY_H */
++
++/* Define to 1 if you have the <sys/devpoll.h> header file. */
++/* #undef HAVE_SYS_DEVPOLL_H */
++
++/* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
++   */
++/* #undef HAVE_SYS_DIR_H */
++
++/* Define to 1 if you have the <sys/endian.h> header file. */
++#define HAVE_SYS_ENDIAN_H 1
++
++/* Define to 1 if you have the <sys/epoll.h> header file. */
++#define HAVE_SYS_EPOLL_H 1
++
++/* Define to 1 if you have the <sys/event.h> header file. */
++/* #undef HAVE_SYS_EVENT_H */
++
++/* Define to 1 if you have the <sys/file.h> header file. */
++#define HAVE_SYS_FILE_H 1
++
++/* Define to 1 if you have the <sys/ioctl.h> header file. */
++#define HAVE_SYS_IOCTL_H 1
++
++/* Define to 1 if you have the <sys/kern_control.h> header file. */
++/* #undef HAVE_SYS_KERN_CONTROL_H */
++
++/* Define to 1 if you have the <sys/loadavg.h> header file. */
++/* #undef HAVE_SYS_LOADAVG_H */
++
++/* Define to 1 if you have the <sys/lock.h> header file. */
++/* #undef HAVE_SYS_LOCK_H */
++
++/* Define to 1 if you have the <sys/mkdev.h> header file. */
++/* #undef HAVE_SYS_MKDEV_H */
++
++/* Define to 1 if you have the <sys/modem.h> header file. */
++/* #undef HAVE_SYS_MODEM_H */
++
++/* Define to 1 if you have the <sys/ndir.h> header file, and it defines `DIR'.
++   */
++/* #undef HAVE_SYS_NDIR_H */
++
++/* Define to 1 if you have the <sys/param.h> header file. */
++#define HAVE_SYS_PARAM_H 1
++
++/* Define to 1 if you have the <sys/poll.h> header file. */
++#define HAVE_SYS_POLL_H 1
++
++/* Define to 1 if you have the <sys/resource.h> header file. */
++#define HAVE_SYS_RESOURCE_H 1
++
++/* Define to 1 if you have the <sys/select.h> header file. */
++#define HAVE_SYS_SELECT_H 1
++
++/* Define to 1 if you have the <sys/sendfile.h> header file. */
++#define HAVE_SYS_SENDFILE_H 1
++
++/* Define to 1 if you have the <sys/socket.h> header file. */
++#define HAVE_SYS_SOCKET_H 1
++
++/* Define to 1 if you have the <sys/statvfs.h> header file. */
++/* #undef HAVE_SYS_STATVFS_H */
++
++/* Define to 1 if you have the <sys/stat.h> header file. */
++#define HAVE_SYS_STAT_H 1
++
++/* Define to 1 if you have the <sys/syscall.h> header file. */
++#define HAVE_SYS_SYSCALL_H 1
++
++/* Define to 1 if you have the <sys/sys_domain.h> header file. */
++/* #undef HAVE_SYS_SYS_DOMAIN_H */
++
++/* Define to 1 if you have the <sys/termio.h> header file. */
++/* #undef HAVE_SYS_TERMIO_H */
++
++/* Define to 1 if you have the <sys/times.h> header file. */
++#define HAVE_SYS_TIMES_H 1
++
++/* Define to 1 if you have the <sys/time.h> header file. */
++#define HAVE_SYS_TIME_H 1
++
++/* Define to 1 if you have the <sys/types.h> header file. */
++#define HAVE_SYS_TYPES_H 1
++
++/* Define to 1 if you have the <sys/uio.h> header file. */
++#define HAVE_SYS_UIO_H 1
++
++/* Define to 1 if you have the <sys/un.h> header file. */
++#define HAVE_SYS_UN_H 1
++
++/* Define to 1 if you have the <sys/utsname.h> header file. */
++#define HAVE_SYS_UTSNAME_H 1
++
++/* Define to 1 if you have the <sys/wait.h> header file. */
++#define HAVE_SYS_WAIT_H 1
++
++/* Define to 1 if you have the <sys/xattr.h> header file. */
++#define HAVE_SYS_XATTR_H 1
++
++/* Define to 1 if you have the `tcgetpgrp' function. */
++#define HAVE_TCGETPGRP 1
++
++/* Define to 1 if you have the `tcsetpgrp' function. */
++#define HAVE_TCSETPGRP 1
++
++/* Define to 1 if you have the `tempnam' function. */
++#define HAVE_TEMPNAM 1
++
++/* Define to 1 if you have the <termios.h> header file. */
++#define HAVE_TERMIOS_H 1
++
++/* Define to 1 if you have the <term.h> header file. */
++/* #undef HAVE_TERM_H */
++
++/* Define to 1 if you have the `tgamma' function. */
++#define HAVE_TGAMMA 1
++
++/* Define to 1 if you have the <thread.h> header file. */
++#define HAVE_THREAD_H 1
++
++/* Define to 1 if you have the `timegm' function. */
++/* #undef HAVE_TIMEGM */
++
++/* Define to 1 if you have the `times' function. */
++#define HAVE_TIMES 1
++
++/* Define to 1 if you have the `tmpfile' function. */
++#define HAVE_TMPFILE 1
++
++/* Define to 1 if you have the `tmpnam' function. */
++#define HAVE_TMPNAM 1
++
++/* Define to 1 if you have the `tmpnam_r' function. */
++/* #undef HAVE_TMPNAM_R */
++
++/* Define to 1 if your `struct tm' has `tm_zone'. Deprecated, use
++   `HAVE_STRUCT_TM_TM_ZONE' instead. */
++#define HAVE_TM_ZONE 1
++
++/* Define to 1 if you have the `truncate' function. */
++#define HAVE_TRUNCATE 1
++
++/* Define to 1 if you don't have `tm_zone' but do have the external array
++   `tzname'. */
++#define HAVE_TZNAME 1
++
++/* Define this if you have tcl and TCL_UTF_MAX==6 */
++/* #undef HAVE_UCS4_TCL */
++
++/* Define if your compiler provides uint32_t. */
++#define HAVE_UINT32_T 1
++
++/* Define if your compiler provides uint64_t. */
++#define HAVE_UINT64_T 1
++
++/* Define to 1 if the system has the type `uintptr_t'. */
++#define HAVE_UINTPTR_T 1
++
++/* Define to 1 if you have the `uname' function. */
++#define HAVE_UNAME 1
++
++/* Define to 1 if you have the <unistd.h> header file. */
++#define HAVE_UNISTD_H 1
++
++/* Define to 1 if you have the `unlinkat' function. */
++#define HAVE_UNLINKAT 1
++
++/* Define to 1 if you have the `unsetenv' function. */
++#define HAVE_UNSETENV 1
++
++/* Define if you have a useable wchar_t type defined in wchar.h; useable means
++   wchar_t must be an unsigned type with at least 16 bits. (see
++   Include/unicodeobject.h). */
++/* #undef HAVE_USABLE_WCHAR_T */
++
++/* Define to 1 if you have the <util.h> header file. */
++/* #undef HAVE_UTIL_H */
++
++/* Define to 1 if you have the `utimensat' function. */
++#if __ANDROID_API__ >= 12
++#  define HAVE_UTIMENSAT 1
++#else
++/* #undef HAVE_UTIMENSAT */
++#endif /* __ANDROID_API__ >= 12 */
++
++/* Define to 1 if you have the `utimes' function. */
++#define HAVE_UTIMES 1
++
++/* Define to 1 if you have the <utime.h> header file. */
++#define HAVE_UTIME_H 1
++
++/* Define to 1 if you have the `wait3' function. */
++/* #undef HAVE_WAIT3 */
++
++/* Define to 1 if you have the `wait4' function. */
++#define HAVE_WAIT4 1
++
++/* Define to 1 if you have the `waitid' function. */
++#define HAVE_WAITID 1
++
++/* Define to 1 if you have the `waitpid' function. */
++#define HAVE_WAITPID 1
++
++/* Define if the compiler provides a wchar.h header file. */
++#define HAVE_WCHAR_H 1
++
++/* Define to 1 if you have the `wcscoll' function. */
++#define HAVE_WCSCOLL 1
++
++/* Define to 1 if you have the `wcsftime' function. */
++#define HAVE_WCSFTIME 1
++
++/* Define to 1 if you have the `wcsxfrm' function. */
++#define HAVE_WCSXFRM 1
++
++/* Define to 1 if you have the `wmemcmp' function. */
++#define HAVE_WMEMCMP 1
++
++/* Define if tzset() actually switches the local timezone in a meaningful way.
++   */
++#define HAVE_WORKING_TZSET 1
++
++/* Define to 1 if you have the `writev' function. */
++#define HAVE_WRITEV 1
++
++/* Define if the zlib library has inflateCopy */
++#define HAVE_ZLIB_COPY 1
++
++/* Define to 1 if you have the `_getpty' function. */
++/* #undef HAVE__GETPTY */
++
++/* Define to 1 if you have the <sys/ioctl.h> header file. */
++#define HAVE_SYS_IOCTL_H 1
++
++/* Define if you are using Mach cthreads directly under /include */
++/* #undef HURD_C_THREADS */
++
++/* Define if you are using Mach cthreads under mach / */
++/* #undef MACH_C_THREADS */
++
++/* Define if log1p(-0.) is 0. rather than -0. */
++/* #undef LOG1P_DROPS_ZERO_SIGN */
++
++/* Define to 1 if `major', `minor', and `makedev' are declared in <mkdev.h>.
++   */
++/* #undef MAJOR_IN_MKDEV */
++
++/* Define to 1 if `major', `minor', and `makedev' are declared in
++   <sysmacros.h>. */
++#define MAJOR_IN_SYSMACROS 1
++
++/* Define if mvwdelch in curses.h is an expression. */
++/* #undef MVWDELCH_IS_EXPRESSION */
++
++/* Define to the address where bug reports for this package should be sent. */
++/* #undef PACKAGE_BUGREPORT */
++
++/* Define to the full name of this package. */
++/* #undef PACKAGE_NAME */
++
++/* Define to the full name and version of this package. */
++/* #undef PACKAGE_STRING */
++
++/* Define to the one symbol short name of this package. */
++/* #undef PACKAGE_TARNAME */
++
++/* Define to the home page for this package. */
++/* #undef PACKAGE_URL */
++
++/* Define to the version of this package. */
++/* #undef PACKAGE_VERSION */
++
++/* Define if POSIX semaphores aren't enabled on your system */
++/* #undef POSIX_SEMAPHORES_NOT_ENABLED */
++
++/* Defined if PTHREAD_SCOPE_SYSTEM supported. */
++#define PTHREAD_SYSTEM_SCHED_SUPPORTED 1
++
++/* Define as the preferred size in bits of long digits */
++/* #undef PYLONG_BITS_IN_DIGIT */
++
++/* Define to printf format modifier for long long type */
++#define PY_FORMAT_LONG_LONG "ll"
++
++/* Define to printf format modifier for Py_ssize_t */
++#define PY_FORMAT_SIZE_T "z"
++
++/* Define if you want to build an interpreter with many run-time checks. */
++/* #undef Py_DEBUG */
++
++/* Defined if Python is built as a shared library. */
++#define Py_ENABLE_SHARED 1
++
++/* Define hash algorithm for str, bytes and memoryview. SipHash24: 1, FNV: 2,
++   externally defined: 0 */
++/* #undef Py_HASH_ALGORITHM */
++
++/* assume C89 semantics that RETSIGTYPE is always void */
++#define RETSIGTYPE void
++
++/* Define if setpgrp() must be called as setpgrp(0, 0). */
++/* #undef SETPGRP_HAVE_ARG */
++
++/* Define this to be extension of shared libraries (including the dot!). */
++#define SHLIB_EXT ".so"
++
++/* Define if i>>j for signed int i does not extend the sign bit when i < 0 */
++/* #undef SIGNED_RIGHT_SHIFT_ZERO_FILLS */
++
++/* The size of `double', as computed by sizeof. */
++#define SIZEOF_DOUBLE __SIZEOF_DOUBLE__
++
++/* The size of `float', as computed by sizeof. */
++#define SIZEOF_FLOAT __SIZEOF_FLOAT__
++
++/* The size of `fpos_t', as computed by sizeof. */
++#ifdef ABI_64_BIT
++#  define SIZEOF_FPOS_T 8
++#else
++#  define SIZEOF_FPOS_T 4
++#endif
++
++/* The size of `int', as computed by sizeof. */
++#define SIZEOF_INT __SIZEOF_INT__
++
++/* The size of `long', as computed by sizeof. */
++#define SIZEOF_LONG __SIZEOF_LONG__
++
++/* The size of `long double', as computed by sizeof. */
++#define SIZEOF_LONG_DOUBLE __SIZEOF_LONG_DOUBLE__
++
++/* The size of `long long', as computed by sizeof. */
++#define SIZEOF_LONG_LONG __SIZEOF_LONG_LONG__
++
++/* The size of `off_t', as computed by sizeof. */
++#ifdef ABI_64_BIT
++#  define SIZEOF_OFF_T 8
++#else
++#  define SIZEOF_OFF_T 4
++#endif
++
++
++/* The size of `pid_t', as computed by sizeof. */
++#define SIZEOF_PID_T 4
++
++/* The size of `pthread_t', as computed by sizeof. */
++#ifdef ABI_64_BIT
++#  define SIZEOF_PTHREAD_T 8
++#else
++#  define SIZEOF_PTHREAD_T 4
++#endif
++
++/* The size of `short', as computed by sizeof. */
++#define SIZEOF_SHORT __SIZEOF_SHORT__
++
++/* The size of `size_t', as computed by sizeof. */
++#define SIZEOF_SIZE_T __SIZEOF_SIZE_T__
++
++/* The size of `time_t', as computed by sizeof. */
++#ifdef ABI_64_BIT
++#  define SIZEOF_TIME_T 8
++#else
++#  define SIZEOF_TIME_T 4
++#endif
++
++/* The size of `uintptr_t', as computed by sizeof. */
++#ifdef ABI_64_BIT
++#  define SIZEOF_UINTPTR_T 8
++#else
++#  define SIZEOF_UINTPTR_T 4
++#endif
++
++/* The size of `void *', as computed by sizeof. */
++#define SIZEOF_VOID_P __SIZEOF_POINTER__
++
++/* The size of `wchar_t', as computed by sizeof. */
++#define SIZEOF_WCHAR_T __SIZEOF_WCHAR_T__
++
++/* The size of `_Bool', as computed by sizeof. */
++#define SIZEOF__BOOL 1
++
++/* Define to 1 if you have the ANSI C header files. */
++#define STDC_HEADERS 1
++
++/* Define to 1 if you have the sigaltstack function. */
++#define HAVE_SIGALTSTACK 1
++
++/* Define if you can safely include both <sys/select.h> and <sys/time.h>
++   (which you can't on SCO ODT 3.0). */
++#define SYS_SELECT_WITH_SYS_TIME 1
++
++/* Define if tanh(-0.) is -0., or if platform doesn't have signed zeros */
++#define TANH_PRESERVES_ZERO_SIGN 1
++
++/* Library needed by timemodule.c: librt may be needed for clock_gettime() */
++/* #undef TIMEMODULE_LIB */
++
++/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
++#define TIME_WITH_SYS_TIME 1
++
++/* Define to 1 if your <sys/time.h> declares `struct tm'. */
++/* #undef TM_IN_SYS_TIME */
++
++/* Define if you want to use computed gotos in ceval.c. */
++#define USE_COMPUTED_GOTOS 1
++
++/* Define to use the C99 inline keyword. */
++#define USE_INLINE 1
++
++/* Enable extensions on AIX 3, Interix.  */
++#ifndef _ALL_SOURCE
++# define _ALL_SOURCE 1
++#endif
++/* Enable GNU extensions on systems that have them.  */
++#ifndef _GNU_SOURCE
++# define _GNU_SOURCE 1
++#endif
++/* Enable threading extensions on Solaris.  */
++#ifndef _POSIX_PTHREAD_SEMANTICS
++# define _POSIX_PTHREAD_SEMANTICS 1
++#endif
++/* Enable extensions on HP NonStop.  */
++#ifndef _TANDEM_SOURCE
++# define _TANDEM_SOURCE 1
++#endif
++/* Enable general extensions on Solaris.  */
++#ifndef __EXTENSIONS__
++# define __EXTENSIONS__ 1
++#endif
++
++
++/* Define if you want to use MacPython modules on MacOSX in unix-Python. */
++/* #undef USE_TOOLBOX_OBJECT_GLUE */
++
++/* Define if a va_list is an array of some kind */
++/* #undef VA_LIST_IS_ARRAY */
++
++/* Define if you want SIGFPE handled (see Include/pyfpe.h). */
++#define WANT_SIGFPE_HANDLER 1
++
++/* Define if you want wctype.h functions to be used instead of the one
++   supplied by Python itself. (see Include/unicodectype.h). */
++/* #undef WANT_WCTYPE_FUNCTIONS */
++
++/* Define if WINDOW in curses.h offers a field _flags. */
++/* #undef WINDOW_HAS_FLAGS */
++
++/* Define if you want documentation strings in extension modules */
++#define WITH_DOC_STRINGS 1
++
++/* Define if you want to use the new-style (Openstep, Rhapsody, MacOS) dynamic
++   linker (dyld) instead of the old-style (NextStep) dynamic linker (rld).
++   Dyld is necessary to support frameworks. */
++/* #undef WITH_DYLD */
++
++/* Define to 1 if libintl is needed for locale functions. */
++/* #undef WITH_LIBINTL */
++
++/* Define if you want to produce an OpenStep/Rhapsody framework (shared
++   library plus accessory files). */
++/* #undef WITH_NEXT_FRAMEWORK */
++
++/* Define if you want to compile in Python-specific mallocs */
++#define WITH_PYMALLOC 1
++
++/* Define if you want to compile in rudimentary thread support */
++#define WITH_THREAD 1
++
++/* Define to profile with the Pentium timestamp counter */
++/* #undef WITH_TSC */
++
++/* Define if you want pymalloc to be disabled when running under valgrind */
++/* #undef WITH_VALGRIND */
++
++/* Define if you compile with tkappinit.c */
++#define WITH_APPINIT
++
++/* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
++   significant byte first (like Motorola and SPARC, unlike Intel). */
++#if defined AC_APPLE_UNIVERSAL_BUILD
++# if defined __BIG_ENDIAN__
++#  define WORDS_BIGENDIAN 1
++# endif
++#else
++# ifndef WORDS_BIGENDIAN
++/* #  undef WORDS_BIGENDIAN */
++# endif
++#endif
++
++/* Define if arithmetic is subject to x87-style double rounding issue */
++/* #undef X87_DOUBLE_ROUNDING */
++
++/* Define on OpenBSD to activate all library features */
++/* #undef _BSD_SOURCE */
++
++/* Define on Irix to enable u_int */
++#define _BSD_TYPES 1
++
++/* Define on Darwin to activate all library features */
++#define _DARWIN_C_SOURCE 1
++
++/* This must be set to 64 on some systems to enable large file support. */
++#define _FILE_OFFSET_BITS 64
++
++/* Define on Linux to activate all library features */
++#define _GNU_SOURCE 1
++
++/* Define to include mbstate_t for mbrtowc */
++/* #undef _INCLUDE__STDC_A1_SOURCE */
++
++/* This must be defined on some systems to enable large file support. */
++#define _LARGEFILE_SOURCE 1
++
++/* This must be defined on AIX systems to enable large file support. */
++/* #undef _LARGE_FILES */
++
++/* Define to 1 if on MINIX. */
++/* #undef _MINIX */
++
++/* Define on NetBSD to activate all library features */
++#define _NETBSD_SOURCE 1
++
++/* Define _OSF_SOURCE to get the makedev macro. */
++/* #undef _OSF_SOURCE */
++
++/* Define to 2 if the system does not provide POSIX.1 features except with
++   this defined. */
++/* #undef _POSIX_1_SOURCE */
++
++/* Define to activate features from IEEE Stds 1003.1-2008 */
++#define _POSIX_C_SOURCE 200809L
++
++/* Define to 1 if you need to in order for `stat' and other things to work. */
++/* #undef _POSIX_SOURCE */
++
++/* Define if you have POSIX threads, and your system does not define that. */
++/* #define _POSIX_THREADS 1 */
++
++/* Define to force use of thread-safe errno, h_errno, and other functions */
++#define _REENTRANT 1
++
++/* Define for Solaris 2.5.1 so the uint32_t typedef from <sys/synch.h>,
++   <pthread.h>, or <semaphore.h> is not used. If the typedef were allowed, the
++   #define below would cause a syntax error. */
++/* #undef _UINT32_T */
++
++/* Define for Solaris 2.5.1 so the uint64_t typedef from <sys/synch.h>,
++   <pthread.h>, or <semaphore.h> is not used. If the typedef were allowed, the
++   #define below would cause a syntax error. */
++/* #undef _UINT64_T */
++
++/* Define to the level of X/Open that your system supports */
++#define _XOPEN_SOURCE 700
++
++/* Define to activate Unix95-and-earlier features */
++#define _XOPEN_SOURCE_EXTENDED 1
++
++/* Define on FreeBSD to activate all library features */
++/* #undef __BSD_VISIBLE */
++
++/* Define to 1 if type `char' is unsigned and you are not using gcc.  */
++#ifndef __CHAR_UNSIGNED__
++/* # undef __CHAR_UNSIGNED__ */
++#endif
++
++/* Define to 'long' if <time.h> doesn't define. */
++/* #undef clock_t */
++
++/* Define to empty if `const' does not conform to ANSI C. */
++/* #undef const */
++
++/* Define to `int' if <sys/types.h> doesn't define. */
++/* #undef gid_t */
++
++/* Define to `__inline__' or `__inline' if that's what the C compiler
++   calls it, or to nothing if 'inline' is not supported under any name.  */
++#ifndef __cplusplus
++#undef inline
++#endif
++
++/* Define to the type of a signed integer type of width exactly 32 bits if
++   such a type exists and the standard includes do not define it. */
++/* #undef int32_t */
++
++/* Define to the type of a signed integer type of width exactly 64 bits if
++   such a type exists and the standard includes do not define it. */
++/* #undef int64_t */
++
++/* Define to `int' if <sys/types.h> does not define. */
++/* #undef mode_t */
++
++/* Define to `long int' if <sys/types.h> does not define. */
++/* #undef off_t */
++
++/* Define to `int' if <sys/types.h> does not define. */
++/* #undef pid_t */
++
++/* Define to empty if the keyword does not work. */
++/* #undef signed */
++
++/* Define to `unsigned int' if <sys/types.h> does not define. */
++/* #undef size_t */
++
++/* Define to `int' if <sys/socket.h> does not define. */
++/* #undef socklen_t */
++
++/* Define to `int' if <sys/types.h> doesn't define. */
++/* #undef uid_t */
++
++/* Define to the type of an unsigned integer type of width exactly 32 bits if
++   such a type exists and the standard includes do not define it. */
++/* #undef uint32_t */
++
++/* Define to the type of an unsigned integer type of width exactly 64 bits if
++   such a type exists and the standard includes do not define it. */
++/* #undef uint64_t */
++
++/* Define to empty if the keyword does not work. */
++/* #undef volatile */
++
++
++/* Define the macros needed if on a UnixWare 7.x system. */
++#if defined(__USLC__) && defined(__SCO_VERSION__)
++#define STRICT_SYSV_CURSES /* Don't use ncurses extensions */
++#endif
++
++#endif /*Py_PYCONFIG_H*/
++
+diff --git Python3.4.3.orig/Lib/_sitebuiltins.py Python3.4.3.new/Lib/_sitebuiltins.py
+--- Python3.4.3.orig/Lib/_sitebuiltins.py
++++ Python3.4.3.new/Lib/_sitebuiltins.py
 @@ -51,7 +51,15 @@ class _Printer(object):
                      data = fp.read()
                  break
@@ -17,8 +1684,9 @@
          if not data:
              data = self.__data
          self.__lines = data.split('\n')
---- Python-3.4.3.orig/Lib/distutils/sysconfig.py
-+++ Python-3.4.3.new/Lib/distutils/sysconfig.py
+diff --git Python3.4.3.orig/Lib/distutils/sysconfig.py Python3.4.3.new/Lib/distutils/sysconfig.py
+--- Python3.4.3.orig/Lib/distutils/sysconfig.py
++++ Python3.4.3.new/Lib/distutils/sysconfig.py
 @@ -165,7 +165,7 @@ def customize_compiler(compiler):
      Mainly needed on Unix, so we can plug in the information that
      varies across Unices and is stored in Python's Makefile.
@@ -56,8 +1724,9 @@
      _config_vars = g
  
  
---- Python-3.4.3.orig/Lib/idlelib/PyShell.py
-+++ Python-3.4.3.new/Lib/idlelib/PyShell.py
+diff --git Python3.4.3.orig/Lib/idlelib/PyShell.py Python3.4.3.new/Lib/idlelib/PyShell.py
+--- Python3.4.3.orig/Lib/idlelib/PyShell.py
++++ Python3.4.3.new/Lib/idlelib/PyShell.py
 @@ -445,7 +445,7 @@ class ModifiedInterpreter(InteractiveInterpreter):
          self.spawn_subprocess()
          #time.sleep(20) # test to simulate GUI not accepting connection
@@ -76,15 +1745,15 @@
      if system() == 'Windows':
          iconfile = os.path.join(icondir, 'idle.ico')
          root.wm_iconbitmap(default=iconfile)
---- Python-3.4.3.orig/Lib/idlelib/TreeWidget.py
-+++ Python-3.4.3.new/Lib/idlelib/TreeWidget.py
+diff --git Python3.4.3.orig/Lib/idlelib/TreeWidget.py Python3.4.3.new/Lib/idlelib/TreeWidget.py
+--- Python3.4.3.orig/Lib/idlelib/TreeWidget.py
++++ Python3.4.3.new/Lib/idlelib/TreeWidget.py
 @@ -20,16 +20,10 @@ from tkinter import *
  from idlelib import ZoomHeight
  from idlelib.configHandler import idleConf
  
 -ICONDIR = "Icons"
-+ICONDIR = idleConf.GetIconsDir()
- 
+-
 -# Look for Icons subdirectory in the same directory as this module
 -try:
 -    _icondir = os.path.join(os.path.dirname(__file__), ICONDIR)
@@ -93,13 +1762,16 @@
 -if os.path.isdir(_icondir):
 -    ICONDIR = _icondir
 -elif not os.path.isdir(ICONDIR):
++ICONDIR = idleConf.GetIconsDir()
++
 +# Verify the icon dir
 +if not os.path.isdir(ICONDIR):
      raise RuntimeError("can't find icon directory (%r)" % (ICONDIR,))
  
  def listicons(icondir=ICONDIR):
---- Python-3.4.3.orig/Lib/idlelib/configHandler.py
-+++ Python-3.4.3.new/Lib/idlelib/configHandler.py
+diff --git Python3.4.3.orig/Lib/idlelib/configHandler.py Python3.4.3.new/Lib/idlelib/configHandler.py
+--- Python3.4.3.orig/Lib/idlelib/configHandler.py
++++ Python3.4.3.new/Lib/idlelib/configHandler.py
 @@ -22,6 +22,8 @@ import os
  import sys
  
@@ -182,8 +1854,9 @@
  
  idleConf = IdleConf()
  
---- Python-3.4.3.orig/Lib/idlelib/textView.py
-+++ Python-3.4.3.new/Lib/idlelib/textView.py
+diff --git Python3.4.3.orig/Lib/idlelib/textView.py Python3.4.3.new/Lib/idlelib/textView.py
+--- Python3.4.3.orig/Lib/idlelib/textView.py
++++ Python3.4.3.new/Lib/idlelib/textView.py
 @@ -70,8 +70,18 @@ def view_text(parent, title, text, modal=True):
  
  def view_file(parent, title, filename, encoding=None, modal=True):
@@ -205,8 +1878,30 @@
      except IOError:
          tkMessageBox.showerror(title='File Load Error',
                                 message='Unable to load file %r .' % filename,
---- Python-3.4.3.orig/Lib/subprocess.py
-+++ Python-3.4.3.new/Lib/subprocess.py
+diff --git Python3.4.3.orig/Lib/pkgutil.py Python3.4.3.new/Lib/pkgutil.py
+--- Python3.4.3.orig/Lib/pkgutil.py
++++ Python3.4.3.new/Lib/pkgutil.py
+@@ -283,8 +283,15 @@ class ImpLoader:
+         return mod
+ 
+     def get_data(self, pathname):
+-        with open(pathname, "rb") as file:
+-            return file.read()
++        if '.zip' in pathname:
++            import zipfile
++            zipPath, subPath = filename.split(".zip")
++            with zipfile.ZipFile(zipPath + ".zip", "r") as z:
++                with z.open(subPath.replace("\\", "/")[1:], "r") as fp:
++                    return fp.read()
++        else:
++            with open(pathname, "rb") as file:
++                return file.read()
+ 
+     def _reopen(self):
+         if self.file and self.file.closed:
+diff --git Python3.4.3.orig/Lib/subprocess.py Python3.4.3.new/Lib/subprocess.py
+--- Python3.4.3.orig/Lib/subprocess.py
++++ Python3.4.3.new/Lib/subprocess.py
 @@ -1345,7 +1345,8 @@ class Popen(object):
                  args = list(args)
  
@@ -217,8 +1912,9 @@
                  if executable:
                      args[0] = executable
  
---- Python-3.4.3.orig/Lib/sysconfig.py
-+++ Python-3.4.3.new/Lib/sysconfig.py
+diff --git Python3.4.3.orig/Lib/sysconfig.py Python3.4.3.new/Lib/sysconfig.py
+--- Python3.4.3.orig/Lib/sysconfig.py
++++ Python3.4.3.new/Lib/sysconfig.py
 @@ -345,25 +345,35 @@ def _generate_posix_vars():
      """Generate the Python module containing build-time variables."""
      import pprint
@@ -295,8 +1991,50 @@
  
  def _init_non_posix(vars):
      """Initialize the module as appropriate for NT"""
---- Python-3.4.3.orig/Modules/_decimal/libmpdec/basearith.c
-+++ Python-3.4.3.new/Modules/_decimal/libmpdec/basearith.c
+diff --git Python3.4.3.orig/Lib/turtledemo/__main__.py Python3.4.3.new/Lib/turtledemo/__main__.py
+--- Python3.4.3.orig/Lib/turtledemo/__main__.py
++++ Python3.4.3.new/Lib/turtledemo/__main__.py
+@@ -115,7 +115,17 @@ MAXIMUM_FONT_SIZE = 100
+ font_sizes = [8, 9, 10, 11, 12, 14, 18, 20, 22, 24, 30]
+ 
+ def getExampleEntries():
+-    return [entry[:-3] for entry in os.listdir(demo_dir) if
++    demoFileList = []
++    if '.zip' in demo_dir:
++        import zipfile
++        zipPath, subPath = demo_dir.split('.zip')
++        with zipfile.ZipFile(zipPath + '.zip', 'r') as z:
++            demoFileList = [filename for filename in (
++                relativePath[len(subPath) + 1:] for relativePath in z.namelist() if relativePath.startswith(subPath))
++                            if not '/' in filename]
++    else:
++        demoFileList = os.listdir(demo_dir)
++    return [entry[:-3] for entry in demoFileList if
+             entry.endswith(".py") and entry[0] != '_']
+ 
+ help_entries = (  # (help_label,  help_doc)
+@@ -318,8 +328,16 @@ class DemoWindow(object):
+         modname = 'turtledemo.' + filename
+         __import__(modname)
+         self.module = sys.modules[modname]
+-        with open(self.module.__file__, 'r') as f:
+-            chars = f.read()
++        moduleFilePath = self.module.__file__
++        if '.zip' in moduleFilePath:
++            import zipfile
++            zipPath, subPath = moduleFilePath.split('.zip')
++            with zipfile.ZipFile(zipPath + '.zip', 'r') as z:
++                with z.open(subPath.replace('\\', '/')[1:], 'r') as fp:
++                    chars = fp.read().decode('utf-8')
++        else:
++            with open(moduleFilePath, 'r') as f:
++                chars = f.read()
+         self.text.delete("1.0", "end")
+         self.text.insert("1.0", chars)
+         self.root.title(filename + " - a Python turtle graphics example")
+diff --git Python3.4.3.orig/Modules/_decimal/libmpdec/basearith.c Python3.4.3.new/Modules/_decimal/libmpdec/basearith.c
+--- Python3.4.3.orig/Modules/_decimal/libmpdec/basearith.c
++++ Python3.4.3.new/Modules/_decimal/libmpdec/basearith.c
 @@ -32,7 +32,7 @@
  #include <string.h>
  #include <assert.h>
@@ -306,8 +2044,9 @@
  #include "typearith.h"
  #include "basearith.h"
  
---- Python-3.4.3.orig/Modules/_decimal/libmpdec/io.c
-+++ Python-3.4.3.new/Modules/_decimal/libmpdec/io.c
+diff --git Python3.4.3.orig/Modules/_decimal/libmpdec/io.c Python3.4.3.new/Modules/_decimal/libmpdec/io.c
+--- Python3.4.3.orig/Modules/_decimal/libmpdec/io.c
++++ Python3.4.3.new/Modules/_decimal/libmpdec/io.c
 @@ -37,7 +37,7 @@
  #include <locale.h>
  #include "bits.h"
@@ -340,8 +2079,9 @@
          if (mpd_validate_lconv(spec) < 0) {
              return 0; /* GCOV_NOT_REACHED */
          }
---- Python-3.4.3.orig/Modules/_decimal/libmpdec/memory.c
-+++ Python-3.4.3.new/Modules/_decimal/libmpdec/memory.c
+diff --git Python3.4.3.orig/Modules/_decimal/libmpdec/memory.c Python3.4.3.new/Modules/_decimal/libmpdec/memory.c
+--- Python3.4.3.orig/Modules/_decimal/libmpdec/memory.c
++++ Python3.4.3.new/Modules/_decimal/libmpdec/memory.c
 @@ -30,7 +30,7 @@
  #include <stdio.h>
  #include <stdlib.h>
@@ -351,62 +2091,9 @@
  
  
  /* Guaranteed minimum allocation for a coefficient. May be changed once
---- Python-3.4.3.orig/Modules/_decimal/libmpdec/memory.h
-+++ /dev/null
-@@ -1,51 +0,0 @@
--/*
-- * Copyright (c) 2008-2016 Stefan Krah. All rights reserved.
-- *
-- * Redistribution and use in source and binary forms, with or without
-- * modification, are permitted provided that the following conditions
-- * are met:
-- *
-- * 1. Redistributions of source code must retain the above copyright
-- *    notice, this list of conditions and the following disclaimer.
-- *
-- * 2. Redistributions in binary form must reproduce the above copyright
-- *    notice, this list of conditions and the following disclaimer in the
-- *    documentation and/or other materials provided with the distribution.
-- *
-- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS "AS IS" AND
-- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
-- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
-- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
-- * SUCH DAMAGE.
-- */
--
--
--#ifndef MEMORY_H
--#define MEMORY_H
--
--
--#include "mpdecimal.h"
--
--
--/* Internal header file: all symbols have local scope in the DSO */
--MPD_PRAGMA(MPD_HIDE_SYMBOLS_START)
--
--
--int mpd_switch_to_dyn(mpd_t *result, mpd_ssize_t size, uint32_t *status);
--int mpd_switch_to_dyn_zero(mpd_t *result, mpd_ssize_t size, uint32_t *status);
--int mpd_realloc_dyn(mpd_t *result, mpd_ssize_t size, uint32_t *status);
--
--
--MPD_PRAGMA(MPD_HIDE_SYMBOLS_END) /* restore previous scope rules */
--
--
--#endif
--
--
--
---- Python-3.4.3.orig/Modules/_decimal/libmpdec/mpdecimal.c
-+++ Python-3.4.3.new/Modules/_decimal/libmpdec/mpdecimal.c
+diff --git Python3.4.3.orig/Modules/_decimal/libmpdec/mpdecimal.c Python3.4.3.new/Modules/_decimal/libmpdec/mpdecimal.c
+--- Python3.4.3.orig/Modules/_decimal/libmpdec/mpdecimal.c
++++ Python3.4.3.new/Modules/_decimal/libmpdec/mpdecimal.c
 @@ -36,7 +36,7 @@
  #include "bits.h"
  #include "convolute.h"
@@ -416,66 +2103,301 @@
  #include "typearith.h"
  #include "umodarith.h"
  
---- /dev/null
-+++ Python-3.4.3.new/Modules/_decimal/libmpdec/mpmemory.h
-@@ -0,0 +1,51 @@
-+/*
-+ * Copyright (c) 2008-2016 Stefan Krah. All rights reserved.
-+ *
-+ * Redistribution and use in source and binary forms, with or without
-+ * modification, are permitted provided that the following conditions
-+ * are met:
-+ *
-+ * 1. Redistributions of source code must retain the above copyright
-+ *    notice, this list of conditions and the following disclaimer.
-+ *
-+ * 2. Redistributions in binary form must reproduce the above copyright
-+ *    notice, this list of conditions and the following disclaimer in the
-+ *    documentation and/or other materials provided with the distribution.
-+ *
-+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS "AS IS" AND
-+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
-+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
-+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
-+ * SUCH DAMAGE.
-+ */
+diff --git Python3.4.3.orig/Modules/_decimal/libmpdec/mpdecimal.h Python3.4.3.new/Modules/_decimal/libmpdec/mpdecimal.h
+--- Python3.4.3.orig/Modules/_decimal/libmpdec/mpdecimal.h
++++ Python3.4.3.new/Modules/_decimal/libmpdec/mpdecimal.h
+@@ -372,6 +372,7 @@ void mpd_addstatus_raise(mpd_context_t *ctx, uint32_t flags);
+ #define MPD_CONST_DATA          ((uint8_t)128)
+ #define MPD_DATAFLAGS (MPD_STATIC_DATA|MPD_SHARED_DATA|MPD_CONST_DATA)
+ 
 +
-+
+ /* mpd_t */
+ typedef struct mpd_t {
+     uint8_t flags;
+diff --git Python3.4.3.orig/Modules/_decimal/libmpdec/memory.h Python3.4.3.new/Modules/_decimal/libmpdec/mpmemory.h
+--- Python3.4.3.orig/Modules/_decimal/libmpdec/memory.h
++++ Python3.4.3.new/Modules/_decimal/libmpdec/mpmemory.h
+@@ -26,8 +26,8 @@
+  */
+ 
+ 
+-#ifndef MEMORY_H
+-#define MEMORY_H
 +#ifndef MP_MEMORY_H
 +#define MP_MEMORY_H
-+
-+
-+#include "mpdecimal.h"
-+
-+
-+/* Internal header file: all symbols have local scope in the DSO */
-+MPD_PRAGMA(MPD_HIDE_SYMBOLS_START)
-+
-+
-+int mpd_switch_to_dyn(mpd_t *result, mpd_ssize_t size, uint32_t *status);
-+int mpd_switch_to_dyn_zero(mpd_t *result, mpd_ssize_t size, uint32_t *status);
-+int mpd_realloc_dyn(mpd_t *result, mpd_ssize_t size, uint32_t *status);
-+
-+
-+MPD_PRAGMA(MPD_HIDE_SYMBOLS_END) /* restore previous scope rules */
-+
-+
-+#endif
-+
-+
-+
+ 
+ 
+ #include "mpdecimal.h"
+diff --git Python3.4.3.new/Modules/_hashlib.c Python3.4.3.new/Modules/_hashlib.c
+new file mode 100644
 --- /dev/null
-+++ Python-3.4.3.new/Modules/_hashlib.c
++++ Python3.4.3.new/Modules/_hashlib.c
 @@ -0,0 +1 @@
 +#include "_hashopenssl.c"
---- Python-3.4.3.orig/Modules/_localemodule.c
-+++ Python-3.4.3.new/Modules/_localemodule.c
+diff --git Python3.4.3.orig/Modules/_hashopenssl.c Python3.4.3.new/Modules/_hashopenssl.c
+--- Python3.4.3.orig/Modules/_hashopenssl.c
++++ Python3.4.3.new/Modules/_hashopenssl.c
+@@ -39,7 +39,7 @@
+ typedef struct {
+     PyObject_HEAD
+     PyObject            *name;  /* name of this hash algorithm */
+-    EVP_MD_CTX           ctx;   /* OpenSSL message digest context */
++    EVP_MD_CTX          *ctx;   /* OpenSSL message digest context */
+ #ifdef WITH_THREAD
+     PyThread_type_lock   lock;  /* OpenSSL context lock */
+ #endif
+@@ -51,8 +51,7 @@ static PyTypeObject EVPtype;
+ 
+ #define DEFINE_CONSTS_FOR_NEW(Name)  \
+     static PyObject *CONST_ ## Name ## _name_obj = NULL; \
+-    static EVP_MD_CTX CONST_new_ ## Name ## _ctx; \
+-    static EVP_MD_CTX *CONST_new_ ## Name ## _ctx_p = NULL;
++    static EVP_MD_CTX *CONST_new_ ## Name ## _ctx = NULL;
+ 
+ DEFINE_CONSTS_FOR_NEW(md5)
+ DEFINE_CONSTS_FOR_NEW(sha1)
+@@ -69,6 +68,13 @@ newEVPobject(PyObject *name)
+ {
+     EVPobject *retval = (EVPobject *)PyObject_New(EVPobject, &EVPtype);
+ 
++    if (retval != NULL) {
++        retval->ctx = EVP_MD_CTX_new();
++        if (retval->ctx == NULL) {
++            free(retval);
++            retval = NULL;
++        }
++    }
+     /* save the name for .name to return */
+     if (retval != NULL) {
+         Py_INCREF(name);
+@@ -91,7 +97,7 @@ EVP_hash(EVPobject *self, const void *vp, Py_ssize_t len)
+             process = MUNCH_SIZE;
+         else
+             process = Py_SAFE_DOWNCAST(len, Py_ssize_t, unsigned int);
+-        EVP_DigestUpdate(&self->ctx, (const void*)cp, process);
++        EVP_DigestUpdate(self->ctx, (const void*)cp, process);
+         len -= process;
+         cp += process;
+     }
+@@ -106,7 +112,7 @@ EVP_dealloc(EVPobject *self)
+     if (self->lock != NULL)
+         PyThread_free_lock(self->lock);
+ #endif
+-    EVP_MD_CTX_cleanup(&self->ctx);
++    EVP_MD_CTX_free(self->ctx);
+     Py_XDECREF(self->name);
+     PyObject_Del(self);
+ }
+@@ -114,7 +120,7 @@ EVP_dealloc(EVPobject *self)
+ static void locked_EVP_MD_CTX_copy(EVP_MD_CTX *new_ctx_p, EVPobject *self)
+ {
+     ENTER_HASHLIB(self);
+-    EVP_MD_CTX_copy(new_ctx_p, &self->ctx);
++    EVP_MD_CTX_copy(new_ctx_p, self->ctx);
+     LEAVE_HASHLIB(self);
+ }
+ 
+@@ -131,7 +137,7 @@ EVP_copy(EVPobject *self, PyObject *unused)
+     if ( (newobj = newEVPobject(self->name))==NULL)
+         return NULL;
+ 
+-    locked_EVP_MD_CTX_copy(&newobj->ctx, self);
++    locked_EVP_MD_CTX_copy(newobj->ctx, self);
+     return (PyObject *)newobj;
+ }
+ 
+@@ -142,16 +148,16 @@ static PyObject *
+ EVP_digest(EVPobject *self, PyObject *unused)
+ {
+     unsigned char digest[EVP_MAX_MD_SIZE];
+-    EVP_MD_CTX temp_ctx;
++    EVP_MD_CTX* temp_ctx = EVP_MD_CTX_new();
+     PyObject *retval;
+     unsigned int digest_size;
+ 
+-    locked_EVP_MD_CTX_copy(&temp_ctx, self);
+-    digest_size = EVP_MD_CTX_size(&temp_ctx);
+-    EVP_DigestFinal(&temp_ctx, digest, NULL);
++    locked_EVP_MD_CTX_copy(temp_ctx, self);
++    digest_size = EVP_MD_CTX_size(temp_ctx);
++    EVP_DigestFinal(temp_ctx, digest, NULL);
+ 
+     retval = PyBytes_FromStringAndSize((const char *)digest, digest_size);
+-    EVP_MD_CTX_cleanup(&temp_ctx);
++    EVP_MD_CTX_free(temp_ctx);
+     return retval;
+ }
+ 
+@@ -162,17 +168,17 @@ static PyObject *
+ EVP_hexdigest(EVPobject *self, PyObject *unused)
+ {
+     unsigned char digest[EVP_MAX_MD_SIZE];
+-    EVP_MD_CTX temp_ctx;
++    EVP_MD_CTX* temp_ctx = EVP_MD_CTX_new();
+     PyObject *retval;
+     char *hex_digest;
+     unsigned int i, j, digest_size;
+ 
+     /* Get the raw (binary) digest value */
+-    locked_EVP_MD_CTX_copy(&temp_ctx, self);
+-    digest_size = EVP_MD_CTX_size(&temp_ctx);
+-    EVP_DigestFinal(&temp_ctx, digest, NULL);
++    locked_EVP_MD_CTX_copy(temp_ctx, self);
++    digest_size = EVP_MD_CTX_size(temp_ctx);
++    EVP_DigestFinal(temp_ctx, digest, NULL);
+ 
+-    EVP_MD_CTX_cleanup(&temp_ctx);
++    EVP_MD_CTX_free(temp_ctx);
+ 
+     /* Allocate a new buffer */
+     hex_digest = PyMem_Malloc(digest_size * 2 + 1);
+@@ -241,7 +247,7 @@ static PyObject *
+ EVP_get_block_size(EVPobject *self, void *closure)
+ {
+     long block_size;
+-    block_size = EVP_MD_CTX_block_size(&self->ctx);
++    block_size = EVP_MD_CTX_block_size(self->ctx);
+     return PyLong_FromLong(block_size);
+ }
+ 
+@@ -249,7 +255,7 @@ static PyObject *
+ EVP_get_digest_size(EVPobject *self, void *closure)
+ {
+     long size;
+-    size = EVP_MD_CTX_size(&self->ctx);
++    size = EVP_MD_CTX_size(self->ctx);
+     return PyLong_FromLong(size);
+ }
+ 
+@@ -310,7 +316,7 @@ EVP_tp_init(EVPobject *self, PyObject *args, PyObject *kwds)
+             PyBuffer_Release(&view);
+         return -1;
+     }
+-    EVP_DigestInit(&self->ctx, digest);
++    EVP_DigestInit(self->ctx, digest);
+ 
+     self->name = name_obj;
+     Py_INCREF(self->name);
+@@ -407,9 +413,9 @@ EVPnew(PyObject *name_obj,
+         return NULL;
+ 
+     if (initial_ctx) {
+-        EVP_MD_CTX_copy(&self->ctx, initial_ctx);
++        EVP_MD_CTX_copy(self->ctx, initial_ctx);
+     } else {
+-        EVP_DigestInit(&self->ctx, digest);
++        EVP_DigestInit(self->ctx, digest);
+     }
+ 
+     if (cp && len) {
+@@ -494,18 +500,20 @@ PKCS5_PBKDF2_HMAC_fast(const char *pass, int passlen,
+     unsigned char digtmp[EVP_MAX_MD_SIZE], *p, itmp[4];
+     int cplen, j, k, tkeylen, mdlen;
+     unsigned long i = 1;
+-    HMAC_CTX hctx_tpl, hctx;
++    HMAC_CTX *hctx_tpl, *hctx;
+ 
+     mdlen = EVP_MD_size(digest);
+     if (mdlen < 0)
+         return 0;
+ 
+-    HMAC_CTX_init(&hctx_tpl);
+-    HMAC_CTX_init(&hctx);
++    hctx_tpl = HMAC_CTX_new();
++    hctx = HMAC_CTX_new();
++    if (hctx_tpl == NULL || hctx == NULL) return 0;
+     p = out;
+     tkeylen = keylen;
+-    if (!HMAC_Init_ex(&hctx_tpl, pass, passlen, digest, NULL)) {
+-        HMAC_CTX_cleanup(&hctx_tpl);
++    if (!HMAC_Init_ex(hctx_tpl, pass, passlen, digest, NULL)) {
++        HMAC_CTX_free(hctx);
++        HMAC_CTX_free(hctx_tpl);
+         return 0;
+     }
+     while(tkeylen) {
+@@ -520,31 +528,33 @@ PKCS5_PBKDF2_HMAC_fast(const char *pass, int passlen,
+         itmp[1] = (unsigned char)((i >> 16) & 0xff);
+         itmp[2] = (unsigned char)((i >> 8) & 0xff);
+         itmp[3] = (unsigned char)(i & 0xff);
+-        if (!HMAC_CTX_copy(&hctx, &hctx_tpl)) {
+-            HMAC_CTX_cleanup(&hctx_tpl);
++        if (!HMAC_CTX_copy(hctx, hctx_tpl)) {
++            HMAC_CTX_free(hctx_tpl);
++            HMAC_CTX_free(hctx);
+             return 0;
+         }
+-        if (!HMAC_Update(&hctx, salt, saltlen)
+-                || !HMAC_Update(&hctx, itmp, 4)
+-                || !HMAC_Final(&hctx, digtmp, NULL)) {
+-            HMAC_CTX_cleanup(&hctx_tpl);
+-            HMAC_CTX_cleanup(&hctx);
++        if (!HMAC_Update(hctx, salt, saltlen)
++                || !HMAC_Update(hctx, itmp, 4)
++                || !HMAC_Final(hctx, digtmp, NULL)) {
++            HMAC_CTX_free(hctx_tpl);
++            HMAC_CTX_free(hctx);
+             return 0;
+         }
+-        HMAC_CTX_cleanup(&hctx);
++        HMAC_CTX_reset(hctx);
+         memcpy(p, digtmp, cplen);
+         for (j = 1; j < iter; j++) {
+-            if (!HMAC_CTX_copy(&hctx, &hctx_tpl)) {
+-                HMAC_CTX_cleanup(&hctx_tpl);
++            if (!HMAC_CTX_copy(hctx, hctx_tpl)) {
++                HMAC_CTX_free(hctx_tpl);
++                HMAC_CTX_free(hctx);
+                 return 0;
+             }
+-            if (!HMAC_Update(&hctx, digtmp, mdlen)
+-                    || !HMAC_Final(&hctx, digtmp, NULL)) {
+-                HMAC_CTX_cleanup(&hctx_tpl);
+-                HMAC_CTX_cleanup(&hctx);
++            if (!HMAC_Update(hctx, digtmp, mdlen)
++                    || !HMAC_Final(hctx, digtmp, NULL)) {
++                HMAC_CTX_free(hctx_tpl);
++                HMAC_CTX_free(hctx);
+                 return 0;
+             }
+-            HMAC_CTX_cleanup(&hctx);
++            HMAC_CTX_reset(hctx);
+             for (k = 0; k < cplen; k++) {
+                 p[k] ^= digtmp[k];
+             }
+@@ -553,7 +563,8 @@ PKCS5_PBKDF2_HMAC_fast(const char *pass, int passlen,
+         i++;
+         p+= cplen;
+     }
+-    HMAC_CTX_cleanup(&hctx_tpl);
++    HMAC_CTX_free(hctx_tpl);
++    HMAC_CTX_free(hctx);
+     return 1;
+ }
+ 
+@@ -768,7 +779,7 @@ generate_hash_name_list(void)
+         ret_obj = EVPnew( \
+                     CONST_ ## NAME ## _name_obj, \
+                     NULL, \
+-                    CONST_new_ ## NAME ## _ctx_p, \
++                    CONST_new_ ## NAME ## _ctx, \
+                     (unsigned char*)view.buf, \
+                     view.len); \
+      \
+@@ -790,8 +801,8 @@ generate_hash_name_list(void)
+     if (CONST_ ## NAME ## _name_obj == NULL) { \
+         CONST_ ## NAME ## _name_obj = PyUnicode_FromString(#NAME); \
+         if (EVP_get_digestbyname(#NAME)) { \
+-            CONST_new_ ## NAME ## _ctx_p = &CONST_new_ ## NAME ## _ctx; \
+-            EVP_DigestInit(CONST_new_ ## NAME ## _ctx_p, EVP_get_digestbyname(#NAME)); \
++            CONST_new_ ## NAME ## _ctx = EVP_MD_CTX_new(); \
++            EVP_DigestInit(CONST_new_ ## NAME ## _ctx, EVP_get_digestbyname(#NAME)); \
+         } \
+     } \
+ } while (0);
+diff --git Python3.4.3.orig/Modules/_localemodule.c Python3.4.3.new/Modules/_localemodule.c
+--- Python3.4.3.orig/Modules/_localemodule.c
++++ Python3.4.3.new/Modules/_localemodule.c
 @@ -134,7 +134,7 @@ static PyObject*
  PyLocale_localeconv(PyObject* self)
  {
@@ -555,8 +2477,9 @@
      return result;
  
    failed:
---- Python-3.4.3.orig/Modules/_posixsubprocess.c
-+++ Python-3.4.3.new/Modules/_posixsubprocess.c
+diff --git Python3.4.3.orig/Modules/_posixsubprocess.c Python3.4.3.new/Modules/_posixsubprocess.c
+--- Python3.4.3.orig/Modules/_posixsubprocess.c
++++ Python3.4.3.new/Modules/_posixsubprocess.c
 @@ -20,7 +20,11 @@
  
  #if defined(__ANDROID__) && !defined(SYS_getdents64)
@@ -570,19 +2493,448 @@
  # define SYS_getdents64  __NR_getdents64
  #endif
  
---- Python-3.4.3.orig/Modules/_tkinter.c
-+++ Python-3.4.3.new/Modules/_tkinter.c
+diff --git Python3.4.3.orig/Modules/_ssl.c Python3.4.3.new/Modules/_ssl.c
+--- Python3.4.3.orig/Modules/_ssl.c
++++ Python3.4.3.new/Modules/_ssl.c
+@@ -55,6 +55,10 @@ static PySocketModule_APIObject PySocketModule;
+ #include <sys/poll.h>
+ #endif
+ 
++#ifdef __ANDROID_API__
++#include <fts.h>
++#endif
++
+ /* Include OpenSSL header files */
+ #include "openssl/rsa.h"
+ #include "openssl/crypto.h"
+@@ -691,7 +695,7 @@ _create_tuple_for_X509_NAME (X509_NAME *xname)
+ 
+         /* check to see if we've gotten to a new RDN */
+         if (rdn_level >= 0) {
+-            if (rdn_level != entry->set) {
++            if (rdn_level != X509_NAME_ENTRY_set(entry)) {
+                 /* yes, new RDN */
+                 /* add old RDN to DN */
+                 rdnt = PyList_AsTuple(rdn);
+@@ -708,7 +712,7 @@ _create_tuple_for_X509_NAME (X509_NAME *xname)
+                     goto fail0;
+             }
+         }
+-        rdn_level = entry->set;
++        rdn_level = X509_NAME_ENTRY_set(entry);
+ 
+         /* now add this attribute to the current RDN */
+         name = X509_NAME_ENTRY_get_object(entry);
+@@ -811,18 +815,18 @@ _get_peer_alt_names (X509 *certificate) {
+             goto fail;
+         }
+ 
+-        p = ext->value->data;
++        p = X509_EXTENSION_get_data(ext)->data;
+         if (method->it)
+             names = (GENERAL_NAMES*)
+               (ASN1_item_d2i(NULL,
+                              &p,
+-                             ext->value->length,
++                             X509_EXTENSION_get_data(ext)->length,
+                              ASN1_ITEM_ptr(method->it)));
+         else
+             names = (GENERAL_NAMES*)
+               (method->d2i(NULL,
+                            &p,
+-                           ext->value->length));
++                           X509_EXTENSION_get_data(ext)->length));
+ 
+         for(j = 0; j < sk_GENERAL_NAME_num(names); j++) {
+             /* get a rendering of each name in the set of names */
+@@ -1030,7 +1034,7 @@ _get_crl_dp(X509 *certificate) {
+     int i, j, result;
+     PyObject *lst;
+ 
+-#if OPENSSL_VERSION_NUMBER < 0x10001000L
++#if OPENSSL_VERSION_NUMBER < 0x10001000L || 1
+     dps = X509_get_ext_d2i(certificate, NID_crl_distribution_points,
+                            NULL, NULL);
+ #else
+@@ -1428,9 +1432,9 @@ static PyObject *PySSL_compression(PySSLSocket *self) {
+     if (self->ssl == NULL)
+         Py_RETURN_NONE;
+     comp_method = SSL_get_current_compression(self->ssl);
+-    if (comp_method == NULL || comp_method->type == NID_undef)
++    if (comp_method == NULL || COMP_get_type(comp_method) == NID_undef)
+         Py_RETURN_NONE;
+-    short_name = OBJ_nid2sn(comp_method->type);
++    short_name = OBJ_nid2sn(COMP_get_type(comp_method));
+     if (short_name == NULL)
+         Py_RETURN_NONE;
+     return PyUnicode_DecodeFSDefault(short_name);
+@@ -2082,6 +2086,34 @@ context_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+     SSL_CTX_set_session_id_context(self->ctx, (const unsigned char *) SID_CTX,
+                                    sizeof(SID_CTX));
+ #undef SID_CTX
++    
++#ifdef __ANDROID_API__
++    FTS *certFileWalker;
++    FTSENT *certFileInfo;
++    struct stat certFileStat;
++    int fts_options = FTS_COMFOLLOW | FTS_LOGICAL | FTS_NOCHDIR | FTS_NOSTAT;
++    static char* const certificationPaths[] = {
++            "/system/etc/security/cacerts",
++            "/data/misc/keychain/certs-added",
++            NULL
++    };
++    
++    if ((certFileWalker = fts_open(certificationPaths, fts_options, NULL)) != NULL) {
++        while ((certFileInfo = fts_read(certFileWalker)) != NULL) {
++            FILE *certFile = fopen(certFileInfo->fts_path, "r");
++            if (certFile) {
++                if (fstat(fileno(certFile), &certFileStat) == 0 && S_ISREG(certFileStat.st_mode)) {
++                    X509 *cert = PEM_read_X509(certFile, NULL, NULL, NULL);
++                    if (cert) {
++                        X509_STORE_add_cert(SSL_CTX_get_cert_store(self->ctx), cert);
++                    }
++                }
++                fclose(certFile);
++            }
++        }
++        fts_close(certFileWalker);
++    }
++#endif
+ 
+     return (PyObject *)self;
+ }
+@@ -2272,7 +2304,7 @@ get_verify_flags(PySSLContext *self, void *c)
+     unsigned long flags;
+ 
+     store = SSL_CTX_get_cert_store(self->ctx);
+-    flags = X509_VERIFY_PARAM_get_flags(store->param);
++    flags = X509_VERIFY_PARAM_get_flags(X509_STORE_get0_param(store));
+     return PyLong_FromUnsignedLong(flags);
+ }
+ 
+@@ -2285,17 +2317,17 @@ set_verify_flags(PySSLContext *self, PyObject *arg, void *c)
+     if (!PyArg_Parse(arg, "k", &new_flags))
+         return -1;
+     store = SSL_CTX_get_cert_store(self->ctx);
+-    flags = X509_VERIFY_PARAM_get_flags(store->param);
++    flags = X509_VERIFY_PARAM_get_flags(X509_STORE_get0_param(store));
+     clear = flags & ~new_flags;
+     set = ~flags & new_flags;
+     if (clear) {
+-        if (!X509_VERIFY_PARAM_clear_flags(store->param, clear)) {
++        if (!X509_VERIFY_PARAM_clear_flags(X509_STORE_get0_param(store), clear)) {
+             _setSSLError(NULL, 0, __FILE__, __LINE__);
+             return -1;
+         }
+     }
+     if (set) {
+-        if (!X509_VERIFY_PARAM_set_flags(store->param, set)) {
++        if (!X509_VERIFY_PARAM_set_flags(X509_STORE_get0_param(store), set)) {
+             _setSSLError(NULL, 0, __FILE__, __LINE__);
+             return -1;
+         }
+@@ -2465,8 +2497,8 @@ load_cert_chain(PySSLContext *self, PyObject *args, PyObject *kwds)
+     char *kwlist[] = {"certfile", "keyfile", "password", NULL};
+     PyObject *certfile, *keyfile = NULL, *password = NULL;
+     PyObject *certfile_bytes = NULL, *keyfile_bytes = NULL;
+-    pem_password_cb *orig_passwd_cb = self->ctx->default_passwd_callback;
+-    void *orig_passwd_userdata = self->ctx->default_passwd_callback_userdata;
++    pem_password_cb *orig_passwd_cb = SSL_CTX_get_default_passwd_cb(self->ctx);
++    void *orig_passwd_userdata = SSL_CTX_get_default_passwd_cb_userdata(self->ctx);
+     _PySSLPasswordInfo pw_info = { NULL, NULL, NULL, 0, 0 };
+     int r;
+ 
+@@ -2597,8 +2629,8 @@ _add_ca_certs(PySSLContext *self, void *data, Py_ssize_t len,
+             cert = d2i_X509_bio(biobuf, NULL);
+         } else {
+             cert = PEM_read_bio_X509(biobuf, NULL,
+-                                     self->ctx->default_passwd_callback,
+-                                     self->ctx->default_passwd_callback_userdata);
++                                     SSL_CTX_get_default_passwd_cb(self->ctx),
++                                     SSL_CTX_get_default_passwd_cb_userdata(self->ctx));
+         }
+         if (cert == NULL) {
+             break;
+@@ -3050,21 +3082,21 @@ cert_store_stats(PySSLContext *self)
+     int x509 = 0, crl = 0, pkey = 0, ca = 0, i;
+ 
+     store = SSL_CTX_get_cert_store(self->ctx);
+-    for (i = 0; i < sk_X509_OBJECT_num(store->objs); i++) {
+-        obj = sk_X509_OBJECT_value(store->objs, i);
+-        switch (obj->type) {
++    for (i = 0; i < sk_X509_OBJECT_num(X509_STORE_get0_objects(store)); i++) {
++        obj = sk_X509_OBJECT_value(X509_STORE_get0_objects(store), i);
++        switch (X509_OBJECT_get_type(obj)) {
+             case X509_LU_X509:
+                 x509++;
+-                if (X509_check_ca(obj->data.x509)) {
++                if (X509_check_ca(X509_OBJECT_get0_X509(obj))) {
+                     ca++;
+                 }
+                 break;
+             case X509_LU_CRL:
+                 crl++;
+                 break;
+-            case X509_LU_PKEY:
+-                pkey++;
+-                break;
++//            case X509_LU_PKEY:
++//                pkey++;
++//                break;
+             default:
+                 /* Ignore X509_LU_FAIL, X509_LU_RETRY, X509_LU_PKEY.
+                  * As far as I can tell they are internal states and never
+@@ -3103,17 +3135,17 @@ get_ca_certs(PySSLContext *self, PyObject *args, PyObject *kwds)
+     }
+ 
+     store = SSL_CTX_get_cert_store(self->ctx);
+-    for (i = 0; i < sk_X509_OBJECT_num(store->objs); i++) {
++    for (i = 0; i < sk_X509_OBJECT_num(X509_STORE_get0_objects(store)); i++) {
+         X509_OBJECT *obj;
+         X509 *cert;
+ 
+-        obj = sk_X509_OBJECT_value(store->objs, i);
+-        if (obj->type != X509_LU_X509) {
++        obj = sk_X509_OBJECT_value(X509_STORE_get0_objects(store), i);
++        if (X509_OBJECT_get_type(obj) != X509_LU_X509) {
+             /* not a x509 cert */
+             continue;
+         }
+         /* CA for any purpose */
+-        cert = obj->data.x509;
++        cert = X509_OBJECT_get0_X509(obj);
+         if (!X509_check_ca(cert)) {
+             continue;
+         }
+diff --git Python3.4.3.orig/Modules/_tkinter.c Python3.4.3.new/Modules/_tkinter.c
+--- Python3.4.3.orig/Modules/_tkinter.c
++++ Python3.4.3.new/Modules/_tkinter.c
 @@ -530,6 +530,8 @@ Tcl_AppInit(Tcl_Interp *interp)
-
+ 
      return TCL_OK;
  }
 +#else
 +#  include "tkappinit.c"
  #endif /* !WITH_APPINIT */
-
-
---- Python-3.4.3.orig/Modules/ossaudiodev.c
-+++ Python-3.4.3.new/Modules/ossaudiodev.c
+ 
+ 
+diff --git Python3.4.3.new/Modules/config.c Python3.4.3.new/Modules/config.c
+new file mode 100644
+--- /dev/null
++++ Python3.4.3.new/Modules/config.c
+@@ -0,0 +1,209 @@
++/* -*- C -*- ***********************************************
++Copyright (c) 2000, BeOpen.com.
++Copyright (c) 1995-2000, Corporation for National Research Initiatives.
++Copyright (c) 1990-1995, Stichting Mathematisch Centrum.
++All rights reserved.
++
++See the file "Misc/COPYRIGHT" for information on usage and
++redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
++******************************************************************/
++
++/* Module configuration */
++
++/* !!! !!! !!! This file is edited by the makesetup script !!! !!! !!! */
++
++/* This file contains the table of built-in modules.
++   See init_builtin() in import.c. */
++
++#include "Python.h"
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++
++/* -- ADDMODULE MARKER 1 -- */
++
++extern PyObject* PyMarshal_Init(void);
++extern PyObject* PyInit_imp(void);
++extern PyObject* PyInit_gc(void);
++extern PyObject* PyInit__ast(void);
++extern PyObject* _PyWarnings_Init(void);
++extern PyObject* PyInit__string(void);
++
++extern PyObject* PyInit_errno(void);
++
++extern PyObject* PyInit_array(void);
++extern PyObject* PyInit_audioop(void);
++extern PyObject* PyInit_binascii(void);
++extern PyObject* PyInit_cmath(void);
++extern PyObject* PyInit_math(void);
++extern PyObject* PyInit__md5(void);
++extern PyObject* PyInit_posix(void);
++extern PyObject* PyInit__operator(void);
++extern PyObject* PyInit_signal(void);
++extern PyObject* PyInit__sha1(void);
++extern PyObject* PyInit__sha256(void);
++extern PyObject* PyInit__sha512(void);
++extern PyObject* PyInit_time(void);
++extern PyObject* PyInit__thread(void);
++extern PyObject* PyInit__pickle(void);
++extern PyObject* PyInit__locale(void);
++extern PyObject* PyInit__codecs(void);
++extern PyObject* PyInit__weakref(void);
++extern PyObject* PyInit_zipimport(void);
++extern PyObject* PyInit__random(void);
++extern PyObject* PyInit_itertools(void);
++extern PyObject* PyInit__collections(void);
++extern PyObject* PyInit__heapq(void);
++extern PyObject* PyInit__bisect(void);
++extern PyObject* PyInit__symtable(void);
++extern PyObject* PyInit_mmap(void);
++extern PyObject* PyInit__csv(void);
++extern PyObject* PyInit__sre(void);
++extern PyObject* PyInit_parser(void);
++extern PyObject* PyInit__struct(void);
++extern PyObject* PyInit__datetime(void);
++extern PyObject* PyInit__functools(void);
++extern PyObject* PyInit__json(void);
++extern PyObject* PyInit_zlib(void);
++extern PyObject* PyInit_pwd(void);
++extern PyObject* PyInit_termios(void);
++extern PyObject* PyInit_select(void);
++extern PyObject* PyInit__socket(void);
++extern PyObject* PyInit_fcntl(void);
++
++extern PyObject* PyInit__multibytecodec(void);
++
++extern PyObject* PyInit__codecs_cn(void);
++extern PyObject* PyInit__codecs_hk(void);
++extern PyObject* PyInit__codecs_iso2022(void);
++extern PyObject* PyInit__codecs_jp(void);
++extern PyObject* PyInit__codecs_kr(void);
++extern PyObject* PyInit__codecs_tw(void);
++extern PyObject* PyInit__lsprof(void);
++extern PyObject* PyInit__io(void);
++extern PyObject* PyInit_unicodedata(void);
++extern PyObject* PyInit_atexit(void);
++extern PyObject* PyInit__posixsubprocess(void);
++extern PyObject* PyInit_pyexpat(void);
++extern PyObject* PyInit__elementtree(void);
++extern PyObject* PyInit__multiprocessing(void);
++extern PyObject* PyInit_ossaudiodev(void);
++extern PyObject* PyInit__opcode(void);
++extern PyObject* PyInit__stat(void);
++extern PyObject* PyInit__tracemalloc(void);
++extern PyObject* PyInit_faulthandler(void);
++extern PyObject* PyInit_resource(void);
++extern PyObject* PyInit_syslog(void);
++extern PyObject* PyInit__decimal(void);
++
++struct _inittab _PyImport_Inittab[] = {
++
++/* -- ADDMODULE MARKER 2 -- */
++
++    /* This module lives in marshal.c */
++    {"marshal", PyMarshal_Init},
++
++    /* This lives in import.c */
++    {"_imp", PyInit_imp},
++
++    /* This lives in Python/Python-ast.c */
++    {"_ast", PyInit__ast},
++
++    /* This lives in Objects/unicodeobject.c */
++    {"_string", PyInit__string},
++
++    /* These entries are here for sys.builtin_module_names */
++    {"__main__", NULL},
++    {"__builtin__", NULL},
++    {"sys", NULL},
++    {"exceptions", NULL},
++
++    /* This lives in gcmodule.c */
++    {"gc", PyInit_gc},
++
++    /* This lives in _warnings.c */
++    {"_warnings", _PyWarnings_Init},
++
++    {"errno", PyInit_errno},
++
++    {"array", PyInit_array},
++    {"audioop", PyInit_audioop},
++    {"binascii", PyInit_binascii},
++    {"cmath", PyInit_cmath},
++    {"errno", PyInit_errno},
++    {"math", PyInit_math},
++    {"_md5", PyInit__md5},
++    {"posix", PyInit_posix},
++    {"_operator", PyInit__operator},
++    {"signal", PyInit_signal},
++    {"_sha1", PyInit__sha1},
++    {"_sha256", PyInit__sha256},
++    {"_sha512", PyInit__sha512},
++    {"time", PyInit_time},
++    #ifdef WITH_THREAD
++    {"_thread", PyInit__thread},
++    #endif
++    {"_pickle", PyInit__pickle},
++    {"_locale", PyInit__locale},
++
++    {"_codecs", PyInit__codecs},
++    {"_weakref", PyInit__weakref},
++    {"_random", PyInit__random},
++    {"_bisect", PyInit__bisect},
++    {"_heapq", PyInit__heapq},
++    {"_lsprof", PyInit__lsprof},
++    {"itertools", PyInit_itertools},
++    {"_collections", PyInit__collections},
++    {"_symtable", PyInit__symtable},
++    {"mmap", PyInit_mmap},
++    {"_csv", PyInit__csv},
++    {"_sre", PyInit__sre},
++    {"parser", PyInit_parser},
++    {"_struct", PyInit__struct},
++    {"_datetime", PyInit__datetime},
++    {"_functools", PyInit__functools},
++    {"_json", PyInit__json},
++
++    {"zipimport", PyInit_zipimport},
++    {"zlib", PyInit_zlib},
++    {"pwd", PyInit_pwd},
++    {"termios", PyInit_termios},
++    {"select", PyInit_select},
++    {"_socket", PyInit__socket},
++    {"fcntl", PyInit_fcntl},
++
++    /* CJK codecs */
++    {"_multibytecodec", PyInit__multibytecodec},
++    {"_codecs_cn", PyInit__codecs_cn},
++    {"_codecs_hk", PyInit__codecs_hk},
++    {"_codecs_iso2022", PyInit__codecs_iso2022},
++    {"_codecs_jp", PyInit__codecs_jp},
++    {"_codecs_kr", PyInit__codecs_kr},
++    {"_codecs_tw", PyInit__codecs_tw},
++
++    {"_io", PyInit__io},
++    {"unicodedata", PyInit_unicodedata},
++    {"atexit", PyInit_atexit},
++    {"_posixsubprocess", PyInit__posixsubprocess},
++    {"pyexpat", PyInit_pyexpat},
++    {"_elementtree", PyInit__elementtree},
++    {"_multiprocessing", PyInit__multiprocessing},
++    {"ossaudiodev", PyInit_ossaudiodev},
++    {"_opcode", PyInit__opcode},
++    {"_stat", PyInit__stat},
++    {"_tracemalloc", PyInit__tracemalloc},
++    {"faulthandler", PyInit_faulthandler},
++    {"resource", PyInit_resource},
++    {"syslog", PyInit_syslog},
++    {"decimal", PyInit__decimal},
++
++    /* Sentinel */
++    {0, 0}
++};
++
++
++#ifdef __cplusplus
++}
++#endif
+diff --git Python3.4.3.orig/Modules/ossaudiodev.c Python3.4.3.new/Modules/ossaudiodev.c
+--- Python3.4.3.orig/Modules/ossaudiodev.c
++++ Python3.4.3.new/Modules/ossaudiodev.c
 @@ -30,7 +30,11 @@
  #endif
  
@@ -596,9 +2948,20 @@
  
  #if defined(linux)
  
---- Python-3.4.3.orig/Modules/posixmodule.c
-+++ Python-3.4.3.new/Modules/posixmodule.c
-@@ -6068,13 +6068,13 @@ posix_openpty(PyObject *self, PyObject *noargs)
+diff --git Python3.4.3.orig/Modules/posixmodule.c Python3.4.3.new/Modules/posixmodule.c
+--- Python3.4.3.orig/Modules/posixmodule.c
++++ Python3.4.3.new/Modules/posixmodule.c
+@@ -175,7 +175,9 @@ corresponding Unix manual entries for more information on calls.");
+ #define HAVE_PIPE       1
+ #define HAVE_SYSTEM     1
+ #define HAVE_WAIT       1
++#ifndef __ANDROID__
+ #define HAVE_TTYNAME    1
++#endif /* __ANDROID__ */
+ #endif  /* _MSC_VER */
+ #endif  /* __BORLANDC__ */
+ #endif  /* ! __WATCOMC__ || __QNX__ */
+@@ -6068,13 +6070,13 @@ posix_openpty(PyObject *self, PyObject *noargs)
      if (_Py_set_inheritable(master_fd, 0, NULL) < 0)
          goto posix_error;
  
@@ -619,8 +2982,9 @@
  #endif /* HAVE_OPENPTY */
  
      return Py_BuildValue("(ii)", master_fd, slave_fd);
---- Python-3.4.3.orig/Modules/pwdmodule.c
-+++ Python-3.4.3.new/Modules/pwdmodule.c
+diff --git Python3.4.3.orig/Modules/pwdmodule.c Python3.4.3.new/Modules/pwdmodule.c
+--- Python3.4.3.orig/Modules/pwdmodule.c
++++ Python3.4.3.new/Modules/pwdmodule.c
 @@ -72,7 +72,7 @@ mkpwent(struct passwd *p)
      SETS(setIndex++, p->pw_passwd);
      PyStructSequence_SET_ITEM(v, setIndex++, _PyLong_FromUid(p->pw_uid));
@@ -630,8 +2994,9 @@
      SETS(setIndex++, p->pw_dir);
      SETS(setIndex++, p->pw_shell);
  
---- Python-3.4.3.orig/Modules/socketmodule.c
-+++ Python-3.4.3.new/Modules/socketmodule.c
+diff --git Python3.4.3.orig/Modules/socketmodule.c Python3.4.3.new/Modules/socketmodule.c
+--- Python3.4.3.orig/Modules/socketmodule.c
++++ Python3.4.3.new/Modules/socketmodule.c
 @@ -260,6 +260,8 @@ if_indextoname(index) -- return the corresponding interface name\n\
  #include <net/if.h>
  #endif
@@ -641,8 +3006,9 @@
  /* Generic socket object definitions and includes */
  #define PySocket_BUILDING_SOCKET
  #include "socketmodule.h"
---- Python-3.4.3.orig/Modules/termios.c
-+++ Python-3.4.3.new/Modules/termios.c
+diff --git Python3.4.3.orig/Modules/termios.c Python3.4.3.new/Modules/termios.c
+--- Python3.4.3.orig/Modules/termios.c
++++ Python3.4.3.new/Modules/termios.c
 @@ -220,6 +220,7 @@ termios_tcsendbreak(PyObject *self, PyObject *args)
      return Py_None;
  }
@@ -670,8 +3036,9 @@
      {"tcflush", termios_tcflush,
       METH_VARARGS, termios_tcflush__doc__},
      {"tcflow", termios_tcflow,
---- Python-3.4.3.orig/Parser/myreadline.c
-+++ Python-3.4.3.new/Parser/myreadline.c
+diff --git Python3.4.3.orig/Parser/myreadline.c Python3.4.3.new/Parser/myreadline.c
+--- Python3.4.3.orig/Parser/myreadline.c
++++ Python3.4.3.new/Parser/myreadline.c
 @@ -25,6 +25,10 @@ static PyThread_type_lock _PyOS_ReadlineLock = NULL;
  
  int (*PyOS_InputHook)(void) = NULL;
@@ -693,8 +3060,9 @@
  
  /* Interface used by tokenizer.c and bltinmodule.c */
  
---- Python-3.4.3.orig/Python/bltinmodule.c
-+++ Python-3.4.3.new/Python/bltinmodule.c
+diff --git Python3.4.3.orig/Python/bltinmodule.c Python3.4.3.new/Python/bltinmodule.c
+--- Python3.4.3.orig/Python/bltinmodule.c
++++ Python3.4.3.new/Python/bltinmodule.c
 @@ -24,7 +24,7 @@
  #ifdef HAVE_MBCS
  const char *Py_FileSystemDefaultEncoding = "mbcs";
@@ -704,8 +3072,23 @@
  const char *Py_FileSystemDefaultEncoding = "utf-8";
  int Py_HasFileSystemDefaultEncoding = 1;
  #else
---- Python-3.4.3.orig/Python/formatter_unicode.c
-+++ Python-3.4.3.new/Python/formatter_unicode.c
+diff --git Python3.4.3.orig/Python/condvar.h Python3.4.3.new/Python/condvar.h
+--- Python3.4.3.orig/Python/condvar.h
++++ Python3.4.3.new/Python/condvar.h
+@@ -94,6 +94,10 @@ PyCOND_TIMEDWAIT(PyCOND_T *cond, PyMUTEX_T *mut, PY_LONG_LONG us)
+     int r;
+     struct timespec ts;
+     struct timeval deadline;
++    
++    if (us < 5) us = 5; // TODO: This prevents a deadlock which would occur when running
++    // TODO: test_pending_calls_race in test_concurrent_futures, linked to the call sys.setswitchinterval(1e-6).
++    // TODO: Investigate why there is a deadlock in the first place.
+ 
+     PyCOND_GETTIMEOFDAY(&deadline);
+     PyCOND_ADD_MICROSECONDS(deadline, us);
+diff --git Python3.4.3.orig/Python/formatter_unicode.c Python3.4.3.new/Python/formatter_unicode.c
+--- Python3.4.3.orig/Python/formatter_unicode.c
++++ Python3.4.3.new/Python/formatter_unicode.c
 @@ -666,7 +666,7 @@ static int
  get_locale_info(int type, LocaleInfo *locale_info)
  {
@@ -725,8 +3108,9 @@
      case LT_DEFAULT_LOCALE:
          locale_info->decimal_point = PyUnicode_FromOrdinal('.');
          locale_info->thousands_sep = PyUnicode_FromOrdinal(',');
---- Python-3.4.3.orig/Python/pystrtod.c
-+++ Python-3.4.3.new/Python/pystrtod.c
+diff --git Python3.4.3.orig/Python/pystrtod.c Python3.4.3.new/Python/pystrtod.c
+--- Python3.4.3.orig/Python/pystrtod.c
++++ Python3.4.3.new/Python/pystrtod.c
 @@ -165,7 +165,7 @@ _PyOS_ascii_strtod(const char *nptr, char **endptr)
  {
      char *fail_pos;
