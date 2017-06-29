@@ -286,28 +286,44 @@ class Builder:
         self.config.log.info('Patching Android.mk files...')
         libsOutputDir = buildutils.escapeNDKParameter(outputDir)
         for moduleName, modulePath in libs.items():
-            androidMKPath = os.path.join(modulePath, 'Android.mk')
-            if os.path.exists(androidMKPath):
-                data = ''
-                with open(androidMKPath) as source:
-                    for line in source:
-                        if 'LOCAL_SRC_FILES :=' in line:
-                            data += line.replace(
-                                'LOCAL_SRC_FILES',
-                                'LOCAL_SRC_FILES := {outputDir}/$(TARGET_ARCH_ABI)/lib{name}.so\n'
-                                'OLD_LOCAL_SRC_FILES'.format(
-                                    outputDir=libsOutputDir, name=moduleName)
-                            )
-                        elif 'LOCAL_SRC_FILES +=' in line:
-                            data += line.replace('LOCAL_SRC_FILES', 'OLD_LOCAL_SRC_FILES')
-                        elif 'include $(BUILD_SHARED_LIBRARY)' in line:
-                            data += 'include $(PREBUILT_SHARED_LIBRARY)\n'
-                        else:
-                            data += line
-                with open(androidMKPath, 'w') as destination:
-                    destination.write(data)
+            self.patchOptionalLibAndroidMk(os.path.join(modulePath, 'Android.mk'),
+                                           libsOutputDir, moduleName)
+
         self.config.log.info('Successfully generated additional libraries.')
         return True
+
+    def patchOptionalLibAndroidMk(self, path: str, outputDir: str, moduleName: str):
+        """>>> patchOptionalLibAndroidMk(path, outputDir, moduleName):
+        Patches the Android.mk file at the given path.
+        It will point LOCAL_SRC_FILES to the pre-build library and
+        replace include $(BUILD_SHARED_LIBRARY) with include $(PREBUILT_SHARED_LIBRARY).
+        """
+        if os.path.exists(path):
+            data = ''
+            with open(path) as source:
+                for line in source:
+                    if 'LOCAL_SRC_FILES :=' in line:
+                        data += line.replace(
+                            'LOCAL_SRC_FILES',
+                            'LOCAL_SRC_FILES := {outputDir}/$(TARGET_ARCH_ABI)/lib{name}.so\n'
+                            'OLD_LOCAL_SRC_FILES'.format(
+                                outputDir=outputDir, name=moduleName)
+                        )
+                    elif 'LOCAL_SRC_FILES +=' in line:
+                        data += line.replace('LOCAL_SRC_FILES', 'OLD_LOCAL_SRC_FILES')
+                    elif 'include $(BUILD_SHARED_LIBRARY)' in line:
+                        data += 'include $(PREBUILT_SHARED_LIBRARY)\n'
+                    elif 'include $(call all-subdir-makefiles)' in line:
+                        subDirsWithMk = [os.path.join(dirPath, 'Android.mk')
+                                         for dirPath in os.listdir(os.path.dirname(path))
+                                         if os.path.isdir(dirPath)
+                                         and os.path.exists(os.path.join(dirPath, 'Android.mk'))]
+                        for subMkPath in subDirsWithMk:
+                            self.patchOptionalLibAndroidMk(subMkPath, outputDir, moduleName)
+                    else:
+                        data += line
+            with open(path, 'w') as destination:
+                destination.write(data)
 
     def getPatchFile(self, version: str) -> str:
         """>>> getPatchFile(version) -> path
