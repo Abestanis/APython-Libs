@@ -10,18 +10,18 @@ from logger import Logger
 
 class Cache:
     cachePath = None
-    
+
     def __init__(self, cachePath):
         self.cachePath = cachePath or mkdtemp('tmp', 'APythonLibs')
         self.ensureCacheDir()
-    
+
     def ensureCacheDir(self):
         """>>> ensureCacheDir
         Ensures, that the cache directory exists.
         """
         if not os.path.exists(self.cachePath):
             os.mkdir(self.cachePath)
-    
+
     def download(self, url: str, destination: str, logger: Logger) -> Optional[str]:
         """>>> download(url, destination, logger) -> path or None
         Searches for a file in the cache and downloads it from 'url',
@@ -47,7 +47,7 @@ class Cache:
             logger.info('Using cached version from {path}.'.format(path=cachePath))
         shutil.copy(cachePath, destination)
         return destination
-    
+
     def clear(self, ignore_errors: bool=False):
         """>>> clear(ignore_errors = False)
         Clears the cache and deletes the cache directory.

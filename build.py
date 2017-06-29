@@ -354,7 +354,7 @@ class Builder:
             self.config.log.error('Response {status}:{reason}'.format(status=response.status,
                                                                       reason=response.reason))
             return None
-        result = response.read().split('\n')
+        result = response.read().decode('utf-8').split('\n')
         self.config.log.info('Got a response in {seconds} seconds.'
                              .format(seconds=round(time() - startTime, 2)))
         versions = {}
@@ -537,7 +537,7 @@ class Builder:
                         os.remove(os.path.join(outputDir, subdir, libFile))
         sourceParentPath = os.path.dirname(sourcePath)
         additionalPythonModules = []
-        for moduleData in self.config.additionalLibs.itervalues():
+        for moduleData in self.config.additionalLibs.values():
             additionalPythonModules += moduleData.get('pyModuleReq', [])
             additionalPythonModules += moduleData.get('py3ModuleReq', [])
         for subdir in os.listdir(sourceParentPath):
@@ -552,7 +552,7 @@ class Builder:
         """
         self.config.log.info('Generating JSON file...')
         requirementData = '"requirements": {\n'
-        for libName, libData in self.config.additionalLibs.iteritems():
+        for libName, libData in self.config.additionalLibs.items():
             dependencies = ['libraries/' + dep for dep in libData.get('dependencies', [])]
             dependencies += ['data/' + dep[1] for dep in libData.get('data', [])]
             if 'minAndroidSdk' in libData:
@@ -580,7 +580,7 @@ class Builder:
         requirementData = requirementData[:-2] + '\n},\n'
 
         datafilesData = '"data": {\n'
-        for libData in self.config.additionalLibs.itervalues():
+        for libData in self.config.additionalLibs.values():
             if 'data' in libData.keys():
                 for data in libData['data']:
                     datafilesData += '"' + data[1] + '" : {\n'
@@ -665,7 +665,7 @@ class Builder:
         readmePath = os.path.join(self.config.currDir, 'README.md')
         # itemTemplate = '* {libName} (from {url}) for {modules}\n'
         libList = ''
-        for libraryName, libraryData in self.config.additionalLibs.iteritems():
+        for libraryName, libraryData in self.config.additionalLibs.items():
             libList += '* ' + libraryName + ' (from ' + libraryData['url'] + ')'
             depList = [lib for lib, libData in self.config.additionalLibs.items()
                        if libraryName in libData.get('dependencies', [])]

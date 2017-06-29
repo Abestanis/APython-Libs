@@ -64,7 +64,7 @@ class Configuration:
         if args.disableMultiprocessing is not None:
             self.useMultiprocessing = not args.disableMultiprocessing
         self.librariesDataPath = args.librariesDataFile or self.librariesDataPath
-    
+
     def check(self) -> bool:
         if self.patchPath is None or not os.path.isfile(self.patchPath):
             self.log.error('The path to the git executable is not specified or incorrect.')
@@ -94,7 +94,7 @@ class Configuration:
                     self.log.error('Got invalid cpu ABI: {abi}'.format(abi=cpuABI))
             return False
         return True
-    
+
     def parseConfigFile(self, path: str):
         parser = ConfigParser(interpolation=None)
         parser.optionxform = str
@@ -134,10 +134,10 @@ class Configuration:
             self.pythonPatchDir = self.resolvePath(parser.get('Paths', 'python_patch_dir'))
         if parser.has_option('Paths', 'libraries_data_file'):
             self.librariesDataPath = self.resolvePath(parser.get('Paths', 'libraries_data_file'))
-    
+
     def parseLibrariesData(self):
         self.parseLibrariesFile(self.librariesDataPath)
-    
+
     def parseLibrariesFile(self, path: str):
         parser = ConfigParser(interpolation=None)
         parser.optionxform = str
@@ -178,7 +178,7 @@ class Configuration:
                         continue
                     libData['data'].append(dataStages)
             self.additionalLibs[libraryName] = libData
-    
+
     def computeLibMinAndroidSdkList(self) -> Dict[int, List[str]]:
         """
         Calculate the minimum android sdk version possible needed for each library taking into
@@ -216,7 +216,7 @@ class Configuration:
                 result[sdkVersion] = []
             result[sdkVersion].append(libName)
         return result
-    
+
     def resolvePath(self, path: str) -> Optional[str]:
         if path is None:
             return None
@@ -224,7 +224,7 @@ class Configuration:
         if os.path.isabs(path):
             return path
         return os.path.join(self.currDir, path)
-    
+
     def closeLog(self):
         logOutput = self.log.getOutput()
         if logOutput is not None:
