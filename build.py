@@ -647,10 +647,10 @@ class Builder:
             pythonData += '"lib": ["output/{versionDir}/lib.zip", "{hash}"]\n'.format(
                 versionDir=versionDir, hash=buildutils.createMd5Hash(modulesFile))
             pythonData += '},\n'
-        pythonData += '"__version__": 1\n'
+        pythonData = pythonData[:-2] + '\n'
         jsonPath = os.path.join(os.path.dirname(self.config.outputDir), 'index.json')
         with open(jsonPath, 'w') as jsonFile:
-            jsonFile.write('{\n' + requirementData + datafilesData
+            jsonFile.write('{\n"__version__": 1,\n' + requirementData + datafilesData
                            + additionalLibsData + pythonData + '}\n')
         self.config.log.info('Successfully generated JSON file.')
         return True

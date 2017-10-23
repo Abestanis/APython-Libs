@@ -1,4 +1,5 @@
 {
+"__version__": 1,
 "requirements": {
 "libraries/SDL2_gpu" : ["libraries/SDL2"],
 "libraries/sdl2X11Emulation" : ["libraries/SDL2", "libraries/SDL2_gpu", "libraries/SDL2_ttf", "libraries/pixman"],
@@ -257,6 +258,5 @@
 "_tkinter": ["output/Python3.4.3/x86_64/_tkinter.so", "9e3c02efda4081c3311ed3fba885883b"]
 },
 "lib": ["output/Python3.4.3/lib.zip", "faa63309ff37f4b07129b889d12bdeef"]
-},
-"__version__": 1
+}
 }
