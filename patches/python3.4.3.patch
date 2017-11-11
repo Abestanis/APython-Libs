@@ -2,7 +2,7 @@ diff --git Python3.4.3.new/Include/pyconfig.h Python3.4.3.new/Include/pyconfig.h
 new file mode 100644
 --- /dev/null
 +++ Python3.4.3.new/Include/pyconfig.h
-@@ -0,0 +1,1661 @@
+@@ -0,0 +1,1665 @@
 +/* pyconfig.h.  Generated from pyconfig.h.in by configure.  */
 +/* pyconfig.h.in.  Generated from configure.in by autoheader.  */
 +
@@ -160,7 +160,11 @@ new file mode 100644
 +#define HAVE_COPYSIGN 1
 +
 +/* Define to 1 if you have the `ctermid' function. */
++#if __ANDROID_API__ >= 26
++#  define HAVE_CTERMID 1
++#else
 +/* #undef HAVE_CTERMID */
++#endif /* __ANDROID_API__ >= 26 */
 +
 +/* Define if you have the 'ctermid_r' function. */
 +/* #undef HAVE_CTERMID_R */
@@ -2994,6 +2998,28 @@ diff --git Python3.4.3.orig/Modules/pwdmodule.c Python3.4.3.new/Modules/pwdmodul
      SETS(setIndex++, p->pw_dir);
      SETS(setIndex++, p->pw_shell);
  
+diff --git Python3.4.3.orig/Modules/signalmodule.c Python3.4.3.new/Modules/signalmodule.c
+--- Python3.4.3.orig/Modules/signalmodule.c
++++ Python3.4.3.new/Modules/signalmodule.c
+@@ -211,6 +211,18 @@ signal_handler(int sig_num)
+     int save_errno = errno;
+ 
+ #ifdef WITH_THREAD
++#ifdef __ANDROID__
++    if (!_PyOS_IsMainThread()) {
++        /* On Android the main Python thread may not be the main process thread.
++           As a consequence, we have to relay the signal to the main Python thread
++           to allow the interrupting of sleep and input to work. */
++        if (pthread_kill(main_thread, sig_num) == 0) {
++            errno = save_errno;
++            return;
++        }
++    }
++#endif /* defined __ANDROID__ */
++    
+     /* See NOTES section above */
+     if (getpid() == main_pid)
+ #endif
 diff --git Python3.4.3.orig/Modules/socketmodule.c Python3.4.3.new/Modules/socketmodule.c
 --- Python3.4.3.orig/Modules/socketmodule.c
 +++ Python3.4.3.new/Modules/socketmodule.c
@@ -3036,30 +3062,6 @@ diff --git Python3.4.3.orig/Modules/termios.c Python3.4.3.new/Modules/termios.c
      {"tcflush", termios_tcflush,
       METH_VARARGS, termios_tcflush__doc__},
      {"tcflow", termios_tcflow,
-diff --git Python3.4.3.orig/Parser/myreadline.c Python3.4.3.new/Parser/myreadline.c
---- Python3.4.3.orig/Parser/myreadline.c
-+++ Python3.4.3.new/Parser/myreadline.c
-@@ -25,6 +25,10 @@ static PyThread_type_lock _PyOS_ReadlineLock = NULL;
- 
- int (*PyOS_InputHook)(void) = NULL;
- 
-+int (*get_PyOS_InputHook())(void) {
-+    return PyOS_InputHook;
-+}
-+
- /* This function restarts a fgets() after an EINTR error occurred
-    except if PyOS_InterruptOccurred() returns true. */
- 
-@@ -168,6 +172,9 @@ PyOS_StdioReadline(FILE *sys_stdin, FILE *sys_stdout, const char *prompt)
- 
- char *(*PyOS_ReadlineFunctionPointer)(FILE *, FILE *, const char *);
- 
-+void set_PyOS_ReadlineFunctionPointer(char *(*func)(FILE *, FILE *, const char *)) {
-+    PyOS_ReadlineFunctionPointer = func;
-+}
- 
- /* Interface used by tokenizer.c and bltinmodule.c */
- 
 diff --git Python3.4.3.orig/Python/bltinmodule.c Python3.4.3.new/Python/bltinmodule.c
 --- Python3.4.3.orig/Python/bltinmodule.c
 +++ Python3.4.3.new/Python/bltinmodule.c

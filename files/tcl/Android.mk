@@ -48,6 +48,5 @@ endif
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/generic $(LOCAL_PATH)/unix $(LOCAL_PATH)/libtommath
 LOCAL_EXPORT_C_INCLUDES += $(LOCAL_PATH)/generic
 LOCAL_LDLIBS := -lz
-LOCAL_SHARED_LIBRARIES := pythonPatch
 
 include $(BUILD_SHARED_LIBRARY)

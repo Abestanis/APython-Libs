@@ -1,7 +1,7 @@
 diff --git SDL2.orig/Android.mk SDL2.new/Android.mk
 --- SDL2.orig/Android.mk
 +++ SDL2.new/Android.mk
-@@ -43,11 +43,12 @@ LOCAL_SRC_FILES := \
+@@ -43,10 +43,10 @@ LOCAL_SRC_FILES := \
  	$(wildcard $(LOCAL_PATH)/src/timer/*.c) \
  	$(wildcard $(LOCAL_PATH)/src/timer/unix/*.c) \
  	$(wildcard $(LOCAL_PATH)/src/video/*.c) \
@@ -13,11 +13,9 @@ diff --git SDL2.orig/Android.mk SDL2.new/Android.mk
 -LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES
 +LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DANDROID_JAVA_PACKAGE_PATH=com_apython_python_pythonhost_views_sdl
  LOCAL_LDLIBS := -ldl -lGLESv1_CM -lGLESv2 -llog -landroid
-+LOCAL_SHARED_LIBRARIES := #pythonPatch
  
  include $(BUILD_SHARED_LIBRARY)
- 
-@@ -56,14 +57,14 @@ include $(BUILD_SHARED_LIBRARY)
+@@ -56,14 +56,14 @@ include $(BUILD_SHARED_LIBRARY)
  # SDL static library
  #
  ###########################
@@ -198,10 +196,11 @@ diff --git SDL2.orig/src/core/android/SDL_android.c SDL2.new/src/core/android/SD
      Android_JNI_SetupThread();
  
 -    mActivityClass = (jclass)((*mEnv)->NewGlobalRef(mEnv, cls));
-+    sdlFragmentClass       = (jclass) ((*mEnv)->NewGlobalRef(mEnv, fragmentClass));
-+    sdlLibraryHandlerClass = (jclass) ((*mEnv)->NewGlobalRef(mEnv, libHandlerClass));
- 
+-
 -    midGetNativeSurface = (*mEnv)->GetStaticMethodID(mEnv, mActivityClass,
++    sdlFragmentClass       = (jclass) ((*mEnv)->NewGlobalRef(mEnv, fragmentClass)); // TODO: Handle jni exceptions
++    sdlLibraryHandlerClass = (jclass) ((*mEnv)->NewGlobalRef(mEnv, libHandlerClass));
++    
 +    midGetNativeSurface = (*mEnv)->GetMethodID(mEnv, sdlFragmentClass,
                                  "getNativeSurface","()Landroid/view/Surface;");
 -    midAudioOpen = (*mEnv)->GetStaticMethodID(mEnv, mActivityClass,
@@ -278,8 +277,7 @@ diff --git SDL2.orig/src/core/android/SDL_android.c SDL2.new/src/core/android/SD
 -                                    jint width, jint height, jint format, jfloat rate)
 +JNIEXPORT void NATIVE_FUNCTION(SDLWindowFragment_onNativeResize)(
 +        JNIEnv* env, jobject obj, jint width, jint height, jint format)
- {
--    Android_SetScreenResolution(width, height, format, rate);
++{
 +    SDL_Window* window = GET_SDL_WINDOW(env, obj);
 +    if (window == NULL) {
 +        fprintf(stderr, "Window was NULL in %s, %s!\n", __FILE__, __func__);
@@ -290,7 +288,8 @@ diff --git SDL2.orig/src/core/android/SDL_android.c SDL2.new/src/core/android/SD
 +
 +JNIEXPORT void NATIVE_FUNCTION(SDLLibraryHandler_nativeDisplayResize)(
 +        JNIEnv* env, jclass cls, jint screenWidth, jint screenHeight, jfloat refreshRate)
-+{
+ {
+-    Android_SetScreenResolution(width, height, format, rate);
 +    SDL_Android_SetScreenDimensions(screenWidth, screenHeight, refreshRate);
  }
  
@@ -484,11 +483,7 @@ diff --git SDL2.orig/src/core/android/SDL_android.c SDL2.new/src/core/android/SD
 +    /* Change the current surface to the pbuffer surface */
 +    EGLSurface oldSurface = data->egl_surface;
 +    data->egl_surface = SDL_EGL_CreateSurfaceWithoutWindow(_this);
-     
--    if (data->egl_surface != EGL_NO_SURFACE) {
--        SDL_EGL_MakeCurrent(_this, NULL, NULL);
--        SDL_EGL_DestroySurface(_this, data->egl_surface);
--        data->egl_surface = EGL_NO_SURFACE;
++    
 +    fprintf(stderr, "Setting window to backup the egl context of to %d\n", SDL_GetWindowID(window));
 +    backup_egl_context_window_id = SDL_GetWindowID(window);
 +    SDL_Event event;
@@ -498,7 +493,11 @@ diff --git SDL2.orig/src/core/android/SDL_android.c SDL2.new/src/core/android/SD
 +    SDL_SemWaitTimeout(context_backup_lock, 1000);
 +    
 +    fprintf(stderr, "context_backup_lock wait over\n");
-+    
+     
+-    if (data->egl_surface != EGL_NO_SURFACE) {
+-        SDL_EGL_MakeCurrent(_this, NULL, NULL);
+-        SDL_EGL_DestroySurface(_this, data->egl_surface);
+-        data->egl_surface = EGL_NO_SURFACE;
 +    if (oldSurface != EGL_NO_SURFACE) {
 +        SDL_EGL_DestroySurface(_this, oldSurface);
 +    }
@@ -697,8 +696,9 @@ diff --git SDL2.orig/src/core/android/SDL_android.c SDL2.new/src/core/android/SD
  {
 -    return s_active > 0;
 +    return s_active > 0 ? SDL_TRUE : SDL_FALSE;
-+}
-+
+ }
+ 
+-ANativeWindow* Android_JNI_GetNativeWindow(void)
 +jobject Android_JNI_CreateWindow(SDL_Window* sdl_window) {
 +    JNIEnv *env = Android_JNI_GetEnv();
 +    jobject android_window = (*env)->CallStaticObjectMethod(env, sdlFragmentClass, midCreateWindow);
@@ -708,9 +708,8 @@ diff --git SDL2.orig/src/core/android/SDL_android.c SDL2.new/src/core/android/SD
 +        (*env)->SetLongField(env, android_window, fidNativeWindow, SDL_GetWindowID(sdl_window));
 +    }
 +    return android_window;
- }
- 
--ANativeWindow* Android_JNI_GetNativeWindow(void)
++}
++
 +void Android_JNI_DestroyWindow(jobject android_window) {
 +    JNIEnv *env = Android_JNI_GetEnv();
 +    jmethodID midDestroyWindow = (*env)->GetMethodID(env, sdlFragmentClass, "destroy", "()V");
@@ -1730,10 +1729,11 @@ diff --git SDL2.orig/src/video/SDL_egl.c SDL2.new/src/video/SDL_egl.c
          if (!_this->egl_data->eglMakeCurrent(_this->egl_data->egl_display,
              egl_surface, egl_surface, egl_context)) {
              return SDL_SetError("Unable to make EGL context current");
-@@ -589,6 +592,33 @@ SDL_EGL_DeleteContext(_THIS, SDL_GLContext context)
+@@ -588,6 +591,33 @@ SDL_EGL_DeleteContext(_THIS, SDL_GLContext context)
+         
  }
  
- EGLSurface *
++EGLSurface *
 +SDL_EGL_CreateSurfaceWithoutWindow(_THIS)
 +{
 +    if (SDL_EGL_ChooseConfig(_this) != 0) {
@@ -1760,10 +1760,9 @@ diff --git SDL2.orig/src/video/SDL_egl.c SDL2.new/src/video/SDL_egl.c
 +    return surface;
 +}
 +
-+EGLSurface *
+ EGLSurface *
  SDL_EGL_CreateSurface(_THIS, NativeWindowType nw) 
  {
-     if (SDL_EGL_ChooseConfig(_this) != 0) {
 @@ -602,17 +632,22 @@ SDL_EGL_CreateSurface(_THIS, NativeWindowType nw)
           */
          EGLint format;

@@ -17,7 +17,7 @@ LOCAL_CFLAGS += -DHAVE_TK_CONFIG_H -imacros tkConfig.h
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/generic $(LOCAL_PATH)/unix $(LOCAL_PATH)/bitmaps
 LOCAL_EXPORT_C_INCLUDES += $(LOCAL_PATH)/generic
-LOCAL_SHARED_LIBRARIES := tcl sdl2X11Emulation pythonPatch
+LOCAL_SHARED_LIBRARIES := tcl sdl2X11Emulation
 
 ifeq ($(TARGET_ARCH_ABI), armeabi)
   LOCAL_CFLAGS += -O0 # TODO: This is a workaround for a compiler crash (see https://github.com/android-ndk/ndk/issues/429)

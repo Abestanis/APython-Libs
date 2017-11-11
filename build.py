@@ -441,7 +441,8 @@ class Builder:
         return buildutils.applyPatch(self.config.gitPath, sourcePath,
                                      patchFilePath, self.config.log)
 
-    def generateModulesZip(self, sourcePath: str, outputDir: str) -> bool:
+    @staticmethod
+    def generateModulesZip(sourcePath: str, outputDir: str) -> bool:
         """>>> generateModulesZip(sourcePath, outputDir) -> success
         Generate the Python modules zip from the source at 'sourcePath'
         and store it into 'outputDir'.
@@ -532,8 +533,7 @@ class Builder:
         for subdir in os.listdir(outputDir):
             if os.path.isdir(os.path.join(outputDir, subdir)):
                 for libFile in os.listdir(os.path.join(outputDir, subdir)):
-                    if libFile[3:-3] in self.config.additionalLibs.keys()\
-                            or libFile == 'libpythonPatch.so':
+                    if libFile[3:-3] in self.config.additionalLibs.keys():
                         os.remove(os.path.join(outputDir, subdir, libFile))
         sourceParentPath = os.path.dirname(sourcePath)
         additionalPythonModules = []
@@ -552,7 +552,7 @@ class Builder:
         """
         self.config.log.info('Generating JSON file...')
         requirementData = '"requirements": {\n'
-        for libName, libData in self.config.additionalLibs.items():
+        for libName, libData in sorted(self.config.additionalLibs.items()):
             dependencies = ['libraries/' + dep for dep in libData.get('dependencies', [])]
             dependencies += ['data/' + dep[1] for dep in libData.get('data', [])]
             if 'minAndroidSdk' in libData:
@@ -574,13 +574,13 @@ class Builder:
                     moduleDependencies[moduleName].append('libraries/' + lib)
                 else:
                     moduleDependencies[moduleName] = ['libraries/' + lib]
-        for moduleName, moduleDependencies in moduleDependencies.items():
+        for moduleName, moduleDependencies in sorted(moduleDependencies.items()):
             requirementData += '"pyModule/{name}" : ["{dependencies}"],\n'.format(
                 name=moduleName, dependencies='", "'.join(moduleDependencies))
         requirementData = requirementData[:-2] + '\n},\n'
 
         datafilesData = '"data": {\n'
-        for libData in self.config.additionalLibs.values():
+        for name, libData in sorted(self.config.additionalLibs.items()):
             if 'data' in libData.keys():
                 for data in libData['data']:
                     datafilesData += '"' + data[1] + '" : {\n'
@@ -601,7 +601,7 @@ class Builder:
                 if libFile.startswith('lib') and libFile.endswith('.so'):
                     additionalLibs.add(libFile[3:-3])
         libraryDir = os.path.join(self.config.outputDir, 'libraries')
-        for lib in additionalLibs:
+        for lib in sorted(additionalLibs):
             additionalLibsData += '"' + lib + '": {\n'
             for architecture in os.listdir(libraryDir):
                 if 'lib' + lib + '.so' in os.listdir(os.path.join(libraryDir, architecture)):
@@ -665,7 +665,7 @@ class Builder:
         readmePath = os.path.join(self.config.currDir, 'README.md')
         # itemTemplate = '* {libName} (from {url}) for {modules}\n'
         libList = ''
-        for libraryName, libraryData in self.config.additionalLibs.items():
+        for libraryName, libraryData in sorted(self.config.additionalLibs.items()):
             libList += '* ' + libraryName + ' (from ' + libraryData['url'] + ')'
             depList = [lib for lib, libData in self.config.additionalLibs.items()
                        if libraryName in libData.get('dependencies', [])]
@@ -729,6 +729,7 @@ def main():
     args = parser.parse_args()
     builder = Builder(args)
     sys.exit(0 if builder.build() else 1)
+
 
 if __name__ == '__main__':
     main()

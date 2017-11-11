@@ -2315,6 +2315,31 @@ diff --git Python2.7.2.orig/Modules/python.c Python2.7.2.new/Modules/python.c
  {
  	/* 754 requires that FP exceptions run in "no stop" mode by default,
  	 * and until C vendors implement C99's ways to control FP exceptions,
+diff --git Python2.7.2.orig/Modules/signalmodule.c Python2.7.2.new/Modules/signalmodule.c
+--- Python2.7.2.orig/Modules/signalmodule.c
++++ Python2.7.2.new/Modules/signalmodule.c
+@@ -185,11 +185,20 @@ signal_handler(int sig_num)
+ {
+     int save_errno = errno;
+ 
+-#if defined(WITH_THREAD) && defined(WITH_PTH)
++#ifdef WITH_THREAD
++#ifdef WITH_PTH
+     if (PyThread_get_thread_ident() != main_thread) {
+         pth_raise(*(pth_t *) main_thread, sig_num);
+     }
+     else
++#elif defined(__ANDROID__)
++    if (PyThread_get_thread_ident() != main_thread) {
++        /* On Android the main Python thread may not be the main process thread.
++           As a consequence, we have to relay the signal to the main Python thread
++           to allow the interrupting of sleep and input to work. */
++        pthread_kill(main_thread, sig_num);
++    } else
++#endif
+ #endif
+     {
+ #ifdef WITH_THREAD
 diff --git Python2.7.2.orig/Modules/termios.c Python2.7.2.new/Modules/termios.c
 --- Python2.7.2.orig/Modules/termios.c
 +++ Python2.7.2.new/Modules/termios.c
@@ -2380,30 +2405,6 @@ diff --git Python2.7.2.orig/Objects/stringlib/localeutil.h Python2.7.2.new/Objec
  
          return _Py_InsertThousandsGrouping(buffer, n_buffer, digits, n_digits,
                                             min_width, grouping, thousands_sep);
-diff --git Python2.7.2.orig/Parser/myreadline.c Python2.7.2.new/Parser/myreadline.c
---- Python2.7.2.orig/Parser/myreadline.c
-+++ Python2.7.2.new/Parser/myreadline.c
-@@ -29,6 +29,10 @@ static PyThread_type_lock _PyOS_ReadlineLock = NULL;
- 
- int (*PyOS_InputHook)(void) = NULL;
- 
-+int (*get_PyOS_InputHook())(void) {
-+    return PyOS_InputHook;
-+}
-+
- #ifdef RISCOS
- int Py_RISCOSWimpFlag;
- #endif
-@@ -164,6 +168,9 @@ PyOS_StdioReadline(FILE *sys_stdin, FILE *sys_stdout, char *prompt)
- 
- char *(*PyOS_ReadlineFunctionPointer)(FILE *, FILE *, char *);
- 
-+void set_PyOS_ReadlineFunctionPointer(char *(*func)(FILE *, FILE *, char *)) {
-+    PyOS_ReadlineFunctionPointer = func;
-+}
- 
- /* Interface used by tokenizer.c and bltinmodule.c */
- 
 diff --git Python2.7.2.orig/Python/bltinmodule.c Python2.7.2.new/Python/bltinmodule.c
 --- Python2.7.2.orig/Python/bltinmodule.c
 +++ Python2.7.2.new/Python/bltinmodule.c

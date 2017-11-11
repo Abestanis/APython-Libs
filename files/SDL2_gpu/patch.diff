@@ -13,6 +13,17 @@ diff --git SDL2_gpu.orig/Android.mk SDL2_gpu.new/Android.mk
  
  LOCAL_SRC_FILES := $(SDL_GPU_DIR)/src/SDL_gpu.c \
  				   $(SDL_GPU_DIR)/src/SDL_gpu_matrix.c \
+@@ -21,7 +24,8 @@ LOCAL_SRC_FILES := $(SDL_GPU_DIR)/src/SDL_gpu.c \
+ 				   $(STB_IMAGE_WRITE_DIR)/stb_image_write.c
+ 
+ 
+-LOCAL_CFLAGS += -DSDL_GPU_DISABLE_OPENGL -DSDL_GPU_USE_BUFFER_RESET -DSTBI_FAILURE_USERMSG -O3
++LOCAL_CFLAGS += -DSDL_GPU_DISABLE_OPENGL -DSDL_GPU_USE_BUFFER_RESET -DSTBI_FAILURE_USERMSG -O3 \
++                -DGL_GLEXT_PROTOTYPES -DSDL_GPU_DYNAMIC_GLES_3
+ 
+ LOCAL_LDLIBS += -llog -lGLESv1_CM
+ LOCAL_LDLIBS += -lGLESv2
+diff --git SDL2_gpu.orig/src/SDL_gpu.c SDL2_gpu.new/src/SDL_gpu.c
 --- SDL2_gpu.orig/src/SDL_gpu.c
 +++ SDL2_gpu.new/src/SDL_gpu.c
 @@ -422,8 +422,13 @@ GPU_Target* GPU_Init(Uint16 w, Uint16 h, GPU_WindowFlagEnum SDL_flags)
@@ -41,14 +52,3 @@ diff --git SDL2_gpu.orig/src/SDL_gpu_renderer.c SDL2_gpu.new/src/SDL_gpu_rendere
  	GPU_Renderer* result = NULL;
  	int i;
  	for(i = 0; i < GPU_MAX_REGISTERED_RENDERERS; i++)
-diff --git SDL2_gpu.orig/src/renderer_GL_common.inl SDL2_gpu.new/src/renderer_GL_common.inl
---- SDL2_gpu.orig/src/renderer_GL_common.inl
-+++ SDL2_gpu.new/src/renderer_GL_common.inl
-@@ -3695,6 +3695,7 @@ static GPU_Target* LoadTarget(GPU_Renderer* renderer, GPU_Image* image)
- static void FreeTarget(GPU_Renderer* renderer, GPU_Target* target)
- {
- 	GPU_TARGET_DATA* data;
-+    fprintf(stderr, "Freeing target %p\n", target);
- 
-     if(target == NULL)
-         return;

@@ -3,12 +3,10 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := pythonPatch
 LOCAL_SRC_FILES := redirects.c
-LOCAL_EXPORT_CFLAGS := -include redirects.h \
-                       -D exit=redirectedExit \
-                       -D setlocale=redirectedSetLocale \
-                       -D mbstowcs=redirectedMbstowcs \
-                       -D fdatasync=fsync #TODO: Maybe do this better? http://linux.die.net/man/2/fdatasync
-
+LOCAL_EXPORT_LDFLAGS := -Wl,--wrap,exit \
+                        -Wl,--wrap,setlocale \
+                        -Wl,--wrap,mbstowcs 
+                                              
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)
 
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_STATIC_LIBRARY)
