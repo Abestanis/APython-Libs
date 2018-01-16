@@ -16,7 +16,9 @@ import re
 import shutil
 import sys
 import traceback
+import json
 from argparse import ArgumentParser
+from collections import OrderedDict
 from tempfile import mkdtemp
 from time import time, sleep
 from typing import Dict, Optional
@@ -171,9 +173,12 @@ class Builder:
         libs = {'pythonPatch': os.path.join(sourceDir, 'PythonPatch')}
         outputDir = os.path.join(self.config.outputDir, 'libraries')
         minSdkList = self.config.computeLibMinAndroidSdkList()
+        minSdkList.setdefault(self.config.DEFAULT_MIN_SKD_VERSION, []).append('pythonPatch')
         for sdkVersion in sorted(minSdkList, reverse=True):  # Begin with the latest sdk version
             libraryList = minSdkList[sdkVersion]
             for libraryName in libraryList:
+                if libraryName == 'pythonPatch':
+                    continue
                 libraryData = self.config.additionalLibs[libraryName]
                 makefilePath = os.path.join(self.config.filesDir, libraryName, 'Android.mk')
                 if not os.path.exists(makefilePath):
@@ -224,7 +229,7 @@ class Builder:
                         self.config.log.error('Applying patch ({path}) failed for library {name}, '
                                               'aborting!'.format(path=diffPath, name=libraryName))
                         return False
-                if 'data' in libraryData.keys():
+                if 'data' in libraryData:
                     for dataEntry in libraryData['data']:
                         dataSource, dataName = dataEntry[0], dataEntry[1]
                         dataSrcPath = os.path.join(extractDir, dataSource)
@@ -551,15 +556,14 @@ class Builder:
         by a connecting client to download the created data.
         """
         self.config.log.info('Generating JSON file...')
-        requirementData = '"requirements": {\n'
+        requirements = OrderedDict()
         for libName, libData in sorted(self.config.additionalLibs.items()):
             dependencies = ['libraries/' + dep for dep in libData.get('dependencies', [])]
             dependencies += ['data/' + dep[1] for dep in libData.get('data', [])]
             if 'minAndroidSdk' in libData:
                 dependencies += ['androidSdk/' + str(libData['minAndroidSdk'])]
             if len(dependencies) > 0:
-                requirementData += '"libraries/{name}" : ["{dependencies}"],\n'.format(
-                    name=libName, dependencies='", "'.join(dependencies))
+                requirements['libraries/{name}'.format(name=libName)] = dependencies
         moduleDependencies = {}
         for lib, libData in self.config.additionalLibs.items():
             moduleNames = []
@@ -575,49 +579,53 @@ class Builder:
                 else:
                     moduleDependencies[moduleName] = ['libraries/' + lib]
         for moduleName, moduleDependencies in sorted(moduleDependencies.items()):
-            requirementData += '"pyModule/{name}" : ["{dependencies}"],\n'.format(
-                name=moduleName, dependencies='", "'.join(moduleDependencies))
-        requirementData = requirementData[:-2] + '\n},\n'
+            requirements['pyModule/{name}'.format(name=moduleName)] = moduleDependencies
 
-        datafilesData = '"data": {\n'
+        dataItem = OrderedDict()
         for name, libData in sorted(self.config.additionalLibs.items()):
             if 'data' in libData.keys():
                 for data in libData['data']:
-                    datafilesData += '"' + data[1] + '" : {\n'
                     dataPath = os.path.join(self.config.outputDir, 'data', data[1])
                     if not os.path.exists(dataPath):
                         dataPath += '.zip'
-                    datafilesData += '"path": ["output/data/{name}", "{hash}"],\n'.format(
-                        name=os.path.basename(dataPath), hash=buildutils.createMd5Hash(dataPath))
+                    item = {'path': [
+                        'output/data/{name}'.format(name=os.path.basename(dataPath)),
+                        buildutils.createMd5Hash(dataPath)
+                    ]}
                     if data[2] != 'files/data':
-                        datafilesData += '"dest": "' + data[2] + '",\n'
-                    datafilesData = datafilesData[:-2] + '\n},\n'
-        datafilesData = datafilesData[:-2] + '\n},\n'
+                        item['dest'] = data[2]
+                    dataItem[data[1]] = item
 
         additionalLibs = set()
-        additionalLibsData = '"libraries": {\n'
-        for subdir in os.listdir(os.path.join(self.config.outputDir, 'libraries')):
-            for libFile in os.listdir(os.path.join(self.config.outputDir, 'libraries', subdir)):
-                if libFile.startswith('lib') and libFile.endswith('.so'):
-                    additionalLibs.add(libFile[3:-3])
+        libraries = OrderedDict()
         libraryDir = os.path.join(self.config.outputDir, 'libraries')
-        for lib in sorted(additionalLibs):
-            additionalLibsData += '"' + lib + '": {\n'
-            for architecture in os.listdir(libraryDir):
-                if 'lib' + lib + '.so' in os.listdir(os.path.join(libraryDir, architecture)):
-                    filePath = os.path.join(libraryDir, architecture, 'lib' + lib + '.so')
-                    additionalLibsData += \
-                        '"{abi}": ["output/libraries/{abi}/lib{name}.so", "{hash}"],\n'.format(
-                            abi=architecture, name=lib, hash=buildutils.createMd5Hash(filePath))
-            additionalLibsData = additionalLibsData[:-2] + '\n},\n'
-        additionalLibsData = additionalLibsData[:-2] + '\n},\n'
+        if os.path.isdir(libraryDir):
+            for subdir in os.listdir(libraryDir):
+                for libFile in os.listdir(os.path.join(libraryDir, subdir)):
+                    if libFile.startswith('lib') and libFile.endswith('.so'):
+                        additionalLibs.add(libFile[3:-3])
+            for lib in sorted(additionalLibs):
+                libItem = {}
+                for architecture in os.listdir(libraryDir):
+                    if 'lib' + lib + '.so' in os.listdir(os.path.join(libraryDir, architecture)):
+                        filePath = os.path.join(libraryDir, architecture, 'lib' + lib + '.so')
+                        libItem[architecture] = [
+                            'output/libraries/{abi}/lib{name}.so'
+                            .format(abi=architecture, name=lib),
+                            buildutils.createMd5Hash(filePath)
+                        ]
+                libraries[lib] = libItem
 
-        pythonData = ''
+        jsonData = OrderedDict()
+        jsonData['__version__'] = 1
+        jsonData['requirements'] = requirements
+        jsonData['data'] = dataItem
+        jsonData['libraries'] = libraries
         for versionDir in os.listdir(self.config.outputDir):
             if versionDir == 'libraries' or versionDir == 'data':
                 continue
             version = versionDir[6:]
-            pythonData += '"' + version + '": {\n'
+            versionItem = OrderedDict()
             modulesFile = os.path.join(self.config.outputDir, versionDir, 'lib.zip')
             if not os.path.exists(modulesFile):
                 self.config.log.error('lib.zip not found in {path}.'
@@ -627,31 +635,29 @@ class Builder:
                 abiDir = os.path.join(self.config.outputDir, versionDir, architecture)
                 if not os.path.isdir(abiDir):
                     continue
-                pythonData += '"' + architecture + '": {\n'
+                architectureItem = OrderedDict()
                 if not 'libpython{ver}.so'.format(ver=buildutils.getShortVersion(version)) in \
-                        os.listdir(abiDir):
+                       os.listdir(abiDir):
                     self.config.log.error('The python library was not found in {path}.'
                                           .format(path=abiDir))
                     return False
                 for libFile in os.listdir(abiDir):
-                    if 'libpython' in libFile:
-                        lib = 'pythonLib'
-                    else:
-                        lib = libFile[:-3]
+                    lib = 'pythonLib' if 'libpython' in libFile else libFile[:-3]
                     libPath = os.path.join(abiDir, libFile)
-                    pythonData += '"{name}": ["output/{versionDir}/{abi}/{libFile}", "{hash}"],\n'\
-                        .format(name=lib, versionDir=versionDir, abi=architecture,
-                                libFile=libFile, hash=buildutils.createMd5Hash(libPath))
-                pythonData = pythonData[:-2] + '\n'
-                pythonData += '},\n'
-            pythonData += '"lib": ["output/{versionDir}/lib.zip", "{hash}"]\n'.format(
-                versionDir=versionDir, hash=buildutils.createMd5Hash(modulesFile))
-            pythonData += '},\n'
-        pythonData = pythonData[:-2] + '\n'
+                    architectureItem[lib] = [
+                        'output/{versionDir}/{abi}/{libFile}'
+                        .format(versionDir=versionDir, abi=architecture, libFile=libFile),
+                        buildutils.createMd5Hash(libPath)
+                    ]
+                versionItem[architecture] = architectureItem
+            versionItem['lib'] = [
+                'output/{versionDir}/lib.zip'.format(versionDir=versionDir),
+                buildutils.createMd5Hash(modulesFile)
+            ]
+            jsonData[version] = versionItem
         jsonPath = os.path.join(os.path.dirname(self.config.outputDir), 'index.json')
         with open(jsonPath, 'w') as jsonFile:
-            jsonFile.write('{\n"__version__": 1,\n' + requirementData + datafilesData
-                           + additionalLibsData + pythonData + '}\n')
+            json.dump(jsonData, jsonFile, ensure_ascii=False, indent=0)
         self.config.log.info('Successfully generated JSON file.')
         return True
 
