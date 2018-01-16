@@ -1,3 +1,16 @@
+"""
+This script will download and compile all Python versions to libraries which
+can be used by the APython project (see https://github.com/Abestanis/APython).
+
+To compile the C sources, the Android NDK is used and
+to apply some patches to the source code, git is required.
+The path to both can be provided via command line options
+or via a configuration file (by default, a config.cfg in the
+same directory as this script is used).
+
+Created 18.08.2015 by Sebastian Scholz.
+"""
+
 import os
 import re
 import shutil
@@ -15,19 +28,6 @@ except ImportError:
 import buildutils
 from cache import Cache
 from config import Configuration
-
-DESCRIPTION = '''
-This script will download and compile all Python versions to libraries which
-can be used by the APython project (see https://github.com/Abestanis/APython).
-
-To compile the C sources, the Android NDK is used and
-to apply some patches to the source code, git is required.
-The path to both can be provided via command line options
-or via a configuration file (by default, a config.cfg in the
-same directory as this script is used).
-
-Created 18.08.2015 by Sebastian Scholz.
-'''
 
 
 class Builder:
@@ -688,7 +688,7 @@ class Builder:
 
 
 def main():
-    parser = ArgumentParser(description=DESCRIPTION)
+    parser = ArgumentParser(description=__doc__)
     parser.add_argument('-clear-cache', action='store_true',
                         help='Clear the download cache, before executing the build.')
     parser.add_argument('--logFile', help='The path to a log file. '
