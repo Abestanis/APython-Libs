@@ -22,6 +22,7 @@ class Configuration:
     pythonServer = 'www.python.org'
     pythonServerPath = '/ftp/python/'
     pythonPatchDir = None
+    ipcDir = None
     versionList = None
     # additionalLibs_template = {
     #     'libName': {
@@ -55,6 +56,7 @@ class Configuration:
         self.gitPath = self.resolvePath(args.gitPath) or self.gitPath
         self.ndkPath = self.resolvePath(args.ndkPath) or self.ndkPath
         self.pythonPatchDir = args.pythonPatchDir or self.pythonPatchDir
+        self.ipcDir = args.ipcDir or self.ipcDir
         if args.versions is not None and len(args.versions) != 0:
             self.versionList = args.versions
         self.pythonServer = args.pythonServer or self.pythonServer
@@ -74,6 +76,9 @@ class Configuration:
             return False
         if self.pythonPatchDir is None:
             self.log.error('The path to the Python Patch source directory is not specified.')
+            return False
+        if self.ipcDir is None:
+            self.log.error('The path to the IPC source directory is not specified.')
             return False
         if self.patchesDir is None or not os.path.isdir(self.patchesDir):
             self.log.error('The path to the patches directory is incorrect.')
@@ -132,6 +137,8 @@ class Configuration:
             self.pythonServerPath = parser.get('Paths', 'python_server_path')
         if parser.has_option('Paths', 'python_patch_dir'):
             self.pythonPatchDir = self.resolvePath(parser.get('Paths', 'python_patch_dir'))
+        if parser.has_option('Paths', 'ipc_dir'):
+            self.ipcDir = self.resolvePath(parser.get('Paths', 'ipc_dir'))
         if parser.has_option('Paths', 'libraries_data_file'):
             self.librariesDataPath = self.resolvePath(parser.get('Paths', 'libraries_data_file'))
 

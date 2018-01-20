@@ -170,14 +170,17 @@ class Builder:
             os.mkdir(sourceDir)
         self.config.log.info('Copying Python patch...')
         shutil.copytree(self.config.pythonPatchDir, os.path.join(sourceDir, 'PythonPatch'))
-        libs = {'pythonPatch': os.path.join(sourceDir, 'PythonPatch')}
+        self.config.log.info('Copying IPC...')
+        shutil.copytree(self.config.ipcDir, os.path.join(sourceDir, 'IPC'))
+        libs = {'pythonPatch': os.path.join(sourceDir, 'PythonPatch'),
+                'IPC': os.path.join(sourceDir, 'IPC')}
         outputDir = os.path.join(self.config.outputDir, 'libraries')
         minSdkList = self.config.computeLibMinAndroidSdkList()
         minSdkList.setdefault(self.config.DEFAULT_MIN_SKD_VERSION, []).append('pythonPatch')
         for sdkVersion in sorted(minSdkList, reverse=True):  # Begin with the latest sdk version
             libraryList = minSdkList[sdkVersion]
             for libraryName in libraryList:
-                if libraryName == 'pythonPatch':
+                if libraryName in ['pythonPatch', 'IPC']:
                     continue
                 libraryData = self.config.additionalLibs[libraryName]
                 makefilePath = os.path.join(self.config.filesDir, libraryName, 'Android.mk')
@@ -718,6 +721,8 @@ def main():
     parser.add_argument('--ndkPath', help='The path to the ndk-build executable.')
     parser.add_argument('--pythonPatchDir', help='The path to the directory where the pythonPatch '
                                                  'library source code can be found.')
+    parser.add_argument('--ipcDir', help='The path to the directory where the IPC '
+                                         'library source code can be found.')
     parser.add_argument('--pythonServer', default=Configuration.pythonServer,
                         help='The host address of the Python server. Defaults to {host}".'
                         .format(host=Configuration.pythonServer))
