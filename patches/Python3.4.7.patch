@@ -1,7 +1,7 @@
-diff --git Python3.4.3.new/Include/pyconfig.h Python3.4.3.new/Include/pyconfig.h
+diff --git Python3.4.7.new/Include/pyconfig.h Python3.4.7.new/Include/pyconfig.h
 new file mode 100644
 --- /dev/null
-+++ Python3.4.3.new/Include/pyconfig.h
++++ Python3.4.7.new/Include/pyconfig.h
 @@ -0,0 +1,1665 @@
 +/* pyconfig.h.  Generated from pyconfig.h.in by configure.  */
 +/* pyconfig.h.in.  Generated from configure.in by autoheader.  */
@@ -1668,9 +1668,9 @@ new file mode 100644
 +
 +#endif /*Py_PYCONFIG_H*/
 +
-diff --git Python3.4.3.orig/Lib/_sitebuiltins.py Python3.4.3.new/Lib/_sitebuiltins.py
---- Python3.4.3.orig/Lib/_sitebuiltins.py
-+++ Python3.4.3.new/Lib/_sitebuiltins.py
+diff --git Python3.4.7.orig/Lib/_sitebuiltins.py Python3.4.7.new/Lib/_sitebuiltins.py
+--- Python3.4.7.orig/Lib/_sitebuiltins.py
++++ Python3.4.7.new/Lib/_sitebuiltins.py
 @@ -51,7 +51,15 @@ class _Printer(object):
                      data = fp.read()
                  break
@@ -1688,9 +1688,9 @@ diff --git Python3.4.3.orig/Lib/_sitebuiltins.py Python3.4.3.new/Lib/_sitebuilti
          if not data:
              data = self.__data
          self.__lines = data.split('\n')
-diff --git Python3.4.3.orig/Lib/distutils/sysconfig.py Python3.4.3.new/Lib/distutils/sysconfig.py
---- Python3.4.3.orig/Lib/distutils/sysconfig.py
-+++ Python3.4.3.new/Lib/distutils/sysconfig.py
+diff --git Python3.4.7.orig/Lib/distutils/sysconfig.py Python3.4.7.new/Lib/distutils/sysconfig.py
+--- Python3.4.7.orig/Lib/distutils/sysconfig.py
++++ Python3.4.7.new/Lib/distutils/sysconfig.py
 @@ -165,7 +165,7 @@ def customize_compiler(compiler):
      Mainly needed on Unix, so we can plug in the information that
      varies across Unices and is stored in Python's Makefile.
@@ -1728,10 +1728,10 @@ diff --git Python3.4.3.orig/Lib/distutils/sysconfig.py Python3.4.3.new/Lib/distu
      _config_vars = g
  
  
-diff --git Python3.4.3.orig/Lib/idlelib/PyShell.py Python3.4.3.new/Lib/idlelib/PyShell.py
---- Python3.4.3.orig/Lib/idlelib/PyShell.py
-+++ Python3.4.3.new/Lib/idlelib/PyShell.py
-@@ -445,7 +445,7 @@ class ModifiedInterpreter(InteractiveInterpreter):
+diff --git Python3.4.7.orig/Lib/idlelib/PyShell.py Python3.4.7.new/Lib/idlelib/PyShell.py
+--- Python3.4.7.orig/Lib/idlelib/PyShell.py
++++ Python3.4.7.new/Lib/idlelib/PyShell.py
+@@ -442,7 +442,7 @@ class ModifiedInterpreter(InteractiveInterpreter):
          self.spawn_subprocess()
          #time.sleep(20) # test to simulate GUI not accepting connection
          # Accept the connection from the Python execution server
@@ -1739,8 +1739,8 @@ diff --git Python3.4.3.orig/Lib/idlelib/PyShell.py Python3.4.3.new/Lib/idlelib/P
 +        self.rpcclt.listening_sock.settimeout(10 * 5000)
          try:
              self.rpcclt.accept()
-         except socket.timeout as err:
-@@ -1535,7 +1535,7 @@ def main():
+         except socket.timeout:
+@@ -1532,7 +1532,7 @@ def main():
      root = Tk(className="Idle")
  
      # set application icon
@@ -1749,9 +1749,9 @@ diff --git Python3.4.3.orig/Lib/idlelib/PyShell.py Python3.4.3.new/Lib/idlelib/P
      if system() == 'Windows':
          iconfile = os.path.join(icondir, 'idle.ico')
          root.wm_iconbitmap(default=iconfile)
-diff --git Python3.4.3.orig/Lib/idlelib/TreeWidget.py Python3.4.3.new/Lib/idlelib/TreeWidget.py
---- Python3.4.3.orig/Lib/idlelib/TreeWidget.py
-+++ Python3.4.3.new/Lib/idlelib/TreeWidget.py
+diff --git Python3.4.7.orig/Lib/idlelib/TreeWidget.py Python3.4.7.new/Lib/idlelib/TreeWidget.py
+--- Python3.4.7.orig/Lib/idlelib/TreeWidget.py
++++ Python3.4.7.new/Lib/idlelib/TreeWidget.py
 @@ -20,16 +20,10 @@ from tkinter import *
  from idlelib import ZoomHeight
  from idlelib.configHandler import idleConf
@@ -1773,19 +1773,19 @@ diff --git Python3.4.3.orig/Lib/idlelib/TreeWidget.py Python3.4.3.new/Lib/idleli
      raise RuntimeError("can't find icon directory (%r)" % (ICONDIR,))
  
  def listicons(icondir=ICONDIR):
-diff --git Python3.4.3.orig/Lib/idlelib/configHandler.py Python3.4.3.new/Lib/idlelib/configHandler.py
---- Python3.4.3.orig/Lib/idlelib/configHandler.py
-+++ Python3.4.3.new/Lib/idlelib/configHandler.py
+diff --git Python3.4.7.orig/Lib/idlelib/configHandler.py Python3.4.7.new/Lib/idlelib/configHandler.py
+--- Python3.4.7.orig/Lib/idlelib/configHandler.py
++++ Python3.4.7.new/Lib/idlelib/configHandler.py
 @@ -22,6 +22,8 @@ import os
  import sys
  
  from configparser import ConfigParser
 +from tempfile import mkdtemp
 +from shutil import rmtree, copytree
+ from tkinter import TkVersion
+ from tkinter.font import Font, nametofont
  
- class InvalidConfigType(Exception): pass
- class InvalidConfigSet(Exception): pass
-@@ -65,7 +67,18 @@ class IdleConfParser(ConfigParser):
+@@ -67,7 +69,18 @@ class IdleConfParser(ConfigParser):
  
      def Load(self):
          "Load the configuration file from disk."
@@ -1805,7 +1805,7 @@ diff --git Python3.4.3.orig/Lib/idlelib/configHandler.py Python3.4.3.new/Lib/idl
  
  class IdleUserConfParser(IdleConfParser):
      """
-@@ -154,6 +167,7 @@ class IdleConf:
+@@ -156,6 +169,7 @@ class IdleConf:
          self.defaultCfg = {}
          self.userCfg = {}
          self.cfg = {}  # TODO use to select userCfg vs defaultCfg
@@ -1813,7 +1813,7 @@ diff --git Python3.4.3.orig/Lib/idlelib/configHandler.py Python3.4.3.new/Lib/idl
          self.CreateConfigHandlers()
          self.LoadCfgFiles()
  
-@@ -187,9 +201,14 @@ class IdleConf:
+@@ -189,9 +203,14 @@ class IdleConf:
          cfgDir = '.idlerc'
          userDir = os.path.expanduser('~')
          if userDir != '~': # expanduser() found user home dir
@@ -1828,7 +1828,7 @@ diff --git Python3.4.3.orig/Lib/idlelib/configHandler.py Python3.4.3.new/Lib/idl
                  try:
                      print(warn, file=sys.stderr)
                  except OSError:
-@@ -681,6 +700,29 @@ class IdleConf:
+@@ -736,6 +755,29 @@ class IdleConf:
          for key in self.userCfg:
              self.userCfg[key].Save()
  
@@ -1858,9 +1858,9 @@ diff --git Python3.4.3.orig/Lib/idlelib/configHandler.py Python3.4.3.new/Lib/idl
  
  idleConf = IdleConf()
  
-diff --git Python3.4.3.orig/Lib/idlelib/textView.py Python3.4.3.new/Lib/idlelib/textView.py
---- Python3.4.3.orig/Lib/idlelib/textView.py
-+++ Python3.4.3.new/Lib/idlelib/textView.py
+diff --git Python3.4.7.orig/Lib/idlelib/textView.py Python3.4.7.new/Lib/idlelib/textView.py
+--- Python3.4.7.orig/Lib/idlelib/textView.py
++++ Python3.4.7.new/Lib/idlelib/textView.py
 @@ -70,8 +70,18 @@ def view_text(parent, title, text, modal=True):
  
  def view_file(parent, title, filename, encoding=None, modal=True):
@@ -1882,9 +1882,9 @@ diff --git Python3.4.3.orig/Lib/idlelib/textView.py Python3.4.3.new/Lib/idlelib/
      except IOError:
          tkMessageBox.showerror(title='File Load Error',
                                 message='Unable to load file %r .' % filename,
-diff --git Python3.4.3.orig/Lib/pkgutil.py Python3.4.3.new/Lib/pkgutil.py
---- Python3.4.3.orig/Lib/pkgutil.py
-+++ Python3.4.3.new/Lib/pkgutil.py
+diff --git Python3.4.7.orig/Lib/pkgutil.py Python3.4.7.new/Lib/pkgutil.py
+--- Python3.4.7.orig/Lib/pkgutil.py
++++ Python3.4.7.new/Lib/pkgutil.py
 @@ -283,8 +283,15 @@ class ImpLoader:
          return mod
  
@@ -1903,10 +1903,10 @@ diff --git Python3.4.3.orig/Lib/pkgutil.py Python3.4.3.new/Lib/pkgutil.py
  
      def _reopen(self):
          if self.file and self.file.closed:
-diff --git Python3.4.3.orig/Lib/subprocess.py Python3.4.3.new/Lib/subprocess.py
---- Python3.4.3.orig/Lib/subprocess.py
-+++ Python3.4.3.new/Lib/subprocess.py
-@@ -1345,7 +1345,8 @@ class Popen(object):
+diff --git Python3.4.7.orig/Lib/subprocess.py Python3.4.7.new/Lib/subprocess.py
+--- Python3.4.7.orig/Lib/subprocess.py
++++ Python3.4.7.new/Lib/subprocess.py
+@@ -1348,7 +1348,8 @@ class Popen(object):
                  args = list(args)
  
              if shell:
@@ -1916,9 +1916,9 @@ diff --git Python3.4.3.orig/Lib/subprocess.py Python3.4.3.new/Lib/subprocess.py
                  if executable:
                      args[0] = executable
  
-diff --git Python3.4.3.orig/Lib/sysconfig.py Python3.4.3.new/Lib/sysconfig.py
---- Python3.4.3.orig/Lib/sysconfig.py
-+++ Python3.4.3.new/Lib/sysconfig.py
+diff --git Python3.4.7.orig/Lib/sysconfig.py Python3.4.7.new/Lib/sysconfig.py
+--- Python3.4.7.orig/Lib/sysconfig.py
++++ Python3.4.7.new/Lib/sysconfig.py
 @@ -345,25 +345,35 @@ def _generate_posix_vars():
      """Generate the Python module containing build-time variables."""
      import pprint
@@ -1995,9 +1995,9 @@ diff --git Python3.4.3.orig/Lib/sysconfig.py Python3.4.3.new/Lib/sysconfig.py
  
  def _init_non_posix(vars):
      """Initialize the module as appropriate for NT"""
-diff --git Python3.4.3.orig/Lib/turtledemo/__main__.py Python3.4.3.new/Lib/turtledemo/__main__.py
---- Python3.4.3.orig/Lib/turtledemo/__main__.py
-+++ Python3.4.3.new/Lib/turtledemo/__main__.py
+diff --git Python3.4.7.orig/Lib/turtledemo/__main__.py Python3.4.7.new/Lib/turtledemo/__main__.py
+--- Python3.4.7.orig/Lib/turtledemo/__main__.py
++++ Python3.4.7.new/Lib/turtledemo/__main__.py
 @@ -115,7 +115,17 @@ MAXIMUM_FONT_SIZE = 100
  font_sizes = [8, 9, 10, 11, 12, 14, 18, 20, 22, 24, 30]
  
@@ -2036,9 +2036,9 @@ diff --git Python3.4.3.orig/Lib/turtledemo/__main__.py Python3.4.3.new/Lib/turtl
          self.text.delete("1.0", "end")
          self.text.insert("1.0", chars)
          self.root.title(filename + " - a Python turtle graphics example")
-diff --git Python3.4.3.orig/Modules/_decimal/libmpdec/basearith.c Python3.4.3.new/Modules/_decimal/libmpdec/basearith.c
---- Python3.4.3.orig/Modules/_decimal/libmpdec/basearith.c
-+++ Python3.4.3.new/Modules/_decimal/libmpdec/basearith.c
+diff --git Python3.4.7.orig/Modules/_decimal/libmpdec/basearith.c Python3.4.7.new/Modules/_decimal/libmpdec/basearith.c
+--- Python3.4.7.orig/Modules/_decimal/libmpdec/basearith.c
++++ Python3.4.7.new/Modules/_decimal/libmpdec/basearith.c
 @@ -32,7 +32,7 @@
  #include <string.h>
  #include <assert.h>
@@ -2048,9 +2048,9 @@ diff --git Python3.4.3.orig/Modules/_decimal/libmpdec/basearith.c Python3.4.3.ne
  #include "typearith.h"
  #include "basearith.h"
  
-diff --git Python3.4.3.orig/Modules/_decimal/libmpdec/io.c Python3.4.3.new/Modules/_decimal/libmpdec/io.c
---- Python3.4.3.orig/Modules/_decimal/libmpdec/io.c
-+++ Python3.4.3.new/Modules/_decimal/libmpdec/io.c
+diff --git Python3.4.7.orig/Modules/_decimal/libmpdec/io.c Python3.4.7.new/Modules/_decimal/libmpdec/io.c
+--- Python3.4.7.orig/Modules/_decimal/libmpdec/io.c
++++ Python3.4.7.new/Modules/_decimal/libmpdec/io.c
 @@ -37,7 +37,7 @@
  #include <locale.h>
  #include "bits.h"
@@ -2083,9 +2083,9 @@ diff --git Python3.4.3.orig/Modules/_decimal/libmpdec/io.c Python3.4.3.new/Modul
          if (mpd_validate_lconv(spec) < 0) {
              return 0; /* GCOV_NOT_REACHED */
          }
-diff --git Python3.4.3.orig/Modules/_decimal/libmpdec/memory.c Python3.4.3.new/Modules/_decimal/libmpdec/memory.c
---- Python3.4.3.orig/Modules/_decimal/libmpdec/memory.c
-+++ Python3.4.3.new/Modules/_decimal/libmpdec/memory.c
+diff --git Python3.4.7.orig/Modules/_decimal/libmpdec/memory.c Python3.4.7.new/Modules/_decimal/libmpdec/memory.c
+--- Python3.4.7.orig/Modules/_decimal/libmpdec/memory.c
++++ Python3.4.7.new/Modules/_decimal/libmpdec/memory.c
 @@ -30,7 +30,7 @@
  #include <stdio.h>
  #include <stdlib.h>
@@ -2095,9 +2095,9 @@ diff --git Python3.4.3.orig/Modules/_decimal/libmpdec/memory.c Python3.4.3.new/M
  
  
  /* Guaranteed minimum allocation for a coefficient. May be changed once
-diff --git Python3.4.3.orig/Modules/_decimal/libmpdec/mpdecimal.c Python3.4.3.new/Modules/_decimal/libmpdec/mpdecimal.c
---- Python3.4.3.orig/Modules/_decimal/libmpdec/mpdecimal.c
-+++ Python3.4.3.new/Modules/_decimal/libmpdec/mpdecimal.c
+diff --git Python3.4.7.orig/Modules/_decimal/libmpdec/mpdecimal.c Python3.4.7.new/Modules/_decimal/libmpdec/mpdecimal.c
+--- Python3.4.7.orig/Modules/_decimal/libmpdec/mpdecimal.c
++++ Python3.4.7.new/Modules/_decimal/libmpdec/mpdecimal.c
 @@ -36,7 +36,7 @@
  #include "bits.h"
  #include "convolute.h"
@@ -2107,20 +2107,9 @@ diff --git Python3.4.3.orig/Modules/_decimal/libmpdec/mpdecimal.c Python3.4.3.ne
  #include "typearith.h"
  #include "umodarith.h"
  
-diff --git Python3.4.3.orig/Modules/_decimal/libmpdec/mpdecimal.h Python3.4.3.new/Modules/_decimal/libmpdec/mpdecimal.h
---- Python3.4.3.orig/Modules/_decimal/libmpdec/mpdecimal.h
-+++ Python3.4.3.new/Modules/_decimal/libmpdec/mpdecimal.h
-@@ -372,6 +372,7 @@ void mpd_addstatus_raise(mpd_context_t *ctx, uint32_t flags);
- #define MPD_CONST_DATA          ((uint8_t)128)
- #define MPD_DATAFLAGS (MPD_STATIC_DATA|MPD_SHARED_DATA|MPD_CONST_DATA)
- 
-+
- /* mpd_t */
- typedef struct mpd_t {
-     uint8_t flags;
-diff --git Python3.4.3.orig/Modules/_decimal/libmpdec/memory.h Python3.4.3.new/Modules/_decimal/libmpdec/mpmemory.h
---- Python3.4.3.orig/Modules/_decimal/libmpdec/memory.h
-+++ Python3.4.3.new/Modules/_decimal/libmpdec/mpmemory.h
+diff --git Python3.4.7.orig/Modules/_decimal/libmpdec/memory.h Python3.4.7.new/Modules/_decimal/libmpdec/mpmemory.h
+--- Python3.4.7.orig/Modules/_decimal/libmpdec/memory.h
++++ Python3.4.7.new/Modules/_decimal/libmpdec/mpmemory.h
 @@ -26,8 +26,8 @@
   */
  
@@ -2132,15 +2121,15 @@ diff --git Python3.4.3.orig/Modules/_decimal/libmpdec/memory.h Python3.4.3.new/M
  
  
  #include "mpdecimal.h"
-diff --git Python3.4.3.new/Modules/_hashlib.c Python3.4.3.new/Modules/_hashlib.c
+diff --git Python3.4.7.new/Modules/_hashlib.c Python3.4.7.new/Modules/_hashlib.c
 new file mode 100644
 --- /dev/null
-+++ Python3.4.3.new/Modules/_hashlib.c
++++ Python3.4.7.new/Modules/_hashlib.c
 @@ -0,0 +1 @@
 +#include "_hashopenssl.c"
-diff --git Python3.4.3.orig/Modules/_hashopenssl.c Python3.4.3.new/Modules/_hashopenssl.c
---- Python3.4.3.orig/Modules/_hashopenssl.c
-+++ Python3.4.3.new/Modules/_hashopenssl.c
+diff --git Python3.4.7.orig/Modules/_hashopenssl.c Python3.4.7.new/Modules/_hashopenssl.c
+--- Python3.4.7.orig/Modules/_hashopenssl.c
++++ Python3.4.7.new/Modules/_hashopenssl.c
 @@ -39,7 +39,7 @@
  typedef struct {
      PyObject_HEAD
@@ -2319,7 +2308,7 @@ diff --git Python3.4.3.orig/Modules/_hashopenssl.c Python3.4.3.new/Modules/_hash
 +        HMAC_CTX_free(hctx_tpl);
          return 0;
      }
-     while(tkeylen) {
+     while (tkeylen) {
 @@ -520,31 +528,33 @@ PKCS5_PBKDF2_HMAC_fast(const char *pass, int passlen,
          itmp[1] = (unsigned char)((i >> 16) & 0xff);
          itmp[2] = (unsigned char)((i >> 8) & 0xff);
@@ -2399,9 +2388,9 @@ diff --git Python3.4.3.orig/Modules/_hashopenssl.c Python3.4.3.new/Modules/_hash
          } \
      } \
  } while (0);
-diff --git Python3.4.3.orig/Modules/_localemodule.c Python3.4.3.new/Modules/_localemodule.c
---- Python3.4.3.orig/Modules/_localemodule.c
-+++ Python3.4.3.new/Modules/_localemodule.c
+diff --git Python3.4.7.orig/Modules/_localemodule.c Python3.4.7.new/Modules/_localemodule.c
+--- Python3.4.7.orig/Modules/_localemodule.c
++++ Python3.4.7.new/Modules/_localemodule.c
 @@ -134,7 +134,7 @@ static PyObject*
  PyLocale_localeconv(PyObject* self)
  {
@@ -2481,10 +2470,10 @@ diff --git Python3.4.3.orig/Modules/_localemodule.c Python3.4.3.new/Modules/_loc
      return result;
  
    failed:
-diff --git Python3.4.3.orig/Modules/_posixsubprocess.c Python3.4.3.new/Modules/_posixsubprocess.c
---- Python3.4.3.orig/Modules/_posixsubprocess.c
-+++ Python3.4.3.new/Modules/_posixsubprocess.c
-@@ -20,7 +20,11 @@
+diff --git Python3.4.7.orig/Modules/_posixsubprocess.c Python3.4.7.new/Modules/_posixsubprocess.c
+--- Python3.4.7.orig/Modules/_posixsubprocess.c
++++ Python3.4.7.new/Modules/_posixsubprocess.c
+@@ -23,7 +23,11 @@
  
  #if defined(__ANDROID__) && !defined(SYS_getdents64)
  /* Android doesn't expose syscalls, add the definition manually. */
@@ -2497,15 +2486,15 @@ diff --git Python3.4.3.orig/Modules/_posixsubprocess.c Python3.4.3.new/Modules/_
  # define SYS_getdents64  __NR_getdents64
  #endif
  
-diff --git Python3.4.3.orig/Modules/_ssl.c Python3.4.3.new/Modules/_ssl.c
---- Python3.4.3.orig/Modules/_ssl.c
-+++ Python3.4.3.new/Modules/_ssl.c
+diff --git Python3.4.7.orig/Modules/_ssl.c Python3.4.7.new/Modules/_ssl.c
+--- Python3.4.7.orig/Modules/_ssl.c
++++ Python3.4.7.new/Modules/_ssl.c
 @@ -55,6 +55,10 @@ static PySocketModule_APIObject PySocketModule;
  #include <sys/poll.h>
  #endif
  
 +#ifdef __ANDROID_API__
-+#include <fts.h>
++#include <dirent.h>
 +#endif
 +
  /* Include OpenSSL header files */
@@ -2551,16 +2540,25 @@ diff --git Python3.4.3.orig/Modules/_ssl.c Python3.4.3.new/Modules/_ssl.c
  
          for(j = 0; j < sk_GENERAL_NAME_num(names); j++) {
              /* get a rendering of each name in the set of names */
-@@ -1030,7 +1034,7 @@ _get_crl_dp(X509 *certificate) {
-     int i, j, result;
-     PyObject *lst;
+@@ -1033,7 +1037,7 @@ _get_crl_dp(X509 *certificate) {
+     int i, j;
+     PyObject *lst, *res = NULL;
  
 -#if OPENSSL_VERSION_NUMBER < 0x10001000L
 +#if OPENSSL_VERSION_NUMBER < 0x10001000L || 1
-     dps = X509_get_ext_d2i(certificate, NID_crl_distribution_points,
-                            NULL, NULL);
+     dps = X509_get_ext_d2i(certificate, NID_crl_distribution_points, NULL, NULL);
  #else
-@@ -1428,9 +1432,9 @@ static PyObject *PySSL_compression(PySSLSocket *self) {
+     /* Calls x509v3_cache_extensions and sets up crldp */
+@@ -1083,7 +1087,7 @@ _get_crl_dp(X509 *certificate) {
+ 
+   done:
+     Py_XDECREF(lst);
+-#if OPENSSL_VERSION_NUMBER < 0x10001000L
++#if OPENSSL_VERSION_NUMBER < 0x10001000L || 1
+     sk_DIST_POINT_free(dps);
+ #endif
+     return res;
+@@ -1427,9 +1431,9 @@ static PyObject *PySSL_compression(PySSLSocket *self) {
      if (self->ssl == NULL)
          Py_RETURN_NONE;
      comp_method = SSL_get_current_compression(self->ssl);
@@ -2572,42 +2570,46 @@ diff --git Python3.4.3.orig/Modules/_ssl.c Python3.4.3.new/Modules/_ssl.c
      if (short_name == NULL)
          Py_RETURN_NONE;
      return PyUnicode_DecodeFSDefault(short_name);
-@@ -2082,6 +2086,34 @@ context_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
-     SSL_CTX_set_session_id_context(self->ctx, (const unsigned char *) SID_CTX,
+@@ -2064,6 +2068,38 @@ context_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
                                     sizeof(SID_CTX));
  #undef SID_CTX
-+    
+ 
 +#ifdef __ANDROID_API__
-+    FTS *certFileWalker;
-+    FTSENT *certFileInfo;
 +    struct stat certFileStat;
-+    int fts_options = FTS_COMFOLLOW | FTS_LOGICAL | FTS_NOCHDIR | FTS_NOSTAT;
++    struct dirent* entry;
++    DIR* certificationDir;
++    char pathBuffer[512];
++    FILE* certFile;
 +    static char* const certificationPaths[] = {
-+            "/system/etc/security/cacerts",
-+            "/data/misc/keychain/certs-added",
-+            NULL
++        "/system/etc/security/cacerts",
++        "/data/misc/keychain/certs-added"
 +    };
-+    
-+    if ((certFileWalker = fts_open(certificationPaths, fts_options, NULL)) != NULL) {
-+        while ((certFileInfo = fts_read(certFileWalker)) != NULL) {
-+            FILE *certFile = fopen(certFileInfo->fts_path, "r");
-+            if (certFile) {
-+                if (fstat(fileno(certFile), &certFileStat) == 0 && S_ISREG(certFileStat.st_mode)) {
-+                    X509 *cert = PEM_read_X509(certFile, NULL, NULL, NULL);
-+                    if (cert) {
-+                        X509_STORE_add_cert(SSL_CTX_get_cert_store(self->ctx), cert);
++    for (int i = 0; i < sizeof(certificationPaths) / sizeof(certificationPaths[0]); i++) {
++        if ((certificationDir = opendir(certificationPaths[i])) != NULL) {
++            while ((entry = readdir(certificationDir)) != NULL) {
++                if (entry->d_type == DT_REG || entry->d_type == DT_UNKNOWN) {
++                    snprintf(pathBuffer, 512, "%s/%s", certificationPaths[i], entry->d_name);
++                    certFile = fopen(pathBuffer, "r");
++                    if (certFile == NULL) { continue; }
++                    if (entry->d_type == DT_REG || (fstat(fileno(certFile), &certFileStat) == 0
++                                                    && S_ISREG(certFileStat.st_mode))) {
++                        X509 *cert = PEM_read_X509(certFile, NULL, NULL, NULL);
++                        if (cert) {
++                            X509_STORE_add_cert(SSL_CTX_get_cert_store(self->ctx), cert);
++                        }
 +                    }
++                    fclose(certFile);
 +                }
-+                fclose(certFile);
 +            }
++            closedir(certificationDir);
 +        }
-+        fts_close(certFileWalker);
 +    }
 +#endif
- 
-     return (PyObject *)self;
- }
-@@ -2272,7 +2304,7 @@ get_verify_flags(PySSLContext *self, void *c)
++
+ #ifdef X509_V_FLAG_TRUSTED_FIRST
+     {
+         /* Improve trust chain building when cross-signed intermediate
+@@ -2262,7 +2298,7 @@ get_verify_flags(PySSLContext *self, void *c)
      unsigned long flags;
  
      store = SSL_CTX_get_cert_store(self->ctx);
@@ -2616,7 +2618,7 @@ diff --git Python3.4.3.orig/Modules/_ssl.c Python3.4.3.new/Modules/_ssl.c
      return PyLong_FromUnsignedLong(flags);
  }
  
-@@ -2285,17 +2317,17 @@ set_verify_flags(PySSLContext *self, PyObject *arg, void *c)
+@@ -2275,17 +2311,17 @@ set_verify_flags(PySSLContext *self, PyObject *arg, void *c)
      if (!PyArg_Parse(arg, "k", &new_flags))
          return -1;
      store = SSL_CTX_get_cert_store(self->ctx);
@@ -2637,7 +2639,7 @@ diff --git Python3.4.3.orig/Modules/_ssl.c Python3.4.3.new/Modules/_ssl.c
              _setSSLError(NULL, 0, __FILE__, __LINE__);
              return -1;
          }
-@@ -2465,8 +2497,8 @@ load_cert_chain(PySSLContext *self, PyObject *args, PyObject *kwds)
+@@ -2455,8 +2491,8 @@ load_cert_chain(PySSLContext *self, PyObject *args, PyObject *kwds)
      char *kwlist[] = {"certfile", "keyfile", "password", NULL};
      PyObject *certfile, *keyfile = NULL, *password = NULL;
      PyObject *certfile_bytes = NULL, *keyfile_bytes = NULL;
@@ -2648,7 +2650,7 @@ diff --git Python3.4.3.orig/Modules/_ssl.c Python3.4.3.new/Modules/_ssl.c
      _PySSLPasswordInfo pw_info = { NULL, NULL, NULL, 0, 0 };
      int r;
  
-@@ -2597,8 +2629,8 @@ _add_ca_certs(PySSLContext *self, void *data, Py_ssize_t len,
+@@ -2587,8 +2623,8 @@ _add_ca_certs(PySSLContext *self, void *data, Py_ssize_t len,
              cert = d2i_X509_bio(biobuf, NULL);
          } else {
              cert = PEM_read_bio_X509(biobuf, NULL,
@@ -2659,7 +2661,7 @@ diff --git Python3.4.3.orig/Modules/_ssl.c Python3.4.3.new/Modules/_ssl.c
          }
          if (cert == NULL) {
              break;
-@@ -3050,21 +3082,21 @@ cert_store_stats(PySSLContext *self)
+@@ -3040,21 +3076,21 @@ cert_store_stats(PySSLContext *self)
      int x509 = 0, crl = 0, pkey = 0, ca = 0, i;
  
      store = SSL_CTX_get_cert_store(self->ctx);
@@ -2688,7 +2690,7 @@ diff --git Python3.4.3.orig/Modules/_ssl.c Python3.4.3.new/Modules/_ssl.c
              default:
                  /* Ignore X509_LU_FAIL, X509_LU_RETRY, X509_LU_PKEY.
                   * As far as I can tell they are internal states and never
-@@ -3103,17 +3135,17 @@ get_ca_certs(PySSLContext *self, PyObject *args, PyObject *kwds)
+@@ -3093,17 +3129,17 @@ get_ca_certs(PySSLContext *self, PyObject *args, PyObject *kwds)
      }
  
      store = SSL_CTX_get_cert_store(self->ctx);
@@ -2710,10 +2712,10 @@ diff --git Python3.4.3.orig/Modules/_ssl.c Python3.4.3.new/Modules/_ssl.c
          if (!X509_check_ca(cert)) {
              continue;
          }
-diff --git Python3.4.3.orig/Modules/_tkinter.c Python3.4.3.new/Modules/_tkinter.c
---- Python3.4.3.orig/Modules/_tkinter.c
-+++ Python3.4.3.new/Modules/_tkinter.c
-@@ -530,6 +530,8 @@ Tcl_AppInit(Tcl_Interp *interp)
+diff --git Python3.4.7.orig/Modules/_tkinter.c Python3.4.7.new/Modules/_tkinter.c
+--- Python3.4.7.orig/Modules/_tkinter.c
++++ Python3.4.7.new/Modules/_tkinter.c
+@@ -539,6 +539,8 @@ Tcl_AppInit(Tcl_Interp *interp)
  
      return TCL_OK;
  }
@@ -2722,11 +2724,11 @@ diff --git Python3.4.3.orig/Modules/_tkinter.c Python3.4.3.new/Modules/_tkinter.
  #endif /* !WITH_APPINIT */
  
  
-diff --git Python3.4.3.new/Modules/config.c Python3.4.3.new/Modules/config.c
+diff --git Python3.4.7.new/Modules/config.c Python3.4.7.new/Modules/config.c
 new file mode 100644
 --- /dev/null
-+++ Python3.4.3.new/Modules/config.c
-@@ -0,0 +1,209 @@
++++ Python3.4.7.new/Modules/config.c
+@@ -0,0 +1,227 @@
 +/* -*- C -*- ***********************************************
 +Copyright (c) 2000, BeOpen.com.
 +Copyright (c) 1995-2000, Corporation for National Research Initiatives.
@@ -2844,18 +2846,14 @@ new file mode 100644
 +    {"_string", PyInit__string},
 +
 +    /* These entries are here for sys.builtin_module_names */
-+    {"__main__", NULL},
-+    {"__builtin__", NULL},
++    {"builtins", NULL},
 +    {"sys", NULL},
-+    {"exceptions", NULL},
 +
 +    /* This lives in gcmodule.c */
 +    {"gc", PyInit_gc},
 +
 +    /* This lives in _warnings.c */
 +    {"_warnings", _PyWarnings_Init},
-+
-+    {"errno", PyInit_errno},
 +
 +    {"array", PyInit_array},
 +    {"audioop", PyInit_audioop},
@@ -2926,7 +2924,7 @@ new file mode 100644
 +    {"faulthandler", PyInit_faulthandler},
 +    {"resource", PyInit_resource},
 +    {"syslog", PyInit_syslog},
-+    {"decimal", PyInit__decimal},
++    {"_decimal", PyInit__decimal},
 +
 +    /* Sentinel */
 +    {0, 0}
@@ -2936,9 +2934,9 @@ new file mode 100644
 +#ifdef __cplusplus
 +}
 +#endif
-diff --git Python3.4.3.orig/Modules/ossaudiodev.c Python3.4.3.new/Modules/ossaudiodev.c
---- Python3.4.3.orig/Modules/ossaudiodev.c
-+++ Python3.4.3.new/Modules/ossaudiodev.c
+diff --git Python3.4.7.orig/Modules/ossaudiodev.c Python3.4.7.new/Modules/ossaudiodev.c
+--- Python3.4.7.orig/Modules/ossaudiodev.c
++++ Python3.4.7.new/Modules/ossaudiodev.c
 @@ -30,7 +30,11 @@
  #endif
  
@@ -2952,20 +2950,10 @@ diff --git Python3.4.3.orig/Modules/ossaudiodev.c Python3.4.3.new/Modules/ossaud
  
  #if defined(linux)
  
-diff --git Python3.4.3.orig/Modules/posixmodule.c Python3.4.3.new/Modules/posixmodule.c
---- Python3.4.3.orig/Modules/posixmodule.c
-+++ Python3.4.3.new/Modules/posixmodule.c
-@@ -175,7 +175,9 @@ corresponding Unix manual entries for more information on calls.");
- #define HAVE_PIPE       1
- #define HAVE_SYSTEM     1
- #define HAVE_WAIT       1
-+#ifndef __ANDROID__
- #define HAVE_TTYNAME    1
-+#endif /* __ANDROID__ */
- #endif  /* _MSC_VER */
- #endif  /* __BORLANDC__ */
- #endif  /* ! __WATCOMC__ || __QNX__ */
-@@ -6068,13 +6070,13 @@ posix_openpty(PyObject *self, PyObject *noargs)
+diff --git Python3.4.7.orig/Modules/posixmodule.c Python3.4.7.new/Modules/posixmodule.c
+--- Python3.4.7.orig/Modules/posixmodule.c
++++ Python3.4.7.new/Modules/posixmodule.c
+@@ -6089,13 +6089,13 @@ posix_openpty(PyObject *self, PyObject *noargs)
      if (_Py_set_inheritable(master_fd, 0, NULL) < 0)
          goto posix_error;
  
@@ -2986,9 +2974,9 @@ diff --git Python3.4.3.orig/Modules/posixmodule.c Python3.4.3.new/Modules/posixm
  #endif /* HAVE_OPENPTY */
  
      return Py_BuildValue("(ii)", master_fd, slave_fd);
-diff --git Python3.4.3.orig/Modules/pwdmodule.c Python3.4.3.new/Modules/pwdmodule.c
---- Python3.4.3.orig/Modules/pwdmodule.c
-+++ Python3.4.3.new/Modules/pwdmodule.c
+diff --git Python3.4.7.orig/Modules/pwdmodule.c Python3.4.7.new/Modules/pwdmodule.c
+--- Python3.4.7.orig/Modules/pwdmodule.c
++++ Python3.4.7.new/Modules/pwdmodule.c
 @@ -72,7 +72,7 @@ mkpwent(struct passwd *p)
      SETS(setIndex++, p->pw_passwd);
      PyStructSequence_SET_ITEM(v, setIndex++, _PyLong_FromUid(p->pw_uid));
@@ -2998,9 +2986,9 @@ diff --git Python3.4.3.orig/Modules/pwdmodule.c Python3.4.3.new/Modules/pwdmodul
      SETS(setIndex++, p->pw_dir);
      SETS(setIndex++, p->pw_shell);
  
-diff --git Python3.4.3.orig/Modules/signalmodule.c Python3.4.3.new/Modules/signalmodule.c
---- Python3.4.3.orig/Modules/signalmodule.c
-+++ Python3.4.3.new/Modules/signalmodule.c
+diff --git Python3.4.7.orig/Modules/signalmodule.c Python3.4.7.new/Modules/signalmodule.c
+--- Python3.4.7.orig/Modules/signalmodule.c
++++ Python3.4.7.new/Modules/signalmodule.c
 @@ -211,6 +211,18 @@ signal_handler(int sig_num)
      int save_errno = errno;
  
@@ -3020,9 +3008,9 @@ diff --git Python3.4.3.orig/Modules/signalmodule.c Python3.4.3.new/Modules/signa
      /* See NOTES section above */
      if (getpid() == main_pid)
  #endif
-diff --git Python3.4.3.orig/Modules/socketmodule.c Python3.4.3.new/Modules/socketmodule.c
---- Python3.4.3.orig/Modules/socketmodule.c
-+++ Python3.4.3.new/Modules/socketmodule.c
+diff --git Python3.4.7.orig/Modules/socketmodule.c Python3.4.7.new/Modules/socketmodule.c
+--- Python3.4.7.orig/Modules/socketmodule.c
++++ Python3.4.7.new/Modules/socketmodule.c
 @@ -260,6 +260,8 @@ if_indextoname(index) -- return the corresponding interface name\n\
  #include <net/if.h>
  #endif
@@ -3032,9 +3020,9 @@ diff --git Python3.4.3.orig/Modules/socketmodule.c Python3.4.3.new/Modules/socke
  /* Generic socket object definitions and includes */
  #define PySocket_BUILDING_SOCKET
  #include "socketmodule.h"
-diff --git Python3.4.3.orig/Modules/termios.c Python3.4.3.new/Modules/termios.c
---- Python3.4.3.orig/Modules/termios.c
-+++ Python3.4.3.new/Modules/termios.c
+diff --git Python3.4.7.orig/Modules/termios.c Python3.4.7.new/Modules/termios.c
+--- Python3.4.7.orig/Modules/termios.c
++++ Python3.4.7.new/Modules/termios.c
 @@ -220,6 +220,7 @@ termios_tcsendbreak(PyObject *self, PyObject *args)
      return Py_None;
  }
@@ -3062,9 +3050,9 @@ diff --git Python3.4.3.orig/Modules/termios.c Python3.4.3.new/Modules/termios.c
      {"tcflush", termios_tcflush,
       METH_VARARGS, termios_tcflush__doc__},
      {"tcflow", termios_tcflow,
-diff --git Python3.4.3.orig/Python/bltinmodule.c Python3.4.3.new/Python/bltinmodule.c
---- Python3.4.3.orig/Python/bltinmodule.c
-+++ Python3.4.3.new/Python/bltinmodule.c
+diff --git Python3.4.7.orig/Python/bltinmodule.c Python3.4.7.new/Python/bltinmodule.c
+--- Python3.4.7.orig/Python/bltinmodule.c
++++ Python3.4.7.new/Python/bltinmodule.c
 @@ -24,7 +24,7 @@
  #ifdef HAVE_MBCS
  const char *Py_FileSystemDefaultEncoding = "mbcs";
@@ -3074,23 +3062,23 @@ diff --git Python3.4.3.orig/Python/bltinmodule.c Python3.4.3.new/Python/bltinmod
  const char *Py_FileSystemDefaultEncoding = "utf-8";
  int Py_HasFileSystemDefaultEncoding = 1;
  #else
-diff --git Python3.4.3.orig/Python/condvar.h Python3.4.3.new/Python/condvar.h
---- Python3.4.3.orig/Python/condvar.h
-+++ Python3.4.3.new/Python/condvar.h
+diff --git Python3.4.7.orig/Python/condvar.h Python3.4.7.new/Python/condvar.h
+--- Python3.4.7.orig/Python/condvar.h
++++ Python3.4.7.new/Python/condvar.h
 @@ -94,6 +94,10 @@ PyCOND_TIMEDWAIT(PyCOND_T *cond, PyMUTEX_T *mut, PY_LONG_LONG us)
      int r;
      struct timespec ts;
      struct timeval deadline;
 +    
-+    if (us < 5) us = 5; // TODO: This prevents a deadlock which would occur when running
++    if (us < 20) us = 20; // TODO: This prevents a deadlock which would occur when running
 +    // TODO: test_pending_calls_race in test_concurrent_futures, linked to the call sys.setswitchinterval(1e-6).
 +    // TODO: Investigate why there is a deadlock in the first place.
  
      PyCOND_GETTIMEOFDAY(&deadline);
      PyCOND_ADD_MICROSECONDS(deadline, us);
-diff --git Python3.4.3.orig/Python/formatter_unicode.c Python3.4.3.new/Python/formatter_unicode.c
---- Python3.4.3.orig/Python/formatter_unicode.c
-+++ Python3.4.3.new/Python/formatter_unicode.c
+diff --git Python3.4.7.orig/Python/formatter_unicode.c Python3.4.7.new/Python/formatter_unicode.c
+--- Python3.4.7.orig/Python/formatter_unicode.c
++++ Python3.4.7.new/Python/formatter_unicode.c
 @@ -666,7 +666,7 @@ static int
  get_locale_info(int type, LocaleInfo *locale_info)
  {
@@ -3100,19 +3088,18 @@ diff --git Python3.4.3.orig/Python/formatter_unicode.c Python3.4.3.new/Python/fo
          struct lconv *locale_data = localeconv();
          locale_info->decimal_point = PyUnicode_DecodeLocale(
                                           locale_data->decimal_point,
-@@ -681,8 +681,7 @@ get_locale_info(int type, LocaleInfo *locale_info)
-             return -1;
+@@ -682,7 +682,7 @@ get_locale_info(int type, LocaleInfo *locale_info)
          }
          locale_info->grouping = locale_data->grouping;
--        break;
+         break;
 -    }
-+        break;*/
++    }*/
      case LT_DEFAULT_LOCALE:
          locale_info->decimal_point = PyUnicode_FromOrdinal('.');
          locale_info->thousands_sep = PyUnicode_FromOrdinal(',');
-diff --git Python3.4.3.orig/Python/pystrtod.c Python3.4.3.new/Python/pystrtod.c
---- Python3.4.3.orig/Python/pystrtod.c
-+++ Python3.4.3.new/Python/pystrtod.c
+diff --git Python3.4.7.orig/Python/pystrtod.c Python3.4.7.new/Python/pystrtod.c
+--- Python3.4.7.orig/Python/pystrtod.c
++++ Python3.4.7.new/Python/pystrtod.c
 @@ -165,7 +165,7 @@ _PyOS_ascii_strtod(const char *nptr, char **endptr)
  {
      char *fail_pos;

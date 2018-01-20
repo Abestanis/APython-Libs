@@ -337,7 +337,7 @@ class Builder:
         """>>> getPatchFile(version) -> path
         Return the path to the patch file for the specified Python version.
         """
-        patchFile = os.path.join(self.config.patchesDir, 'python' + version + '.patch')
+        patchFile = os.path.join(self.config.patchesDir, 'Python' + version + '.patch')
         if not os.path.exists(patchFile):
             patchFile = None
         return patchFile

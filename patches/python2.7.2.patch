@@ -1900,7 +1900,7 @@ diff --git Python2.7.2.orig/Modules/_ssl.c Python2.7.2.new/Modules/_ssl.c
  #endif
  
 +#ifdef __ANDROID_API__
-+#include <fts.h>
++#include <dirent.h>
 +#endif
 +
  /* Include OpenSSL header files */
@@ -1917,43 +1917,47 @@ diff --git Python2.7.2.orig/Modules/_ssl.c Python2.7.2.new/Modules/_ssl.c
  #ifndef OPENSSL_NO_SSL2
      else if (proto_version == PY_SSL_VERSION_SSL2)
          self->ctx = SSL_CTX_new(SSLv2_method()); /* Set up context */
-@@ -406,6 +412,35 @@ newPySSLObject(PySocketSockObject *Sock, char *key_file, char *cert_file,
+@@ -406,6 +412,39 @@ newPySSLObject(PySocketSockObject *Sock, char *key_file, char *cert_file,
  
      self->Socket = Sock;
      Py_INCREF(self->Socket);
 +
 +#ifdef __ANDROID_API__
-+    FTS *certFileWalker;
-+    FTSENT *certFileInfo;
 +    struct stat certFileStat;
-+    int fts_options = FTS_COMFOLLOW | FTS_LOGICAL | FTS_NOCHDIR | FTS_NOSTAT;
++    struct dirent* entry;
++    DIR* certificationDir;
++    char pathBuffer[512];
++    FILE* certFile;
 +    static char* const certificationPaths[] = {
-+            "/system/etc/security/cacerts",
-+            "/data/misc/keychain/certs-added",
-+            NULL
++        "/system/etc/security/cacerts",
++        "/data/misc/keychain/certs-added"
 +    };
-+    
-+    if ((certFileWalker = fts_open(certificationPaths, fts_options, NULL)) != NULL) {
-+        while ((certFileInfo = fts_read(certFileWalker)) != NULL) {
-+            FILE *certFile = fopen(certFileInfo->fts_path, "r");
-+            if (certFile) {
-+                if (fstat(fileno(certFile), &certFileStat) == 0 && S_ISREG(certFileStat.st_mode)) {
-+                    X509 *cert = PEM_read_X509(certFile, NULL, NULL, NULL);
-+                    if (cert) {
-+                        X509_STORE_add_cert(SSL_CTX_get_cert_store(self->ctx), cert);
++    for (int i = 0; i < sizeof(certificationPaths) / sizeof(certificationPaths[0]); i++) {
++        if ((certificationDir = opendir(certificationPaths[i])) != NULL) {
++            while ((entry = readdir(certificationDir)) != NULL) {
++                if (entry->d_type == DT_REG || entry->d_type == DT_UNKNOWN) {
++                    snprintf(pathBuffer, 512, "%s/%s", certificationPaths[i], entry->d_name);
++                    certFile = fopen(pathBuffer, "r");
++                    if (certFile == NULL) { continue; }
++                    if (entry->d_type == DT_REG || (fstat(fileno(certFile), &certFileStat) == 0
++                                                    && S_ISREG(certFileStat.st_mode))) {
++                        X509 *cert = PEM_read_X509(certFile, NULL, NULL, NULL);
++                        if (cert) {
++                            X509_STORE_add_cert(SSL_CTX_get_cert_store(self->ctx), cert);
++                        }
 +                    }
++                    fclose(certFile);
 +                }
-+                fclose(certFile);
 +            }
++            closedir(certificationDir);
 +        }
-+        fts_close(certFileWalker);
 +    }
 +#endif
 +
      return self;
   fail:
      if (errstr)
-@@ -606,7 +641,7 @@ _create_tuple_for_X509_NAME (X509_NAME *xname)
+@@ -606,7 +645,7 @@ _create_tuple_for_X509_NAME (X509_NAME *xname)
  
          /* check to see if we've gotten to a new RDN */
          if (rdn_level >= 0) {
@@ -1962,7 +1966,7 @@ diff --git Python2.7.2.orig/Modules/_ssl.c Python2.7.2.new/Modules/_ssl.c
                  /* yes, new RDN */
                  /* add old RDN to DN */
                  rdnt = PyList_AsTuple(rdn);
-@@ -623,7 +658,7 @@ _create_tuple_for_X509_NAME (X509_NAME *xname)
+@@ -623,7 +662,7 @@ _create_tuple_for_X509_NAME (X509_NAME *xname)
                      goto fail0;
              }
          }
@@ -1971,7 +1975,7 @@ diff --git Python2.7.2.orig/Modules/_ssl.c Python2.7.2.new/Modules/_ssl.c
  
          /* now add this attribute to the current RDN */
          name = X509_NAME_ENTRY_get_object(entry);
-@@ -720,16 +755,16 @@ _get_peer_alt_names (X509 *certificate) {
+@@ -720,16 +759,16 @@ _get_peer_alt_names (X509 *certificate) {
              goto fail;
          }
  
@@ -2007,7 +2011,7 @@ diff --git Python2.7.2.new/Modules/config.c Python2.7.2.new/Modules/config.c
 new file mode 100644
 --- /dev/null
 +++ Python2.7.2.new/Modules/config.c
-@@ -0,0 +1,200 @@
+@@ -0,0 +1,198 @@
 +/* -*- C -*- ***********************************************
 +Copyright (c) 2000, BeOpen.com.
 +Copyright (c) 1995-2000, Corporation for National Research Initiatives.
@@ -2129,8 +2133,6 @@ new file mode 100644
 +
 +    /* This lives in _warnings.c */
 +    {"_warnings", _PyWarnings_Init},
-+
-+    {"errno", initerrno},
 +
 +    {"array", initarray},
 +    {"audioop", initaudioop},
@@ -2260,17 +2262,7 @@ diff --git Python2.7.2.orig/Modules/ossaudiodev.c Python2.7.2.new/Modules/ossaud
 diff --git Python2.7.2.orig/Modules/posixmodule.c Python2.7.2.new/Modules/posixmodule.c
 --- Python2.7.2.orig/Modules/posixmodule.c
 +++ Python2.7.2.new/Modules/posixmodule.c
-@@ -154,7 +154,9 @@ corresponding Unix manual entries for more information on calls.");
- #endif
- #define HAVE_SYSTEM     1
- #define HAVE_WAIT       1
-+#ifndef __ANDROID__
- #define HAVE_TTYNAME    1
-+#endif /* __ANDROID__ */
- #endif  /* PYOS_OS2 && PYCC_GCC && __VMS */
- #endif  /* _MSC_VER */
- #endif  /* __BORLANDC__ */
-@@ -3787,13 +3789,13 @@ posix_openpty(PyObject *self, PyObject *noargs)
+@@ -3787,13 +3787,13 @@ posix_openpty(PyObject *self, PyObject *noargs)
      slave_fd = open(slave_name, O_RDWR | O_NOCTTY); /* open slave */
      if (slave_fd < 0)
          return posix_error();
