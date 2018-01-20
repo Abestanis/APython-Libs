@@ -237,9 +237,13 @@ class Builder:
                         dataSource, dataName = dataEntry[0], dataEntry[1]
                         dataSrcPath = os.path.join(extractDir, dataSource)
                         if not os.path.exists(dataSrcPath):
-                            self.config.log.warn('Data source defined for library {name} does not '
-                                                 'exist: {dataSource}. Skipping it.'
-                                                 .format(name=libraryName, dataSource=dataSource))
+                            dataSrcPath = os.path.join(self.config.filesDir,
+                                                       libraryName, dataSource)
+                            if not os.path.exists(dataSrcPath):
+                                self.config.log.warn(
+                                    'Data source defined for library {name} does not exist: '
+                                    '{dataSource}. Skipping it.'.format(
+                                        name=libraryName, dataSource=dataSource))
                             continue
                         if os.path.isdir(dataSrcPath):
                             shutil.make_archive(
