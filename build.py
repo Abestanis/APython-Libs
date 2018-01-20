@@ -21,6 +21,7 @@ from argparse import ArgumentParser
 from collections import OrderedDict
 from tempfile import mkdtemp
 from time import time, sleep
+from glob import glob
 from typing import Dict, Optional
 try:
     from http.client import HTTPSConnection as Connection
@@ -253,6 +254,15 @@ class Builder:
                             destination = os.path.join(self.config.outputDir, 'data',
                                                        dataName + os.path.splitext(dataSrcPath)[1])
                             shutil.copy(dataSrcPath, destination)
+                if 'includeDir' in libraryData:
+                    includeDir = os.path.join(extractDir, 'inc', libraryData['includeDir'])
+                    os.makedirs(includeDir)
+                    includeFilters = libraryData.get('includeDirContent', ['include/*.h'])
+                    filesToCopy = set()
+                    for includeFilter in includeFilters:
+                        filesToCopy.update(glob(os.path.join(extractDir, includeFilter)))
+                    for path in filesToCopy:
+                        shutil.copy(path, includeDir)
                 libs[libraryName] = extractDir
             applicationMKPath = os.path.join(sourceDir, 'Application.mk')
             buildutils.fillTemplate(

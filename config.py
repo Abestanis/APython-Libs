@@ -27,12 +27,14 @@ class Configuration:
     # additionalLibs_template = {
     #     'libName': {
     #         'url': '',
-    #         'dependencies': [],                      # optional
-    #         'extractionFilter': [],                  # optional
-    #         'pyModuleReq': [],                       # optional
-    #         'py3ModuleReq': [],                      # optional
-    #         'minAndroidSdk': 9,                      # optional
-    #         'data': [['src', 'output_name', 'dest']] # optional
+    #         'dependencies': [],                     # optional
+    #         'extractionFilter': [],                 # optional
+    #         'pyModuleReq': [],                      # optional
+    #         'py3ModuleReq': [],                     # optional
+    #         'includeDir': '',                       # optional
+    #         'includeDirContent': [],                # optional
+    #         'minAndroidSdk': 9,                     # optional
+    #         'data': [['src', 'output_name', 'dst']] # optional
     #     }
     # }
     additionalLibs = None
@@ -165,6 +167,10 @@ class Configuration:
                 libData['pyModuleReq'] = rawData['py_module_dep'].split(', ')
             if 'py3_module_dep' in rawData.keys():
                 libData['py3ModuleReq'] = rawData['py3_module_dep'].split(', ')
+            if 'include_dir' in rawData.keys():
+                libData['includeDir'] = rawData['include_dir']
+            if 'include_dir_content' in rawData.keys():
+                libData['includeDirContent'] = rawData['include_dir_content'].split()
             if 'min_android_sdk' in rawData.keys():
                 if not rawData['min_android_sdk'].isdigit():
                     self.log.warn(
