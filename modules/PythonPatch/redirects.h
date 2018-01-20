@@ -12,6 +12,7 @@ __attribute__((visibility("default"))) void setExitHandler(_exitHandler handler)
 char* __wrap_setlocale(int category, const char *locale);
 void __noreturn __wrap_exit(int code);
 size_t __wrap_mbstowcs(wchar_t *dest, const char * src, size_t len);
+char* __wrap_ttyname(int __fd);
 
 #ifdef __cplusplus
 }
