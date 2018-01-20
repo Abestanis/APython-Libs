@@ -3,7 +3,8 @@ import re
 import tarfile
 import subprocess
 from typing import Union, Tuple, Optional, List
-from urllib.request import urlopen, URLError
+from urllib.request import urlopen
+from urllib.error import URLError
 from contextlib import closing
 from hashlib import md5
 from multiprocessing import Pool

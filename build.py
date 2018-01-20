@@ -610,7 +610,7 @@ class Builder:
                         buildutils.createMd5Hash(dataPath)
                     ]}
                     if data[2] != 'files/data':
-                        item['dest'] = data[2]
+                        item['dst'] = data[2]
                     dataItem[data[1]] = item
 
         additionalLibs = set()
@@ -653,13 +653,13 @@ class Builder:
                 if not os.path.isdir(abiDir):
                     continue
                 architectureItem = OrderedDict()
-                if not 'libpython{ver}.so'.format(ver=buildutils.getShortVersion(version)) in \
+                if not 'lib' + 'python{ver}.so'.format(ver=buildutils.getShortVersion(version)) in \
                        os.listdir(abiDir):
                     self.config.log.error('The python library was not found in {path}.'
                                           .format(path=abiDir))
                     return False
                 for libFile in os.listdir(abiDir):
-                    lib = 'pythonLib' if 'libpython' in libFile else libFile[:-3]
+                    lib = 'pythonLib' if 'lib' + 'python' in libFile else libFile[:-3]
                     libPath = os.path.join(abiDir, libFile)
                     architectureItem[lib] = [
                         'output/{versionDir}/{abi}/{libFile}'

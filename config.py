@@ -225,9 +225,7 @@ class Configuration:
         result = {}
         for libName, libData in libDataTable.items():
             sdkVersion = libData[0]
-            if sdkVersion not in result:
-                result[sdkVersion] = []
-            result[sdkVersion].append(libName)
+            result.setdefault(sdkVersion, []).append(libName)
         return result
 
     def resolvePath(self, path: str) -> Optional[str]:
