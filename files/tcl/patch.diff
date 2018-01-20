@@ -2,7 +2,7 @@ diff --git Tcl.new/unix/tclConfig.h Tcl.new/unix/tclConfig.h
 new file mode 100644
 --- /dev/null
 +++ Tcl.new/unix/tclConfig.h
-@@ -0,0 +1,534 @@
+@@ -0,0 +1,538 @@
 +/* ../unix/tclConfig.h  */
 +
 +#ifndef _TCLCONFIG
@@ -39,7 +39,11 @@ new file mode 100644
 +#define HAVE_FREEADDRINFO 1
 +
 +/* Do we have fts functions? */
-+#define HAVE_FTS 1
++#if __ANDROID_API__ >= 21
++#  define HAVE_FTS 1
++#else
++#  undef HAVE_FTS
++#endif /* __ANDROID_API__ >= 21 */
 +
 +/* Define to 1 if you have the `gai_strerror' function. */
 +#define HAVE_GAI_STRERROR 1

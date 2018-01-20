@@ -13,7 +13,7 @@ EXCLUDED_FILES := generic/tkPointer.c \
 
 LOCAL_SRC_FILES := $(filter-out $(EXCLUDED_FILES), $(FILE_LIST:$(LOCAL_PATH)/%=%))
 
-LOCAL_CFLAGS += -DHAVE_TK_CONFIG_H -imacros tkConfig.h
+LOCAL_CFLAGS += -DHAVE_TK_CONFIG_H --imacros=tkConfig.h
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/generic $(LOCAL_PATH)/unix $(LOCAL_PATH)/bitmaps
 LOCAL_EXPORT_C_INCLUDES += $(LOCAL_PATH)/generic

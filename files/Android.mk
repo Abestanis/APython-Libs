@@ -23,15 +23,12 @@ EXCLUDED_FILES := Modules/almodule.c \
                   Modules/imgfile.c \
                   Modules/nismodule.c \
                   Modules/overlapped.c \
-                  Modules/readline.c \
                   Modules/sgimodule.c \
                   Modules/spwdmodule.c \
                   Modules/sunaudiodev.c \
                   Modules/svmodule.c \
                   Modules/_bsddb.c \
                   Modules/_ctypes/darwin/dlfcn_simple.c \
-                  Modules/_curses_panel.c \
-                  Modules/_cursesmodule.c \
                   Modules/_dbmmodule.c \
                   Modules/_gdbmmodule.c \
                   Modules/_lzmamodule.c \
@@ -92,6 +89,9 @@ EXCLUDED_FILES := $(LOCAL_PATH)/Modules/_ssl.c \
                   $(LOCAL_PATH)/Modules/tkappinit.c \
                   $(LOCAL_PATH)/Modules/cryptmodule.c \
                   $(LOCAL_PATH)/Modules/_cryptmodule.c \
+                  $(LOCAL_PATH)/source/Modules/_curses_panel.c \
+                  $(LOCAL_PATH)/source/Modules/_cursesmodule.c \
+                  $(LOCAL_PATH)/source/Modules/readline.c \
                   $(wildcard $(LOCAL_PATH)/Modules/_ctypes/*) \
                   $(wildcard $(LOCAL_PATH)/Modules/_ctypes/*/*) \
 
@@ -119,14 +119,13 @@ endif
 ifneq (,$(filter $(TARGET_ARCH), x86_64 x86))
     LOCAL_CFLAGS += -D ASM
 endif
-
 ifeq ($(TARGET_ARCH), x86)
     LOCAL_CFLAGS += -U CONFIG_64 -D PPRO
 endif
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/Include $(LOCAL_PATH)/Modules $(LOCAL_PATH)/Modules/_io $(LOCAL_PATH)/Modules/expat $(LOCAL_PATH)/Modules/cjkcodecs $(LOCAL_PATH)/Modules/_decimal $(LOCAL_PATH)/Modules/_decimal/libmpdec
 LOCAL_EXPORT_C_INCLUDES += $(LOCAL_PATH)/Include
-LOCAL_SHARED_LIBRARIES := pythonPatch
+LOCAL_WHOLE_STATIC_LIBRARIES := pythonPatch
 LOCAL_LDLIBS := -lz
 
 LOCAL_SHORT_COMMANDS = true

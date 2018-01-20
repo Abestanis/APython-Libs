@@ -223,7 +223,5 @@ LOCAL_C_INCLUDES := $(LOCAL_PATH) \
                     $(dir $(wildcard $(LOCAL_PATH)/crypto/*/*.h))
 LOCAL_EXPORT_C_INCLUDES += $(LOCAL_PATH)/include
 
-LOCAL_SHARED_LIBRARIES := pythonPatch
-
 LOCAL_SHORT_COMMANDS = true
 include $(BUILD_SHARED_LIBRARY)

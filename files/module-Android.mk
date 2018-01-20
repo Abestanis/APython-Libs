@@ -5,7 +5,8 @@ LOCAL_MODULE := $(notdir $(LOCAL_PATH))Module
 LOCAL_SRC_FILES := {moduleSourceWildcards}
 LOCAL_SRC_FILES := $(LOCAL_SRC_FILES:$(LOCAL_PATH)/%=%)
 
-LOCAL_SHARED_LIBRARIES := pythonPatch python$(PYTHON_SHORT_VERSION) {libDependencies}
+LOCAL_SHARED_LIBRARIES := python$(PYTHON_SHORT_VERSION) {libDependencies}
+LOCAL_WHOLE_STATIC_LIBRARIES := pythonPatch
 LOCAL_MODULE_FILENAME := $(notdir $(LOCAL_PATH))
 
 LOCAL_CFLAGS := -D 'PLATFORM=\"android\"' \
