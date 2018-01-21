@@ -89,9 +89,9 @@ EXCLUDED_FILES := $(LOCAL_PATH)/Modules/_ssl.c \
                   $(LOCAL_PATH)/Modules/tkappinit.c \
                   $(LOCAL_PATH)/Modules/cryptmodule.c \
                   $(LOCAL_PATH)/Modules/_cryptmodule.c \
-                  $(LOCAL_PATH)/source/Modules/_curses_panel.c \
-                  $(LOCAL_PATH)/source/Modules/_cursesmodule.c \
-                  $(LOCAL_PATH)/source/Modules/readline.c \
+                  $(LOCAL_PATH)/Modules/_curses_panel.c \
+                  $(LOCAL_PATH)/Modules/_cursesmodule.c \
+                  $(LOCAL_PATH)/Modules/readline.c \
                   $(wildcard $(LOCAL_PATH)/Modules/_ctypes/*) \
                   $(wildcard $(LOCAL_PATH)/Modules/_ctypes/*/*) \
 
