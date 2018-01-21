@@ -245,7 +245,7 @@ class Builder:
                                     'Data source defined for library {name} does not exist: '
                                     '{dataSource}. Skipping it.'.format(
                                         name=libraryName, dataSource=dataSource))
-                            continue
+                                continue
                         if os.path.isdir(dataSrcPath):
                             shutil.make_archive(
                                 os.path.join(self.config.outputDir, 'data', dataName), 'zip',
