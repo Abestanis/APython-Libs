@@ -251,8 +251,9 @@ class Builder:
                                 os.path.join(self.config.outputDir, 'data', dataName), 'zip',
                                 root_dir=dataSrcPath)
                         else:
-                            destination = os.path.join(self.config.outputDir, 'data',
-                                                       dataName + os.path.splitext(dataSrcPath)[1])
+                            destination = os.path.join(
+                                self.config.outputDir, 'data',
+                                dataName + '.' + dataSrcPath.split('.', 1)[1])
                             shutil.copy(dataSrcPath, destination)
                 if 'includeDir' in libraryData:
                     includeDir = os.path.join(extractDir, 'inc', libraryData['includeDir'])
@@ -604,7 +605,12 @@ class Builder:
                 for data in libData['data']:
                     dataPath = os.path.join(self.config.outputDir, 'data', data[1])
                     if not os.path.exists(dataPath):
-                        dataPath += '.zip'
+                        for path in os.listdir(os.path.dirname(dataPath)):
+                            if path.startswith(data[1] + '.'):
+                                dataPath = os.path.join(os.path.dirname(dataPath), path)
+                                break
+                        else:
+                            dataPath += '.zip'
                     item = {'path': [
                         'output/data/{name}'.format(name=os.path.basename(dataPath)),
                         buildutils.createMd5Hash(dataPath)
