@@ -16,8 +16,10 @@ Currently these additional libraries are downloaded:
 * SDL2_ttf (from https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-2.0.14.tar.gz) for the library sdl2X11Emulation
 * bzip (from http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz) for the Python modules bz2, _bz2
 * ffi (from ftp://sourceware.org/pub/libffi/libffi-3.2.1.tar.gz) for the Python module _ctypes
+* ncurses (from ftp://ftp.gnu.org/gnu/ncurses/ncurses-6.0.tar.gz) for the Python modules _curses, _curses_panel
 * openSSL (from https://www.openssl.org/source/openssl-1.1.0f.tar.gz) for the Python modules _ssl, _hashlib, crypt, _crypt
 * pixman (from https://www.cairographics.org/releases/pixman-0.34.0.tar.gz) for the library sdl2X11Emulation
+* readline (from ftp://ftp.cwru.edu/pub/bash/readline-7.0.tar.gz) for the Python module readline
 * sdl2X11Emulation (from https://github.com/Abestanis/SDL2X11Emulation) for the library tk
 * tcl (from http://netix.dl.sourceforge.net/project/tcl/Tcl/8.6.4/tcl8.6.4-src.tar.gz) for the Python module _tkinter and for the library tk
 * tk (from http://freefr.dl.sourceforge.net/project/tcl/Tcl/8.6.4/tk8.6.4-src.tar.gz) for the Python module _tkinter
