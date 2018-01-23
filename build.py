@@ -596,9 +596,8 @@ class Builder:
                     moduleDependencies[moduleName].append('libraries/' + lib)
                 else:
                     moduleDependencies[moduleName] = ['libraries/' + lib]
-        for moduleName, moduleDependencies in sorted(moduleDependencies.items()):
-            requirements['pyModule/{name}'.format(name=moduleName)] = moduleDependencies
-
+        for moduleName, moduleDependencyList in sorted(moduleDependencies.items()):
+            requirements['pyModule/{name}'.format(name=moduleName)] = sorted(moduleDependencyList)
         dataItem = OrderedDict()
         for name, libData in sorted(self.config.additionalLibs.items()):
             if 'data' in libData.keys():
@@ -611,10 +610,10 @@ class Builder:
                                 break
                         else:
                             dataPath += '.zip'
-                    item = {'path': [
+                    item = OrderedDict(path=[
                         'output/data/{name}'.format(name=os.path.basename(dataPath)),
                         buildutils.createMd5Hash(dataPath)
-                    ]}
+                    ])
                     if data[2] != 'files/data':
                         item['dst'] = data[2]
                     dataItem[data[1]] = item
@@ -628,7 +627,7 @@ class Builder:
                     if libFile.startswith('lib') and libFile.endswith('.so'):
                         additionalLibs.add(libFile[3:-3])
             for lib in sorted(additionalLibs):
-                libItem = {}
+                libItem = OrderedDict()
                 for architecture in os.listdir(libraryDir):
                     if 'lib' + lib + '.so' in os.listdir(os.path.join(libraryDir, architecture)):
                         filePath = os.path.join(libraryDir, architecture, 'lib' + lib + '.so')
@@ -709,7 +708,8 @@ class Builder:
                     libList += ' and'
             if len(depList) > 0:
                 libList += ' for the {library} {list}'.format(
-                    library='libraries' if len(depList) > 1 else 'library', list=', '.join(depList))
+                    library='libraries' if len(depList) > 1 else 'library',
+                    list=', '.join(sorted(depList)))
             libList += '\n'
         with open(readmeTemplatePath, 'r') as template:
             with open(readmePath, 'w') as output:

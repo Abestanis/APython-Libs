@@ -49,8 +49,8 @@
 "libraries/openSSL"
 ],
 "pyModule/_tkinter": [
-"libraries/tk",
-"libraries/tcl"
+"libraries/tcl",
+"libraries/tk"
 ],
 "pyModule/bz2": [
 "libraries/bzip"
@@ -87,25 +87,21 @@
 },
 "libraries": {
 "SDL2": {
-"armeabi-v7a": [
-"output/libraries/armeabi-v7a/libSDL2.so",
-"63e1f29221ff5c944435580cb1bbe556"
+"arm64-v8a": [
+"output/libraries/arm64-v8a/libSDL2.so",
+"9b27abc2fc88359f42984cdc16a5a218"
 ],
 "armeabi": [
 "output/libraries/armeabi/libSDL2.so",
 "2b73e77574221a7a18793b76d08b9373"
 ],
-"x86_64": [
-"output/libraries/x86_64/libSDL2.so",
-"dbf0587c5317e3c88c3db8d32ddf1669"
+"armeabi-v7a": [
+"output/libraries/armeabi-v7a/libSDL2.so",
+"63e1f29221ff5c944435580cb1bbe556"
 ],
 "mips": [
 "output/libraries/mips/libSDL2.so",
 "f3613c40c39e7b4cc21261f7c3fb4d87"
-],
-"arm64-v8a": [
-"output/libraries/arm64-v8a/libSDL2.so",
-"9b27abc2fc88359f42984cdc16a5a218"
 ],
 "mips64": [
 "output/libraries/mips64/libSDL2.so",
@@ -114,28 +110,28 @@
 "x86": [
 "output/libraries/x86/libSDL2.so",
 "83f6f3aab9ec69a6d978ec7d6968df1f"
+],
+"x86_64": [
+"output/libraries/x86_64/libSDL2.so",
+"dbf0587c5317e3c88c3db8d32ddf1669"
 ]
 },
 "SDL2_gpu": {
-"armeabi-v7a": [
-"output/libraries/armeabi-v7a/libSDL2_gpu.so",
-"827dbf17f9f148476bbb3e20afc4cad0"
+"arm64-v8a": [
+"output/libraries/arm64-v8a/libSDL2_gpu.so",
+"5ada9833fc16062eb6aca8b39468ec32"
 ],
 "armeabi": [
 "output/libraries/armeabi/libSDL2_gpu.so",
 "ed2c6fb9dfd46b0ee1633fb1de826bcb"
 ],
-"x86_64": [
-"output/libraries/x86_64/libSDL2_gpu.so",
-"842f38671f2499be0b665c6d2d1dfa7d"
+"armeabi-v7a": [
+"output/libraries/armeabi-v7a/libSDL2_gpu.so",
+"827dbf17f9f148476bbb3e20afc4cad0"
 ],
 "mips": [
 "output/libraries/mips/libSDL2_gpu.so",
 "affd034edb5c59a790f49b129f0d0181"
-],
-"arm64-v8a": [
-"output/libraries/arm64-v8a/libSDL2_gpu.so",
-"5ada9833fc16062eb6aca8b39468ec32"
 ],
 "mips64": [
 "output/libraries/mips64/libSDL2_gpu.so",
@@ -144,28 +140,28 @@
 "x86": [
 "output/libraries/x86/libSDL2_gpu.so",
 "b4ee9c47e5d346ca67fdda6e26d8405a"
+],
+"x86_64": [
+"output/libraries/x86_64/libSDL2_gpu.so",
+"842f38671f2499be0b665c6d2d1dfa7d"
 ]
 },
 "SDL2_ttf": {
-"armeabi-v7a": [
-"output/libraries/armeabi-v7a/libSDL2_ttf.so",
-"27b5ab139cd6dbf9a8eed6ea7ca9f2bd"
+"arm64-v8a": [
+"output/libraries/arm64-v8a/libSDL2_ttf.so",
+"aa794aaadb6b124173209d7d84b2e782"
 ],
 "armeabi": [
 "output/libraries/armeabi/libSDL2_ttf.so",
 "24e2b50e1b4123c41902673ad5b10994"
 ],
-"x86_64": [
-"output/libraries/x86_64/libSDL2_ttf.so",
-"3e66fc8e86756e9d53db97dd831604ea"
+"armeabi-v7a": [
+"output/libraries/armeabi-v7a/libSDL2_ttf.so",
+"27b5ab139cd6dbf9a8eed6ea7ca9f2bd"
 ],
 "mips": [
 "output/libraries/mips/libSDL2_ttf.so",
 "ca8412b95764500c54d6750ad339fc79"
-],
-"arm64-v8a": [
-"output/libraries/arm64-v8a/libSDL2_ttf.so",
-"aa794aaadb6b124173209d7d84b2e782"
 ],
 "mips64": [
 "output/libraries/mips64/libSDL2_ttf.so",
@@ -174,28 +170,28 @@
 "x86": [
 "output/libraries/x86/libSDL2_ttf.so",
 "f322158cd4301a11a0972a6c7cf4ac5d"
+],
+"x86_64": [
+"output/libraries/x86_64/libSDL2_ttf.so",
+"3e66fc8e86756e9d53db97dd831604ea"
 ]
 },
 "bzip": {
-"armeabi-v7a": [
-"output/libraries/armeabi-v7a/libbzip.so",
-"acd3f112b22b3ac32e7f79e117904a4f"
+"arm64-v8a": [
+"output/libraries/arm64-v8a/libbzip.so",
+"f20fb1b0c6609c8c733c6021cbcae54a"
 ],
 "armeabi": [
 "output/libraries/armeabi/libbzip.so",
 "77244842cfaebd774a0ee04d6011d815"
 ],
-"x86_64": [
-"output/libraries/x86_64/libbzip.so",
-"b54d377a870dcbeee71c1a212ce895cf"
+"armeabi-v7a": [
+"output/libraries/armeabi-v7a/libbzip.so",
+"acd3f112b22b3ac32e7f79e117904a4f"
 ],
 "mips": [
 "output/libraries/mips/libbzip.so",
 "1d7b7c804ca3e19b38347d36b1b341b3"
-],
-"arm64-v8a": [
-"output/libraries/arm64-v8a/libbzip.so",
-"f20fb1b0c6609c8c733c6021cbcae54a"
 ],
 "mips64": [
 "output/libraries/mips64/libbzip.so",
@@ -204,28 +200,28 @@
 "x86": [
 "output/libraries/x86/libbzip.so",
 "0f605a0151de6fe94bc30077a7a3f299"
+],
+"x86_64": [
+"output/libraries/x86_64/libbzip.so",
+"b54d377a870dcbeee71c1a212ce895cf"
 ]
 },
 "ffi": {
-"armeabi-v7a": [
-"output/libraries/armeabi-v7a/libffi.so",
-"c91df2f5d43c6790aeb9e4ffaffdef7a"
+"arm64-v8a": [
+"output/libraries/arm64-v8a/libffi.so",
+"185bf98a47fb6a0a313df1d673eb4897"
 ],
 "armeabi": [
 "output/libraries/armeabi/libffi.so",
 "c8973cd25ce448aebf392e8011e6bcc6"
 ],
-"x86_64": [
-"output/libraries/x86_64/libffi.so",
-"0802322c190519112fd44d8e6f7f1b50"
+"armeabi-v7a": [
+"output/libraries/armeabi-v7a/libffi.so",
+"c91df2f5d43c6790aeb9e4ffaffdef7a"
 ],
 "mips": [
 "output/libraries/mips/libffi.so",
 "27203a46a734440db9fc2b763fe4ed81"
-],
-"arm64-v8a": [
-"output/libraries/arm64-v8a/libffi.so",
-"185bf98a47fb6a0a313df1d673eb4897"
 ],
 "mips64": [
 "output/libraries/mips64/libffi.so",
@@ -234,28 +230,28 @@
 "x86": [
 "output/libraries/x86/libffi.so",
 "d9c93febd2ae8ffaaf9349247ee74bfc"
+],
+"x86_64": [
+"output/libraries/x86_64/libffi.so",
+"0802322c190519112fd44d8e6f7f1b50"
 ]
 },
 "ncurses": {
-"armeabi-v7a": [
-"output/libraries/armeabi-v7a/libncurses.so",
-"b67b9e263a3d5da9fd9892265a794444"
+"arm64-v8a": [
+"output/libraries/arm64-v8a/libncurses.so",
+"d7dc14dce032c2b6c74a1b164e633342"
 ],
 "armeabi": [
 "output/libraries/armeabi/libncurses.so",
 "4bac89aa09251a422b670ed0e6773194"
 ],
-"x86_64": [
-"output/libraries/x86_64/libncurses.so",
-"be8ae297312355e0993b9bbb091ea69c"
+"armeabi-v7a": [
+"output/libraries/armeabi-v7a/libncurses.so",
+"b67b9e263a3d5da9fd9892265a794444"
 ],
 "mips": [
 "output/libraries/mips/libncurses.so",
 "f225368b52bc0921106611e073ec8276"
-],
-"arm64-v8a": [
-"output/libraries/arm64-v8a/libncurses.so",
-"d7dc14dce032c2b6c74a1b164e633342"
 ],
 "mips64": [
 "output/libraries/mips64/libncurses.so",
@@ -264,28 +260,28 @@
 "x86": [
 "output/libraries/x86/libncurses.so",
 "884c2018f556c8133b5bbad6401daacd"
+],
+"x86_64": [
+"output/libraries/x86_64/libncurses.so",
+"be8ae297312355e0993b9bbb091ea69c"
 ]
 },
 "openSSL": {
-"armeabi-v7a": [
-"output/libraries/armeabi-v7a/libopenSSL.so",
-"d404217420170229956df2cdbf47fe3f"
+"arm64-v8a": [
+"output/libraries/arm64-v8a/libopenSSL.so",
+"d0a103831ec12bc53980d7a900d1ed06"
 ],
 "armeabi": [
 "output/libraries/armeabi/libopenSSL.so",
 "2a4b5eb6598a7238422eccaceea01eb7"
 ],
-"x86_64": [
-"output/libraries/x86_64/libopenSSL.so",
-"8d617eca79de1b8c148684af323325da"
+"armeabi-v7a": [
+"output/libraries/armeabi-v7a/libopenSSL.so",
+"d404217420170229956df2cdbf47fe3f"
 ],
 "mips": [
 "output/libraries/mips/libopenSSL.so",
 "a8ef3b5a8fa4c1a5a182c9a212725a69"
-],
-"arm64-v8a": [
-"output/libraries/arm64-v8a/libopenSSL.so",
-"d0a103831ec12bc53980d7a900d1ed06"
 ],
 "mips64": [
 "output/libraries/mips64/libopenSSL.so",
@@ -294,28 +290,28 @@
 "x86": [
 "output/libraries/x86/libopenSSL.so",
 "cf6978a0ec826f99031583530256ddc1"
+],
+"x86_64": [
+"output/libraries/x86_64/libopenSSL.so",
+"8d617eca79de1b8c148684af323325da"
 ]
 },
 "pixman": {
-"armeabi-v7a": [
-"output/libraries/armeabi-v7a/libpixman.so",
-"8143638a88566310fc87b3681eee1a6b"
+"arm64-v8a": [
+"output/libraries/arm64-v8a/libpixman.so",
+"301f05934bc8e1c6544fc42cf93186db"
 ],
 "armeabi": [
 "output/libraries/armeabi/libpixman.so",
 "2569d3d8eaff8355db9ac921be875455"
 ],
-"x86_64": [
-"output/libraries/x86_64/libpixman.so",
-"38d557483abfb53c58146541d7086def"
+"armeabi-v7a": [
+"output/libraries/armeabi-v7a/libpixman.so",
+"8143638a88566310fc87b3681eee1a6b"
 ],
 "mips": [
 "output/libraries/mips/libpixman.so",
 "889d843cec09e1a8d0e0df79c148d635"
-],
-"arm64-v8a": [
-"output/libraries/arm64-v8a/libpixman.so",
-"301f05934bc8e1c6544fc42cf93186db"
 ],
 "mips64": [
 "output/libraries/mips64/libpixman.so",
@@ -324,28 +320,28 @@
 "x86": [
 "output/libraries/x86/libpixman.so",
 "10a09efeb0615b282d1f6a13df35cc08"
+],
+"x86_64": [
+"output/libraries/x86_64/libpixman.so",
+"38d557483abfb53c58146541d7086def"
 ]
 },
 "readline": {
-"armeabi-v7a": [
-"output/libraries/armeabi-v7a/libreadline.so",
-"da8013ee7faa9ea23dba902ee6e999af"
+"arm64-v8a": [
+"output/libraries/arm64-v8a/libreadline.so",
+"132d3c6a23fc38362059ea972d98e912"
 ],
 "armeabi": [
 "output/libraries/armeabi/libreadline.so",
 "225aaefe79285f00d0d6c67fc17d7252"
 ],
-"x86_64": [
-"output/libraries/x86_64/libreadline.so",
-"b38f854041c021ff766731525b258a33"
+"armeabi-v7a": [
+"output/libraries/armeabi-v7a/libreadline.so",
+"da8013ee7faa9ea23dba902ee6e999af"
 ],
 "mips": [
 "output/libraries/mips/libreadline.so",
 "24405003e95491f7a022cf234d7087e8"
-],
-"arm64-v8a": [
-"output/libraries/arm64-v8a/libreadline.so",
-"132d3c6a23fc38362059ea972d98e912"
 ],
 "mips64": [
 "output/libraries/mips64/libreadline.so",
@@ -354,28 +350,28 @@
 "x86": [
 "output/libraries/x86/libreadline.so",
 "8313eca8c04cee77860df5fff3f5cd5d"
+],
+"x86_64": [
+"output/libraries/x86_64/libreadline.so",
+"b38f854041c021ff766731525b258a33"
 ]
 },
 "sdl2X11Emulation": {
-"armeabi-v7a": [
-"output/libraries/armeabi-v7a/libsdl2X11Emulation.so",
-"8fd9be1ba11dd3c942e53e04c4197c6c"
+"arm64-v8a": [
+"output/libraries/arm64-v8a/libsdl2X11Emulation.so",
+"767a28a8d8de220bfef598aa490bf67a"
 ],
 "armeabi": [
 "output/libraries/armeabi/libsdl2X11Emulation.so",
 "cbe3cd4ec0eec7734ce53994f88a0c54"
 ],
-"x86_64": [
-"output/libraries/x86_64/libsdl2X11Emulation.so",
-"a7348e97f9b810ae2acc11cd58dab8bb"
+"armeabi-v7a": [
+"output/libraries/armeabi-v7a/libsdl2X11Emulation.so",
+"8fd9be1ba11dd3c942e53e04c4197c6c"
 ],
 "mips": [
 "output/libraries/mips/libsdl2X11Emulation.so",
 "40e06937e15b9d70b4c28c836e82c849"
-],
-"arm64-v8a": [
-"output/libraries/arm64-v8a/libsdl2X11Emulation.so",
-"767a28a8d8de220bfef598aa490bf67a"
 ],
 "mips64": [
 "output/libraries/mips64/libsdl2X11Emulation.so",
@@ -384,28 +380,28 @@
 "x86": [
 "output/libraries/x86/libsdl2X11Emulation.so",
 "75bcd0c2f750fff63ade68b46b139288"
+],
+"x86_64": [
+"output/libraries/x86_64/libsdl2X11Emulation.so",
+"a7348e97f9b810ae2acc11cd58dab8bb"
 ]
 },
 "tcl": {
-"armeabi-v7a": [
-"output/libraries/armeabi-v7a/libtcl.so",
-"e2f18004228f9fd11787a1e0fa0e115f"
+"arm64-v8a": [
+"output/libraries/arm64-v8a/libtcl.so",
+"ea13676ce94cf0080fdfe198d59eca19"
 ],
 "armeabi": [
 "output/libraries/armeabi/libtcl.so",
 "bc238fde915ccf1ed266f6ef409dc0aa"
 ],
-"x86_64": [
-"output/libraries/x86_64/libtcl.so",
-"9e0d3e9041c46845a4f2f9c5af1a0813"
+"armeabi-v7a": [
+"output/libraries/armeabi-v7a/libtcl.so",
+"e2f18004228f9fd11787a1e0fa0e115f"
 ],
 "mips": [
 "output/libraries/mips/libtcl.so",
 "f5b402ce3934474add5f9c72ed6d1a1d"
-],
-"arm64-v8a": [
-"output/libraries/arm64-v8a/libtcl.so",
-"ea13676ce94cf0080fdfe198d59eca19"
 ],
 "mips64": [
 "output/libraries/mips64/libtcl.so",
@@ -414,28 +410,28 @@
 "x86": [
 "output/libraries/x86/libtcl.so",
 "35ec74c1415bf90ae8820722d8165539"
+],
+"x86_64": [
+"output/libraries/x86_64/libtcl.so",
+"9e0d3e9041c46845a4f2f9c5af1a0813"
 ]
 },
 "tk": {
-"armeabi-v7a": [
-"output/libraries/armeabi-v7a/libtk.so",
-"483c20e55eb1d20ed4ab3bab409cc6c8"
+"arm64-v8a": [
+"output/libraries/arm64-v8a/libtk.so",
+"8430997acbb93480fdc586756dfde407"
 ],
 "armeabi": [
 "output/libraries/armeabi/libtk.so",
 "05aa95aba8569e86aab7615765cd5cba"
 ],
-"x86_64": [
-"output/libraries/x86_64/libtk.so",
-"c977702053fa90a494541ac05debb26e"
+"armeabi-v7a": [
+"output/libraries/armeabi-v7a/libtk.so",
+"483c20e55eb1d20ed4ab3bab409cc6c8"
 ],
 "mips": [
 "output/libraries/mips/libtk.so",
 "84946429c496aef7b40e32219362df6a"
-],
-"arm64-v8a": [
-"output/libraries/arm64-v8a/libtk.so",
-"8430997acbb93480fdc586756dfde407"
 ],
 "mips64": [
 "output/libraries/mips64/libtk.so",
@@ -444,6 +440,10 @@
 "x86": [
 "output/libraries/x86/libtk.so",
 "42fce8d24c79cc31619482d09720ee83"
+],
+"x86_64": [
+"output/libraries/x86_64/libtk.so",
+"c977702053fa90a494541ac05debb26e"
 ]
 }
 },
