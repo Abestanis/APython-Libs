@@ -750,6 +750,7 @@ def main():
                         help='The path on the Python server to see all available Python versions. '
                              'Defaults to "{path}".'.format(path=Configuration.pythonServerPath))
     parser.add_argument('--cpuABIs', nargs='*', default=Configuration.ALL_CPU_ABIS,
+                        choices=Configuration.ALL_CPU_ABIS,
                         help='The cpu ABIs to compile for. Defaults to all. Possible values are '
                              + ', '.join(Configuration.ALL_CPU_ABIS))
     parser.add_argument('--disableMultiprocessing', default=False, action='store_true',

@@ -6,7 +6,7 @@ from logger import Logger
 
 
 class Configuration:
-    ALL_CPU_ABIS = ['armeabi', 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64', 'mips', 'mips64']
+    ALL_CPU_ABIS = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
     DEFAULT_MIN_SKD_VERSION = 14
 
     logFilePath = None
