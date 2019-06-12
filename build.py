@@ -17,12 +17,13 @@ import shutil
 import sys
 import traceback
 import json
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from collections import OrderedDict
 from tempfile import mkdtemp
 from time import time, sleep
 from glob import glob
 from typing import Dict, Optional
+
 try:
     from http.client import HTTPSConnection as Connection
 except ImportError:
@@ -31,15 +32,17 @@ except ImportError:
 import buildutils
 from cache import Cache
 from config import Configuration
+from logger import Loggable
 
 
-class Builder:
+class Builder(Loggable):
 
     config = None
     cache = None
 
-    def __init__(self, args):
+    def __init__(self, args: Namespace) -> None:
         self.config = Configuration(args)
+        super(Builder, self).__init__(self.config.log)
         self.cache = Cache(self.config.cacheDir)
         if args.clear_cache:
             self.cache.clear(ignore_errors=True)
@@ -71,14 +74,14 @@ class Builder:
                 connection = Connection(self.config.pythonServer)
                 for version in versionList:
                     if self.getPatchFile(version) is None:
-                        self.config.log.warn('No patch-file found for specified version {version}. '
-                                             'Ignoring this version.'.format(version=version))
+                        self.warn('No patch-file found for specified version {version}. '
+                                  'Ignoring this version.'.format(version=version))
                         continue
                     versions[version] = self.versionToUrl(connection, version)
                 connection.close()
-            self.config.log.debug('Got {num} versions to process...'.format(num=len(versions)))
+            self.debug('Got {num} versions to process...'.format(num=len(versions)))
             for version, versionPath in versions.items():
-                self.config.log.info('Processing Python version ' + version)
+                self.info('Processing Python version ' + version)
                 versionOutputDir = os.path.join(self.config.outputDir, 'Python' + version)
                 if not os.path.exists(versionOutputDir):
                     os.makedirs(versionOutputDir)
@@ -89,20 +92,19 @@ class Builder:
                 if extractedDir is None:
                     return False
                 if not self.patchPythonSource(extractedDir, self.getPatchFile(version)):
-                    self.config.log.error('Patching the sources failed for '
-                                          'Python version {version}!'.format(version=version))
+                    self.error('Patching the sources failed for Python version {version}!'
+                               .format(version=version))
                     return False
-                self.config.log.info('Generating modules zip...')
+                self.info('Generating modules zip...')
                 if not self.generateModulesZip(extractedDir, versionOutputDir):
-                    self.config.log.error('Failed to create lib zip at {dir}!'
-                                          .format(dir=versionOutputDir))
+                    self.error('Failed to create lib zip at {dir}!'.format(dir=versionOutputDir))
                     return False
                 if not self.compilePythonSource(extractedDir, version, tempdir):
-                    self.config.log.error('Compilation failed for Python version {version}!'
-                                          .format(version=version))
+                    self.error('Compilation failed for Python version {version}!'
+                               .format(version=version))
                     return False
                 self.cleanup(extractedDir, versionOutputDir)
-            self.config.log.info('Done generating libraries.')
+            self.info('Done generating libraries.')
             if not self.generateJSON():
                 return False
             self.updateReadMe()
@@ -115,16 +117,16 @@ class Builder:
                                 (deltaSeconds, 'seconds')]:
                 if delta != 0:
                     timeArray.append('{delta} {name}'.format(delta=int(delta), name=name))
-            self.config.log.info('Building finished in {timeStr} and {milliseconds} milliseconds.'
-                                 .format(timeStr=', '.join(timeArray), milliseconds=milliseconds))
+            self.info('Building finished in {timeStr} and {milliseconds} milliseconds.'
+                      .format(timeStr=', '.join(timeArray), milliseconds=milliseconds))
             success = True
         except KeyboardInterrupt:
-            self.config.log.error('Cancelling build due to interrupt.')
+            self.error('Cancelling build due to interrupt.')
         except Exception as error:
-            self.config.log.error('Caught exception: {error}'.format(error=error))
+            self.error('Caught exception: {error}'.format(error=error))
             traceback.print_exception(*(sys.exc_info() + (None, self.config.log.getOutput())))
         finally:
-            self.config.log.info('Cleaning up...')
+            self.info('Cleaning up...')
             shutil.rmtree(tempdir, ignore_errors=True)
             if success:
                 self.cache.clear(ignore_errors=True)
@@ -136,14 +138,13 @@ class Builder:
         if os.path.exists(path):
             if not os.path.isdir(path) or len(os.listdir(path)) != 0:
                 if self.config.warnOnOutputOverwrite:
-                    self.config.log.warn('The output directory "{dir}" already exists.'
-                                         .format(dir=path))
+                    self.warn('The output directory "{dir}" already exists.'.format(dir=path))
                     # We do not want to override something important
                     if self.config.log.getOutput() is not None:
                         return False
                     if input('Press enter to overwrite the directory or c to cancel the build.')\
                             in ['c', 'C']:
-                        self.config.log.error('Cancelling build.')
+                        self.error('Cancelling build.')
                         return False
                 if not os.path.isdir(path):
                     os.remove(path)
@@ -166,12 +167,12 @@ class Builder:
         output directory and 'sourceDir' is set up to compile the
         python binaries in it.
         """
-        self.config.log.info('Setting up optional libraries...')
+        self.info('Setting up optional libraries...')
         if not os.path.isdir(sourceDir):
             os.mkdir(sourceDir)
-        self.config.log.info('Copying Python patch...')
+        self.info('Copying Python patch...')
         shutil.copytree(self.config.pythonPatchDir, os.path.join(sourceDir, 'PythonPatch'))
-        self.config.log.info('Copying IPC...')
+        self.info('Copying IPC...')
         shutil.copytree(self.config.ipcDir, os.path.join(sourceDir, 'IPC'))
         libs = {'pythonPatch': os.path.join(sourceDir, 'PythonPatch'),
                 'IPC': os.path.join(sourceDir, 'IPC')}
@@ -187,51 +188,48 @@ class Builder:
                 makefilePath = os.path.join(self.config.filesDir, libraryName, 'Android.mk')
                 if not os.path.exists(makefilePath):
                     makefilePath = None
-                    self.config.log.info('No local Android.mk file was found for library {name}.'
-                                         .format(name=libraryName))
+                    self.info('No local Android.mk file was found for library {name}.'
+                              .format(name=libraryName))
                 maxRetries = 5
                 for retry in range(maxRetries):
-                    self.config.log.info('Downloading library {name} from {url}...'
-                                         .format(name=libraryName, url=libraryData['url']))
+                    self.info('Downloading library {name} from {url}...'
+                              .format(name=libraryName, url=libraryData['url']))
                     downloadFile = self.cache.download(libraryData['url'], tempDir, self.config.log)
                     if downloadFile is None:
-                        self.config.log.warn(
-                            'Download from {url} failed, retrying ({retry}/{max})'
-                            .format(url=libraryData['url'], retry=retry + 1, max=maxRetries))
+                        self.warn('Download from {url} failed, retrying ({retry}/{max})'
+                                  .format(url=libraryData['url'], retry=retry + 1, max=maxRetries))
                         continue
-                    self.config.log.info('Extracting {file}...'
-                                         .format(file=os.path.basename(downloadFile)))
+                    self.info('Extracting {file}...'.format(file=os.path.basename(downloadFile)))
                     extractDir = buildutils.extract(downloadFile, sourceDir,
                                                     libraryData.get('extractionFilter', None))
                     if extractDir is False:
-                        self.config.log.error('Could not extract archive from {url}: Unsupported '
-                                              'archive format!'.format(url=libraryData['url']))
+                        self.error('Could not extract archive from {url}: Unsupported '
+                                   'archive format!'.format(url=libraryData['url']))
                         return False
                     if type(extractDir) != str:
-                        self.config.log.warn(
+                        self.warn(
                             'Extraction of archive from {url} failed, retrying ({retry}/{max})'
                             .format(url=libraryData['url'], retry=retry + 1, max=maxRetries))
                         continue
                     break
                 else:
-                    self.config.log.error('Download from {url} failed!'
-                                          .format(url=libraryData['url']))
+                    self.error('Download from {url} failed!'.format(url=libraryData['url']))
                     return False
-                self.config.log.info('Extracting done.')
+                self.info('Extracting done.')
                 if makefilePath:
                     shutil.copy(makefilePath, os.path.join(extractDir, 'Android.mk'))
                 if not os.path.exists(os.path.join(extractDir, 'Android.mk')):
-                    self.config.log.warn('No Android.mk file was found for library {name}, '
-                                         'ignoring it.'.format(name=libraryName))
+                    self.warn('No Android.mk file was found for library {name}, ignoring it.'
+                              .format(name=libraryName))
                     shutil.rmtree(extractDir, ignore_errors=True)
                     continue
                 diffPath = os.path.join(self.config.filesDir, libraryName, 'patch.diff')
                 if os.path.exists(diffPath):
-                    self.config.log.info('Patching {lib}...'.format(lib=libraryName))
+                    self.info('Patching {lib}...'.format(lib=libraryName))
                     if not buildutils.applyPatch(self.config.gitPath, extractDir, diffPath,
                                                  self.config.log):
-                        self.config.log.error('Applying patch ({path}) failed for library {name}, '
-                                              'aborting!'.format(path=diffPath, name=libraryName))
+                        self.error('Applying patch ({path}) failed for library {name}, aborting!'
+                                   .format(path=diffPath, name=libraryName))
                         return False
                 if 'data' in libraryData:
                     for dataEntry in libraryData['data']:
@@ -241,10 +239,9 @@ class Builder:
                             dataSrcPath = os.path.join(self.config.filesDir,
                                                        libraryName, dataSource)
                             if not os.path.exists(dataSrcPath):
-                                self.config.log.warn(
-                                    'Data source defined for library {name} does not exist: '
-                                    '{dataSource}. Skipping it.'.format(
-                                        name=libraryName, dataSource=dataSource))
+                                self.warn('Data source defined for library {name} does not exist: '
+                                          '{dataSource}. Skipping it.'
+                                          .format(name=libraryName, dataSource=dataSource))
                                 continue
                         if os.path.isdir(dataSrcPath):
                             shutil.make_archive(
@@ -275,8 +272,8 @@ class Builder:
             androidMKPath = os.path.join(sourceDir, 'Android.mk')
             with open(androidMKPath, 'w') as androidMK:
                 androidMK.write('include $(call all-subdir-makefiles)')
-            self.config.log.info('Compiling {num} additional libraries for Android Sdk version '
-                                 '{version}...'.format(num=len(libraryList), version=sdkVersion))
+            self.info('Compiling {num} additional libraries for Android Sdk version {version}...'
+                      .format(num=len(libraryList), version=sdkVersion))
             if self.config.useMultiprocessing:
                 subprocessArgs = [
                     buildutils.createCompileSubprocessArgs(
@@ -290,29 +287,28 @@ class Builder:
                     self.config.ndkPath, os.path.join(tempDir, 'NDK-Temp'), sourceDir,
                     outputDir, self.config.cpuABIs, self.config.log)
             if not success:
-                self.config.log.error('Compiling the additional libraries failed.')
+                self.error('Compiling the additional libraries failed.')
                 return False
-            self.config.log.info('Compiling of {num} additional libraries succeeded.'
-                                 .format(num=len(libraryList)))
+            self.info('Compiling of {num} additional libraries succeeded.'
+                      .format(num=len(libraryList)))
             os.remove(applicationMKPath)
             os.remove(androidMKPath)
             if sdkVersion != max(minSdkList.keys()):
                 for libraryName in libraryList:
                     os.rename(os.path.join(libs[libraryName], 'Android.mk'),
                               os.path.join(libs[libraryName], 'Android.mk.d'))
-        self.config.log.info('Compiling of all ({num}) additional libraries succeeded.'
-                             .format(num=len(libs)))
+        self.info('Compiling of all ({num}) additional libraries succeeded.'.format(num=len(libs)))
         for libPath in libs.values():
             if os.path.exists(os.path.join(libPath, 'Android.mk.d')):
                 os.rename(os.path.join(libPath, 'Android.mk.d'),
                           os.path.join(libPath, 'Android.mk'))
-        self.config.log.info('Patching Android.mk files...')
+        self.info('Patching Android.mk files...')
         libsOutputDir = buildutils.escapeNDKParameter(outputDir)
         for moduleName, modulePath in libs.items():
             self.patchOptionalLibAndroidMk(os.path.join(modulePath, 'Android.mk'),
                                            libsOutputDir, moduleName)
 
-        self.config.log.info('Successfully generated additional libraries.')
+        self.info('Successfully generated additional libraries.')
         return True
 
     def patchOptionalLibAndroidMk(self, path: str, outputDir: str, moduleName: str):
@@ -366,40 +362,40 @@ class Builder:
         """
         startTime = time()
         connection = Connection(self.config.pythonServer)
-        self.config.log.info('Gathering Python versions at "{url}"...'
-                             .format(url=connection.host + self.config.pythonServerPath))
+        self.info('Gathering Python versions at "{url}"...'
+                  .format(url=connection.host + self.config.pythonServerPath))
         connection.request('GET', self.config.pythonServerPath,
                            headers={"Connection": "keep-alive"})
         response = connection.getresponse()
         if response.status != 200:
-            self.config.log.error('Failed to connect to "{host}/{path}":'
-                                  .format(host=connection.host, path=self.config.pythonServerPath))
-            self.config.log.error('Response {status}:{reason}'.format(status=response.status,
-                                                                      reason=response.reason))
+            self.error('Failed to connect to "{host}/{path}":'
+                       .format(host=connection.host, path=self.config.pythonServerPath))
+            self.error('Response {status}:{reason}'.format(
+                status=response.status, reason=response.reason))
             return None
         result = response.read().decode('utf-8').split('\n')
-        self.config.log.info('Got a response in {seconds} seconds.'
-                             .format(seconds=round(time() - startTime, 2)))
+        self.info('Got a response in {seconds} seconds.'
+                  .format(seconds=round(time() - startTime, 2)))
         versions = {}
-        self.config.log.info('Checking availability of the sources...')
+        self.info('Checking availability of the sources...')
         for line in result:
             versionMatch = re.search(r'href\s*=\s*"(.*)"', line)
             if versionMatch is None:
                 continue
             version = versionMatch.group(1)
-            if re.match('\A\d+\.\d+(\.\d+)*/\Z', version) is None:
+            if re.match(r'\A\d+\.\d+(\.\d+)*/\Z', version) is None:
                 continue
             version = version[:-1]
             if self.getPatchFile(version) is None:
-                self.config.log.info('Ignoring version {version} because no patch-file was found.'
-                                     .format(version=version))
+                self.info('Ignoring version {version} because no patch-file was found.'
+                          .format(version=version))
                 continue
             url = self.versionToUrl(connection, version)
             if type(url) != str:
                 if version != '2.0':
-                    self.config.log.info('Ignoring version {version} because it has no downloadable'
-                                         ' source code. Maybe this version is still in development.'
-                                         .format(version=version))
+                    self.info('Ignoring version {version} because it has no downloadable'
+                              ' source code. Maybe this version is still in development.'
+                              .format(version=version))
                 continue
             versions[version] = url
         connection.close()
@@ -413,14 +409,13 @@ class Builder:
         returned, otherwise the network response is returned.
         """
         path = self.config.pythonServerPath + version + '/Python-' + version + '.tgz'
-        self.config.log.debug('Checking Python version at "{url}"...'
-                              .format(url=connection.host + path))
+        self.debug('Checking Python version at "{url}"...'.format(url=connection.host + path))
         startTime = time()
         connection.request('HEAD', path, headers={"Connection": "keep-alive"})
         response = connection.getresponse()
         response.read()  # Empty the request
-        self.config.log.debug('Got a response in {seconds} seconds.'
-                              .format(seconds=round(time() - startTime, 2)))
+        self.debug('Got a response in {seconds} seconds.'
+                   .format(seconds=round(time() - startTime, 2)))
         if response.status != 200:
             return response
         return path
@@ -432,8 +427,8 @@ class Builder:
         Returns the path to the downloaded archive on success or None
         on failure.
         """
-        self.config.log.info('Downloading Python source from "{url}"...'
-                             .format(url=self.config.pythonServer + versionPath))
+        self.info('Downloading Python source from "{url}"...'
+                  .format(url=self.config.pythonServer + versionPath))
         return self.cache.download('https://' + self.config.pythonServer + versionPath,
                                    downloadDir, self.config.log)
 
@@ -443,17 +438,17 @@ class Builder:
         Returns the path to the first directory of the extracted archive
         on success or None on error.
         """
-        self.config.log.info('Extracting {archive}...'.format(archive=sourceArchive))
+        self.info('Extracting {archive}...'.format(archive=sourceArchive))
         res = buildutils.extract(
             sourceArchive, extractedDir,
             ['Include', 'Lib', 'Modules', 'Objects', 'Parser', 'Python', 'LICENSE', 'README'],
             ['.c', '.h', '.py', '.pyc', '.inc', '.txt', '', '.gif', '.png', '.def']
         )
         if res is None:
-            self.config.log.error('Failed to extract {archive}!'.format(archive=sourceArchive))
+            self.error('Failed to extract {archive}!'.format(archive=sourceArchive))
         elif not res:
-            self.config.log.error('Failed to extract {archive}: Archive is compressed with an '
-                                  'unsupported compression.'.format(archive=sourceArchive))
+            self.error('Failed to extract {archive}: Archive is compressed with an '
+                       'unsupported compression.'.format(archive=sourceArchive))
             return None
         return res
 
@@ -530,7 +525,7 @@ class Builder:
                 pythonDir=pythonDir
             )
         # Compile
-        self.config.log.info('Compiling Python {version}...'.format(version=pythonVersion))
+        self.info('Compiling Python {version}...'.format(version=pythonVersion))
         outputDir = os.path.join(self.config.outputDir, 'Python' + pythonVersion)
         if self.config.useMultiprocessing:
             subprocessArgs = [
@@ -551,7 +546,7 @@ class Builder:
         from the last build, so another Python version can be
         compiled there.
         """
-        self.config.log.info('Removing unnecessary files...')
+        self.info('Removing unnecessary files...')
         shutil.rmtree(sourcePath)
         for subdir in os.listdir(outputDir):
             if os.path.isdir(os.path.join(outputDir, subdir)):
@@ -573,7 +568,7 @@ class Builder:
         Generate the JSON file with all information needed
         by a connecting client to download the created data.
         """
-        self.config.log.info('Generating JSON file...')
+        self.info('Generating JSON file...')
         requirements = OrderedDict()
         for libName, libData in sorted(self.config.additionalLibs.items()):
             dependencies = ['libraries/' + dep for dep in libData.get('dependencies', [])]
@@ -650,8 +645,8 @@ class Builder:
             versionItem = OrderedDict()
             modulesFile = os.path.join(self.config.outputDir, versionDir, 'lib.zip')
             if not os.path.exists(modulesFile):
-                self.config.log.error('lib.zip not found in {path}.'
-                                      .format(path=os.path.join(self.config.outputDir, versionDir)))
+                self.error('lib.zip not found in {path}.'
+                           .format(path=os.path.join(self.config.outputDir, versionDir)))
                 return False
             for architecture in os.listdir(os.path.join(self.config.outputDir, versionDir)):
                 abiDir = os.path.join(self.config.outputDir, versionDir, architecture)
@@ -660,8 +655,7 @@ class Builder:
                 architectureItem = OrderedDict()
                 if not 'lib' + 'python{ver}.so'.format(ver=buildutils.getShortVersion(version)) in \
                        os.listdir(abiDir):
-                    self.config.log.error('The python library was not found in {path}.'
-                                          .format(path=abiDir))
+                    self.error('The python library was not found in {path}.'.format(path=abiDir))
                     return False
                 for libFile in os.listdir(abiDir):
                     lib = 'pythonLib' if 'lib' + 'python' in libFile else libFile[:-3]
@@ -680,7 +674,7 @@ class Builder:
         jsonPath = os.path.join(os.path.dirname(self.config.outputDir), 'index.json')
         with open(jsonPath, 'w') as jsonFile:
             json.dump(jsonData, jsonFile, ensure_ascii=False, indent=0)
-        self.config.log.info('Successfully generated JSON file.')
+        self.info('Successfully generated JSON file.')
         return True
 
     def updateReadMe(self):
@@ -688,7 +682,7 @@ class Builder:
         Update the ReadMe file to display all currently
         available libraries.
         """
-        self.config.log.info('Updating README.md...')
+        self.info('Updating README.md...')
         readmeTemplatePath = os.path.join(self.config.currDir, 'README.md.template')
         readmePath = os.path.join(self.config.currDir, 'README.md')
         # itemTemplate = '* {libName} (from {url}) for {modules}\n'

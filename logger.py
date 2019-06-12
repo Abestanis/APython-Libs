@@ -1,14 +1,14 @@
 import sys
-from typing import IO, Optional
+from typing import IO, Optional, Any
 
 
 class Logger:
     _output = None
 
-    def __init__(self, output: Optional[IO]=None):
+    def __init__(self, output: Optional[IO] = None):
         self._output = output
 
-    def console(self, message: str, end: str='\n'):
+    def console(self, message: str, end: str = '\n'):
         """
         Write message with end as the last character to sys.stdout, if it is a terminal.
         :param message: The message to write
@@ -47,3 +47,21 @@ class Logger:
         :return: The output fileobject of this logger or None
         """
         return self._output
+
+
+class Loggable(object):
+    def __init__(self, logger: Logger, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._logger = logger
+
+    def debug(self, message: str):
+        self._logger.debug(message)
+
+    def info(self, message: str):
+        self._logger.info(message)
+
+    def warn(self, message: str):
+        self._logger.warn(message)
+
+    def error(self, message: str):
+        self._logger.error(message)
