@@ -2,7 +2,7 @@
 This script will download and compile all Python versions to libraries which
 can be used by the APython project (see https://github.com/Abestanis/APython).
 
-To compile the C sources, the Android NDK is used and
+To compile the C sources, cmake and the Android NDK is used and
 to apply some patches to the source code, git is required.
 The path to both can be provided via command line options
 or via a configuration file (by default, a config.cfg in the
@@ -22,7 +22,9 @@ from collections import OrderedDict
 from tempfile import mkdtemp
 from time import time, sleep
 from glob import glob
-from typing import Dict, Optional
+from typing import Dict, Optional, List, Union
+from difflib import get_close_matches
+from http.client import HTTPResponse
 
 try:
     from http.client import HTTPSConnection as Connection
@@ -36,7 +38,6 @@ from logger import Loggable
 
 
 class Builder(Loggable):
-
     config = None
     cache = None
 
@@ -49,8 +50,10 @@ class Builder(Loggable):
             self.cache.ensureCacheDir()
 
     def build(self) -> bool:
-        """>>> build() -> success
-        Build all python libraries and modules for Android.
+        """
+        Build all Python libraries and modules for Android.
+
+        :return: True if the build was successful.
         """
         success = False
         versionList = self.config.versionList
@@ -62,9 +65,8 @@ class Builder(Loggable):
             if not self.config.check():
                 return False
             self.config.parseLibrariesData()
-            if not self.createOutputDir(self.config.outputDir):
-                return False
-            if not self.setupOptionalLibs(tempdir, sourceDir):
+            if not self.createOutputDir(self.config.outputDir) or \
+                    not self.setupOptionalLibs(tempdir, sourceDir):
                 return False
             if len(versionList) == 0:
                 versions = self.getAllAvailablePythonVersions()
@@ -91,7 +93,8 @@ class Builder(Loggable):
                 extractedDir = self.extractPythonArchive(downloadFile, sourceDir)
                 if extractedDir is None:
                     return False
-                if not self.patchPythonSource(extractedDir, self.getPatchFile(version)):
+                if not buildutils.applyPatch(self.config.gitPath, extractedDir,
+                                             self.getPatchFile(version), self.config.log):
                     self.error('Patching the sources failed for Python version {version}!'
                                .format(version=version))
                     return False
@@ -115,7 +118,7 @@ class Builder(Loggable):
             timeArray = []
             for delta, name in [(deltaHours, 'hours'), (deltaMinutes, 'minutes'),
                                 (deltaSeconds, 'seconds')]:
-                if delta != 0:
+                if delta != 0 and len(timeArray) == 0:
                     timeArray.append('{delta} {name}'.format(delta=int(delta), name=name))
             self.info('Building finished in {timeStr} and {milliseconds} milliseconds.'
                       .format(timeStr=', '.join(timeArray), milliseconds=milliseconds))
@@ -142,7 +145,7 @@ class Builder(Loggable):
                     # We do not want to override something important
                     if self.config.log.getOutput() is not None:
                         return False
-                    if input('Press enter to overwrite the directory or c to cancel the build.')\
+                    if input('Press enter to overwrite the directory or c to cancel the build.') \
                             in ['c', 'C']:
                         self.error('Cancelling build.')
                         return False
@@ -153,6 +156,13 @@ class Builder(Loggable):
                         shutil.rmtree(path, ignore_errors=True)
                         if not os.path.exists(path):
                             break
+                    else:
+                        try:
+                            shutil.rmtree(path, ignore_errors=False)
+                        except IOError as error:
+                            self.error('Failed to clean the output directory: {reason}'
+                                       .format(reason=error))
+                            return False
                 # Give the file system time to sync, otherwise creating the dir may raise an error
                 sleep(0.5)
                 os.mkdir(path)
@@ -161,11 +171,14 @@ class Builder(Loggable):
         return True
 
     def setupOptionalLibs(self, tempDir, sourceDir) -> bool:
-        """>>> setupOptionalLibs(tempDir, sourceDir) -> success
+        """
         Download and compile all additional libraries.
-        When finished, all libraries and their data are stored in the
-        output directory and 'sourceDir' is set up to compile the
-        python binaries in it.
+        When finished, all libraries and their data are stored in the output directory and
+        'sourceDir' is set up to compile the python binaries in it.
+
+        :param tempDir: The temporary directory to use during building.
+        :param sourceDir: The directory to extract the library sources to.
+        :return: True if setting up the optional libraries was successful.
         """
         self.info('Setting up optional libraries...')
         if not os.path.isdir(sourceDir):
@@ -178,66 +191,86 @@ class Builder(Loggable):
                 'IPC': os.path.join(sourceDir, 'IPC')}
         outputDir = os.path.join(self.config.outputDir, 'libraries')
         minSdkList = self.config.computeLibMinAndroidSdkList()
-        minSdkList.setdefault(self.config.DEFAULT_MIN_SKD_VERSION, []).append('pythonPatch')
-        for sdkVersion in sorted(minSdkList, reverse=True):  # Begin with the latest sdk version
-            libraryList = minSdkList[sdkVersion]
+        minSdkList.setdefault(self.config.minSdkVersion, []).append('pythonPatch')
+        # Begin with the latest sdk version
+        for sdkVersion, libraryList in sorted(minSdkList.items(), reverse=True):
             for libraryName in libraryList:
                 if libraryName in ['pythonPatch', 'IPC']:
                     continue
                 libraryData = self.config.additionalLibs[libraryName]
-                makefilePath = os.path.join(self.config.filesDir, libraryName, 'Android.mk')
-                if not os.path.exists(makefilePath):
-                    makefilePath = None
-                    self.info('No local Android.mk file was found for library {name}.'
-                              .format(name=libraryName))
-                maxRetries = 5
-                for retry in range(maxRetries):
-                    self.info('Downloading library {name} from {url}...'
-                              .format(name=libraryName, url=libraryData['url']))
-                    downloadFile = self.cache.download(libraryData['url'], tempDir, self.config.log)
-                    if downloadFile is None:
-                        self.warn('Download from {url} failed, retrying ({retry}/{max})'
-                                  .format(url=libraryData['url'], retry=retry + 1, max=maxRetries))
-                        continue
-                    self.info('Extracting {file}...'.format(file=os.path.basename(downloadFile)))
-                    extractDir = buildutils.extract(downloadFile, sourceDir,
-                                                    libraryData.get('extractionFilter', None))
-                    if extractDir is False:
-                        self.error('Could not extract archive from {url}: Unsupported '
-                                   'archive format!'.format(url=libraryData['url']))
+                name = libraryData.get('parent', libraryName)
+                extractDir = libs.get(name)
+                if extractDir is None:
+                    makefilePath = os.path.join(
+                        self.config.buildFilesDir, name, buildutils.MAKE_FILE)
+                    if not os.path.exists(makefilePath):
+                        makefilePath = None
+                        self.info('No local {makeFile} file was found for library {name}.'
+                                  .format(makeFile=buildutils.MAKE_FILE, name=name))
+                    libUrl = libraryData['url']
+                    maxRetries = 5
+                    for retry in range(maxRetries):
+                        self.info('Downloading library {name} from {url}...'
+                                  .format(name=name, url=libUrl))
+                        downloadFile = self.cache.download(libUrl, tempDir, self.config.log)
+                        if downloadFile is None:
+                            self.warn('Download from {url} failed, retrying ({retry}/{max})'
+                                      .format(url=libUrl, retry=retry + 1, max=maxRetries))
+                            continue
+                        self.info('Extracting {file}...'.format(
+                            file=os.path.basename(downloadFile)))
+                        extractDir = buildutils.extract(downloadFile, sourceDir,
+                                                        libraryData.get('extractionFilter', None))
+                        if extractDir is False:
+                            self.error('Could not extract archive from {url}: Unsupported '
+                                       'archive format!'.format(url=libUrl))
+                            return False
+                        if type(extractDir) != str:
+                            self.warn(
+                                'Extraction of archive from {url} failed, retrying ({retry}/{max})'
+                                .format(url=libUrl, retry=retry + 1, max=maxRetries))
+                            continue
+                        break
+                    else:
+                        self.error('Download from {url} failed!'.format(url=libUrl))
                         return False
-                    if type(extractDir) != str:
-                        self.warn(
-                            'Extraction of archive from {url} failed, retrying ({retry}/{max})'
-                            .format(url=libraryData['url'], retry=retry + 1, max=maxRetries))
+                    self.info('Extracting done.')
+                    diffPath = os.path.join(self.config.patchesDir, name + '.patch')
+                    if os.path.exists(diffPath):
+                        self.info('Patching {lib}...'.format(lib=name))
+                        if not buildutils.applyPatch(self.config.gitPath, extractDir, diffPath,
+                                                     self.config.log):
+                            self.error('Applying patch ({path}) failed for library {name}, '
+                                       'aborting!'.format(path=diffPath, name=name))
+                            return False
+                    extractDirMakefile = os.path.join(extractDir, buildutils.MAKE_FILE)
+                    if makefilePath:
+                        if not os.path.exists(extractDirMakefile):
+                            self.copyTemplateMakefile(makefilePath, extractDirMakefile)
+                        else:
+                            self.mergeMakeFiles(makefilePath, extractDirMakefile)
+                    elif not os.path.exists(extractDirMakefile):
+                        self.warn('No {makeFile} file was found for library {name}, ignoring it.'
+                                  .format(makeFile=buildutils.MAKE_FILE, name=name))
+                        shutil.rmtree(extractDir, ignore_errors=True)
                         continue
-                    break
-                else:
-                    self.error('Download from {url} failed!'.format(url=libraryData['url']))
-                    return False
-                self.info('Extracting done.')
-                if makefilePath:
-                    shutil.copy(makefilePath, os.path.join(extractDir, 'Android.mk'))
-                if not os.path.exists(os.path.join(extractDir, 'Android.mk')):
-                    self.warn('No Android.mk file was found for library {name}, ignoring it.'
-                              .format(name=libraryName))
-                    shutil.rmtree(extractDir, ignore_errors=True)
-                    continue
-                diffPath = os.path.join(self.config.filesDir, libraryName, 'patch.diff')
-                if os.path.exists(diffPath):
-                    self.info('Patching {lib}...'.format(lib=libraryName))
-                    if not buildutils.applyPatch(self.config.gitPath, extractDir, diffPath,
-                                                 self.config.log):
-                        self.error('Applying patch ({path}) failed for library {name}, aborting!'
-                                   .format(path=diffPath, name=libraryName))
-                        return False
+                    if 'includeDir' in libraryData:
+                        includeDir = os.path.join(extractDir, 'inc', libraryData['includeDir'])
+                        os.makedirs(includeDir)
+                        includeFilters = libraryData.get('includeDirContent', ['include/*.h'])
+                        filesToCopy = set()
+                        for includeFilter in includeFilters:
+                            filesToCopy.update(glob(os.path.join(extractDir, includeFilter)))
+                        for path in filesToCopy:
+                            shutil.copy(path, includeDir)
+                    libs[name] = extractDir
                 if 'data' in libraryData:
                     for dataEntry in libraryData['data']:
                         dataSource, dataName = dataEntry[0], dataEntry[1]
                         dataSrcPath = os.path.join(extractDir, dataSource)
                         if not os.path.exists(dataSrcPath):
-                            dataSrcPath = os.path.join(self.config.filesDir,
-                                                       libraryName, dataSource)
+                            dataSrcPath = os.path.join(self.config.buildFilesDir,
+                                                       name, dataSource)
                             if not os.path.exists(dataSrcPath):
                                 self.warn('Data source defined for library {name} does not exist: '
                                           '{dataSource}. Skipping it.'
@@ -252,101 +285,248 @@ class Builder(Loggable):
                                 self.config.outputDir, 'data',
                                 dataName + '.' + dataSrcPath.split('.', 1)[1])
                             shutil.copy(dataSrcPath, destination)
-                if 'includeDir' in libraryData:
-                    includeDir = os.path.join(extractDir, 'inc', libraryData['includeDir'])
-                    os.makedirs(includeDir)
-                    includeFilters = libraryData.get('includeDirContent', ['include/*.h'])
-                    filesToCopy = set()
-                    for includeFilter in includeFilters:
-                        filesToCopy.update(glob(os.path.join(extractDir, includeFilter)))
-                    for path in filesToCopy:
-                        shutil.copy(path, includeDir)
-                libs[libraryName] = extractDir
-            applicationMKPath = os.path.join(sourceDir, 'Application.mk')
-            buildutils.fillTemplate(
-                os.path.join(self.config.filesDir, 'Application.mk'),
-                applicationMKPath,
-                pyShortVersion='',
-                androidSdkVersion=sdkVersion
-            )
-            androidMKPath = os.path.join(sourceDir, 'Android.mk')
-            with open(androidMKPath, 'w') as androidMK:
-                androidMK.write('include $(call all-subdir-makefiles)')
             self.info('Compiling {num} additional libraries for Android Sdk version {version}...'
                       .format(num=len(libraryList), version=sdkVersion))
-            if self.config.useMultiprocessing:
-                subprocessArgs = [
-                    buildutils.createCompileSubprocessArgs(
-                        self.config.ndkPath, os.path.join(tempDir, 'NDK-Temp'),
-                        sourceDir, outputDir, abi, self.config.log
-                    ) for abi in self.config.cpuABIs
-                ]
-                success = buildutils.callSubProcessesMultiThreaded(subprocessArgs, self.config.log)
-            else:
-                success = buildutils.ndkCompile(
-                    self.config.ndkPath, os.path.join(tempDir, 'NDK-Temp'), sourceDir,
-                    outputDir, self.config.cpuABIs, self.config.log)
+            success = buildutils.build(
+                self.config.ndkPath, sourceDir, outputDir, os.path.join(tempDir, 'NDK-Temp'),
+                cmakePath=self.config.cmakePath, makePath=self.config.makePath,
+                androidSdkVersion=sdkVersion, cpuABIs=self.config.cpuABIs, logger=self.config.log)
             if not success:
                 self.error('Compiling the additional libraries failed.')
                 return False
             self.info('Compiling of {num} additional libraries succeeded.'
                       .format(num=len(libraryList)))
-            os.remove(applicationMKPath)
-            os.remove(androidMKPath)
             if sdkVersion != max(minSdkList.keys()):
                 for libraryName in libraryList:
-                    os.rename(os.path.join(libs[libraryName], 'Android.mk'),
-                              os.path.join(libs[libraryName], 'Android.mk.d'))
+                    os.rename(os.path.join(libs[libraryName], buildutils.MAKE_FILE),
+                              os.path.join(libs[libraryName], buildutils.MAKE_FILE + '.d'))
         self.info('Compiling of all ({num}) additional libraries succeeded.'.format(num=len(libs)))
         for libPath in libs.values():
-            if os.path.exists(os.path.join(libPath, 'Android.mk.d')):
-                os.rename(os.path.join(libPath, 'Android.mk.d'),
-                          os.path.join(libPath, 'Android.mk'))
-        self.info('Patching Android.mk files...')
+            if os.path.exists(os.path.join(libPath, buildutils.MAKE_FILE + '.d')):
+                os.rename(os.path.join(libPath, buildutils.MAKE_FILE + '.d'),
+                          os.path.join(libPath, buildutils.MAKE_FILE))
+        self.info('Patching {makefile} files...'.format(makefile=buildutils.MAKE_FILE))
         libsOutputDir = buildutils.escapeNDKParameter(outputDir)
         for moduleName, modulePath in libs.items():
-            self.patchOptionalLibAndroidMk(os.path.join(modulePath, 'Android.mk'),
-                                           libsOutputDir, moduleName)
+            self.patchOptionalLibMakefile(
+                os.path.join(modulePath, buildutils.MAKE_FILE),
+                libsOutputDir, moduleName, self.config.cpuABIs)
 
         self.info('Successfully generated additional libraries.')
         return True
 
-    def patchOptionalLibAndroidMk(self, path: str, outputDir: str, moduleName: str):
-        """>>> patchOptionalLibAndroidMk(path, outputDir, moduleName):
-        Patches the Android.mk file at the given path.
-        It will point LOCAL_SRC_FILES to the pre-build library and
-        replace include $(BUILD_SHARED_LIBRARY) with include $(PREBUILT_SHARED_LIBRARY).
+    @staticmethod
+    def copyTemplateMakefile(sourceMakeFile, targetMakeFile):
+        with open(sourceMakeFile) as makeFileTemplate:
+            with open(targetMakeFile, 'w') as makeFile:
+                for line in makeFileTemplate.readlines():
+                    makeFile.write(
+                        line.replace('source/', '').replace('/source', ''))
+
+    @staticmethod
+    def _parseNextCmakeToken(text, lineGenerator=None):
+        if lineGenerator is None:
+            lineGenerator = [].__iter__()
+        text = text.lstrip()
+        while text == '\n' or len(text) == 0:
+            try:
+                text = next(lineGenerator).lstrip()
+            except StopIteration:
+                return text, ''
+        for quote in ('"', "'"):
+            if text.startswith(quote):
+                token = ''
+                text = text[1:]
+                index = text.find(quote)
+                while index == -1 or (text[index - 1] == '\\' and text[index - 2] != '\\'):
+                    if index == -1:
+                        token += text
+                        try:
+                            text = next(lineGenerator).lstrip()
+                        except StopIteration:
+                            return token + text, ''
+                    index = text.find(quote, index + 1)
+                return token + text[:index], text[:index]
+        else:
+            if text.startswith('#'):
+                return text, ''
+            for character in ('(', ')'):
+                if text.startswith(character):
+                    return character, text[len(character):]
+            minIndex = len(text)
+            for character in ('#', ' ', '(', ')', '\n'):
+                index = text.find(character)
+                if index != -1 and minIndex > index:
+                    minIndex = index
+            return text[:minIndex], text[minIndex:]
+
+    def _patchLibCommand(self, command, commandTemplate, originalLine, lineGenerator,
+                         allowedTargets, beforeCommandTemplate=None):
+        def lineGeneratorWrapper():
+            nonlocal originalLine
+            while True:
+                newLine = next(lineGenerator)
+                originalLine += newLine
+                yield newLine
+        wrappedLineGenerator = lineGeneratorWrapper()
+        token, line = self._parseNextCmakeToken(originalLine, wrappedLineGenerator)
+        if token.lower() != command.lower():
+            return '', originalLine
+        token, line = self._parseNextCmakeToken(line, wrappedLineGenerator)
+        if token != '(':
+            return '', originalLine
+        target, line = self._parseNextCmakeToken(line, wrappedLineGenerator)
+        if target not in allowedTargets:
+            return '', originalLine
+        args = ''
+        isPrivate = False
+        before = False
+        token, line = self._parseNextCmakeToken(line, lineGenerator)
+        while token != ')':
+            if token.lower() == 'private':
+                isPrivate = True
+            elif token.lower() in ['interface', 'public']:
+                isPrivate = False
+            elif args == '' and token.lower() == 'before':
+                before = True
+            elif not isPrivate:
+                args += ' ' + token
+            token, line = self._parseNextCmakeToken(line, lineGenerator)
+        template = commandTemplate if not before or beforeCommandTemplate is None else \
+            beforeCommandTemplate
+        return template.format(target=target, args=args, openBracket='{', closeBracket='}'), line
+
+    def patchOptionalLibMakefile(
+            self, path: str, outputDir: str, moduleName: str, cpuABIs: List[str]):
         """
-        if os.path.exists(path):
-            data = ''
-            with open(path) as source:
-                for line in source:
-                    if 'LOCAL_SRC_FILES :=' in line:
-                        data += line.replace(
-                            'LOCAL_SRC_FILES',
-                            'LOCAL_SRC_FILES := {outputDir}/$(TARGET_ARCH_ABI)/lib{name}.so\n'
-                            'OLD_LOCAL_SRC_FILES'.format(
-                                outputDir=outputDir, name=moduleName)
-                        )
-                    elif 'LOCAL_SRC_FILES +=' in line:
-                        data += line.replace('LOCAL_SRC_FILES', 'OLD_LOCAL_SRC_FILES')
-                    elif 'include $(BUILD_SHARED_LIBRARY)' in line:
-                        data += 'include $(PREBUILT_SHARED_LIBRARY)\n'
-                    elif 'include $(call all-subdir-makefiles)' in line:
-                        subDirsWithMk = [os.path.join(dirPath, 'Android.mk')
-                                         for dirPath in os.listdir(os.path.dirname(path))
-                                         if os.path.isdir(dirPath)
-                                         and os.path.exists(os.path.join(dirPath, 'Android.mk'))]
-                        for subMkPath in subDirsWithMk:
-                            self.patchOptionalLibAndroidMk(subMkPath, outputDir, moduleName)
-                    else:
+        Patches the makefile file at the given path.
+        This will convert all SHARED targets to imported targets.
+
+        :param path: The path to the makefile.
+        :param outputDir: The path to the output directories of the libraries.
+        :param moduleName: The name of the module of the makefile.
+        :param cpuABIs: The list af ABIs the module was compiled for.
+        """
+        if not os.path.exists(path):
+            return
+        # noinspection SpellCheckingInspection
+        data = 'macro(MACRO_NOOP)\nendmacro(MACRO_NOOP)\n'
+        with open(path) as source:
+            patchedTargets = []
+            lines = (line for line in source)
+            for line in lines:
+                tokenLine = line
+                tokens = []
+                while True:
+                    token, tokenLine = self._parseNextCmakeToken(tokenLine)
+                    if len(token) == 0:
+                        break
+                    tokens.append(token.lower())
+                if 'add_library' in tokens:
+                    startPoint = line.find('add_library') + len('add_library')
+                    data += line[:startPoint]
+                    line = line[startPoint:]
+                    token, restLine = self._parseNextCmakeToken(line, lines)
+                    if token != '(':
                         data += line
-            with open(path, 'w') as destination:
-                destination.write(data)
+                        continue
+                    libName, restLine = self._parseNextCmakeToken(restLine, lines)
+                    libType, rest = self._parseNextCmakeToken(restLine, lines)
+                    if libType.lower() in ['shared', 'module']:
+                        restLine = rest
+                    elif libType.lower() == 'static':
+                        data += line
+                        continue
+                    else:
+                        libType = 'SHARED'
+                    assert libName != ''
+                    libDirGenericPath = outputDir + '/${CMAKE_ANDROID_ARCH_ABI}/'
+                    libPath = libDirGenericPath + 'lib{name}.so'.format(name=libName)
+                    libDirPath = os.path.join(outputDir, cpuABIs[0])
+                    if not os.path.isfile(
+                            os.path.join(libDirPath, 'lib{name}.so'.format(name=libName))):
+                        matches = get_close_matches('lib{name}.so'.format(name=libName),
+                                                    os.listdir(libDirPath), n=1, cutoff=0.75)
+                        if len(matches) == 0:
+                            data += line
+                            continue
+                        libPath = libDirGenericPath + matches[0]
+                        self.info('Choosing shared library file {path} for {name}'
+                                  .format(path=libPath, name=libName))
+                    patchedTargets.append(libName)
+                    data += '({name} {type} IMPORTED GLOBAL)\nset_property(TARGET {name} ' \
+                            'PROPERTY IMPORTED_LOCATION "{path}")\nMACRO_NOOP('\
+                            .format(name=libName, type=libType, path=libPath) + restLine
+                elif 'target_include_directories' in tokens:
+                    startPoint = line.find('target_include_directories')
+                    data += line[:startPoint]
+                    command, line = self._patchLibCommand(
+                        'target_include_directories',
+                        'set_property(TARGET {target} APPEND PROPERTY '
+                        'INTERFACE_INCLUDE_DIRECTORIES {args})',
+                        line[startPoint:], lines, patchedTargets,
+                        'get_property({target}_TEMP_INCLUDE_DIRS TARGET {target} PROPERTY '
+                        'INTERFACE_INCLUDE_DIRECTORIES)\n'
+                        'set_property(TARGET {target} APPEND PROPERTY '
+                        'INTERFACE_INCLUDE_DIRECTORIES {args} '
+                        '${openBracket}{target}_TEMP_INCLUDE_DIRS{closeBracket})')
+                    data += command + line
+                elif 'target_link_libraries' in tokens:
+                    startPoint = line.find('target_link_libraries')
+                    data += line[:startPoint]
+                    command, line = self._patchLibCommand(
+                        'target_link_libraries',
+                        'set_property(TARGET {target} APPEND PROPERTY '
+                        'INTERFACE_LINK_LIBRARIES {args})',
+                        line[startPoint:], lines, patchedTargets)
+                    data += command + line
+                elif 'target_compile_definitions' in tokens:
+                    startPoint = line.find('target_compile_definitions')
+                    data += line[:startPoint]
+                    command, line = self._patchLibCommand(
+                        'target_compile_definitions',
+                        'set_property(TARGET {target} APPEND PROPERTY '
+                        'INTERFACE_COMPILE_DEFINITIONS {args})',
+                        line[startPoint:], lines, patchedTargets)
+                    data += command + line
+                elif 'install' in tokens:
+                    data += line.replace('install', 'MACRO_NOOP')
+                elif 'add_subdirectory' in tokens:
+                    data += line
+                    line = line[line.find('add_subdirectory') + len('add_subdirectory'):]
+                    token, line = self._parseNextCmakeToken(line, lines)
+                    if token != '(':
+                        data += line
+                        continue
+                    dirName, _ = self._parseNextCmakeToken(line, lines)
+                    subDir = os.path.join(os.path.dirname(path), dirName)
+                    subMkPath = os.path.join(subDir, buildutils.MAKE_FILE)
+                    if os.path.isdir(subDir) and os.path.isfile(subMkPath):
+                        self.patchOptionalLibMakefile(subMkPath, outputDir, moduleName, cpuABIs)
+                else:
+                    data += line
+        with open(path, 'w') as destination:
+            destination.write(data)
+
+    @staticmethod
+    def mergeMakeFiles(makefilePath1, makefilePath2):
+        data = ''
+        with open(makefilePath1) as source:
+            for line in source:
+                if 'add_subdirectory' in line:
+                    with open(makefilePath2) as secondMakeFile:
+                        data += secondMakeFile.read()
+                else:
+                    data += line.replace('source/', '').replace('/source', '')
+        with open(makefilePath2, 'w') as destination:
+            destination.write(data)
 
     def getPatchFile(self, version: str) -> str:
-        """>>> getPatchFile(version) -> path
+        """
         Return the path to the patch file for the specified Python version.
+
+        :param version: The python version.
+        :return: The path to the patch file.
         """
         patchFile = os.path.join(self.config.patchesDir, 'Python' + version + '.patch')
         if not os.path.exists(patchFile):
@@ -354,11 +534,12 @@ class Builder(Loggable):
         return patchFile
 
     def getAllAvailablePythonVersions(self) -> Optional[Dict[str, str]]:
-        """>>> getAllAvailablePythonVersions() -> version to url dict
-        Query all available Python versions from the source server
-        and returns a dict with a version to download url mapping.
-        Versions are also filtered by the availability of a patch file
-        for that version.
+        """
+        Query all available Python versions from the source server and returns a dict with a
+        version to download url mapping. Versions are also filtered by the availability
+        of a patch file for that version.
+
+        :return: A mapping of Python version strings to their corresponding download url.
         """
         startTime = time()
         connection = Connection(self.config.pythonServer)
@@ -401,12 +582,15 @@ class Builder(Loggable):
         connection.close()
         return versions
 
-    def versionToUrl(self, connection: Connection, version: str) -> str:
-        """>>> versionToUrl(connection, version) -> url
-        Takes an existing connection to the Python source server and
-        and queries it for the downloadable of the requested Python
-        version. If the version exists, the url to its source is
-        returned, otherwise the network response is returned.
+    def versionToUrl(self, connection: Connection, version: str) -> Union[str, HTTPResponse]:
+        """
+        Takes an existing connection to the Python source server and and queries it for the
+        downloadable of the requested Python version. If the version exists, the url to its
+        source is returned, otherwise the network response is returned.
+
+        :param connection: An existing connection to the python download server.
+        :param version: The Python version.
+        :return: The url for the download of the sources of the Python version.
         """
         path = self.config.pythonServerPath + version + '/Python-' + version + '.tgz'
         self.debug('Checking Python version at "{url}"...'.format(url=connection.host + path))
@@ -421,11 +605,13 @@ class Builder(Loggable):
         return path
 
     def downloadPythonSource(self, versionPath: str, downloadDir: str) -> Optional[str]:
-        """>>> downloadPythonSource(versionPath, downloadDir) -> path / None
-        Download a Python source archive from the Python source server
-        at the sub-path 'versionPath' and stores it in 'downloadDir'.
-        Returns the path to the downloaded archive on success or None
-        on failure.
+        """
+        Download a Python source archive from the Python source server at the sub-path
+        'versionPath' and stores it in 'downloadDir'.
+
+        :param versionPath: The relative path on the download server to the Python source file.
+        :param downloadDir: The path to the directory to store the downloaded sources in.
+        :return: The path to the downloaded file on success or None on failure.
         """
         self.info('Downloading Python source from "{url}"...'
                   .format(url=self.config.pythonServer + versionPath))
@@ -433,10 +619,13 @@ class Builder(Loggable):
                                    downloadDir, self.config.log)
 
     def extractPythonArchive(self, sourceArchive: str, extractedDir: str) -> Optional[str]:
-        """>>> extractPythonArchive(sourceArchive, extractedDir) -> path or None
+        """
         Extract the Python archive at 'sourceArchive' to 'extractedDir'.
-        Returns the path to the first directory of the extracted archive
-        on success or None on error.
+
+        :param sourceArchive: The path to the source archive file.
+        :param extractedDir: The path to the directory where to extract the source to.
+        :return: The path to the first directory of the extracted archive
+                 on success or None on error.
         """
         self.info('Extracting {archive}...'.format(archive=sourceArchive))
         res = buildutils.extract(
@@ -452,18 +641,15 @@ class Builder(Loggable):
             return None
         return res
 
-    def patchPythonSource(self, sourcePath: str, patchFilePath: str) -> bool:
-        """>>> patchPythonSource(sourcePath, patchFilePath) -> success
-        Apply the patch at 'patchFilePath' to the Python source at 'sourcePath'.
-        """
-        return buildutils.applyPatch(self.config.gitPath, sourcePath,
-                                     patchFilePath, self.config.log)
-
     @staticmethod
     def generateModulesZip(sourcePath: str, outputDir: str) -> bool:
-        """>>> generateModulesZip(sourcePath, outputDir) -> success
+        """
         Generate the Python modules zip from the source at 'sourcePath'
         and store it into 'outputDir'.
+
+        :param sourcePath: The path to the Python source directory.
+        :param outputDir: The path within to store the modules zip.
+        :return: True on success, False otherwise.
         """
         outputPath = os.path.join(outputDir, 'lib')
         if os.path.exists(outputPath):
@@ -476,86 +662,48 @@ class Builder(Loggable):
                                    os.path.join(sourcePath, 'Lib')).endswith('lib.zip')
 
     def compilePythonSource(self, sourcePath: str, pythonVersion: str, tempDir: str) -> bool:
-        """>>> compilePythonSource(sourcePath, pythonVersion, tempDir) -> success
+        """
         Compile the source of the given Python version located at 'sourcePath'
         and stores the compiled binaries into the output directory.
+
+        :param sourcePath: The path to the Python source directory.
+        :param pythonVersion: The Python version string.
+        :param tempDir: The temporary directory to use during compiling.
+        :return: True on success, False otherwise.
         """
         parentDir = os.path.dirname(sourcePath)
-        # Setup the Application.mk.
-        buildutils.fillTemplate(
-            os.path.join(self.config.filesDir, 'Application.mk'),
-            os.path.join(parentDir, 'Application.mk'),
-            pyShortVersion=buildutils.getShortVersion(pythonVersion),
-            androidSdkVersion=self.config.DEFAULT_MIN_SKD_VERSION
-        )
-        with open(os.path.join(parentDir, 'Android.mk'), 'w') as androidMK:
-            androidMK.write('include $(call all-subdir-makefiles)')
-        # Copy the Android.mk and configuration files
-        shutil.copy(os.path.join(self.config.filesDir, 'Android.mk'), sourcePath)
-        # Setup module libraries
-        moduleDependencies = {}
-        for lib, libData in self.config.additionalLibs.items():
-            moduleNames = []
-            if 'pyModuleReq' in libData.keys():
-                moduleNames = libData['pyModuleReq']
-            if int(pythonVersion[0]) >= 3 and 'py3ModuleReq' in libData.keys():
-                moduleNames = libData['py3ModuleReq']
-            if len(moduleNames) < 1:
-                continue
-            for moduleName in moduleNames:
-                if moduleName in moduleDependencies:
-                    moduleDependencies[moduleName].append(lib)
-                else:
-                    moduleDependencies[moduleName] = [lib]
-        for moduleName, moduleDependencies in moduleDependencies.items():
-            moduleDir = os.path.join(parentDir, moduleName)
-            if not os.path.exists(moduleDir):
-                os.mkdir(moduleDir)
-            pythonDir = os.path.basename(sourcePath)
-            moduleWildcards = [moduleName + '.[ch]', moduleName + 'module.c', moduleName + '/*.c']
-            moduleWildcards = [
-                '$(wildcard $(LOCAL_PATH)/../{pyDir}/Modules/{wildcard})'
-                .format(pyDir=pythonDir, wildcard=wildcard) for wildcard in moduleWildcards
-            ]
-            buildutils.fillTemplate(
-                os.path.join(self.config.filesDir, 'module-Android.mk'),
-                os.path.join(moduleDir, 'Android.mk'),
-                moduleSourceWildcards=' '.join(moduleWildcards),
-                libDependencies=' '.join(moduleDependencies),
-                pythonDir=pythonDir
-            )
+        # Copy the makefile
+        self.copyTemplateMakefile(
+            os.path.join(self.config.buildFilesDir, 'Python' + pythonVersion, buildutils.MAKE_FILE),
+            os.path.join(sourcePath, buildutils.MAKE_FILE))
         # Compile
         self.info('Compiling Python {version}...'.format(version=pythonVersion))
         outputDir = os.path.join(self.config.outputDir, 'Python' + pythonVersion)
-        if self.config.useMultiprocessing:
-            subprocessArgs = [
-                buildutils.createCompileSubprocessArgs(
-                    self.config.ndkPath, os.path.join(tempDir, 'NDK-Temp'),
-                    parentDir, outputDir, abi, self.config.log
-                ) for abi in self.config.cpuABIs
-            ]
-            return buildutils.callSubProcessesMultiThreaded(subprocessArgs, self.config.log)
-        else:
-            return buildutils.ndkCompile(self.config.ndkPath, os.path.join(tempDir, 'NDK-Temp'),
-                                         parentDir, outputDir, self.config.cpuABIs, self.config.log)
+        return buildutils.build(
+            self.config.ndkPath, parentDir, outputDir, os.path.join(tempDir, 'NDK-Temp'),
+            cmakePath=self.config.cmakePath, makePath=self.config.makePath,
+            androidSdkVersion=self.config.minSdkVersion, cpuABIs=self.config.cpuABIs,
+            logger=self.config.log)
 
     def cleanup(self, sourcePath: str, outputDir: str):
-        """>>> cleanup(sourcePath, outputDir)
-        Remove unnecessary build artifacts in the 'outputDir'
-        and cleans the build directory located at 'sourcePath'
-        from the last build, so another Python version can be
-        compiled there.
+        """
+        Remove unnecessary build artifacts in the 'outputDir' and cleans the build directory located
+        at 'sourcePath' from the last build, so another Python version can be compiled there.
+
+        :param sourcePath: The path to the sources directory.
+        :param outputDir: The path to the output directory.
         """
         self.info('Removing unnecessary files...')
         shutil.rmtree(sourcePath)
+        additionalLibsNames, additionalLibsData = zip(*self.config.additionalLibs.items())
         for subdir in os.listdir(outputDir):
             if os.path.isdir(os.path.join(outputDir, subdir)):
                 for libFile in os.listdir(os.path.join(outputDir, subdir)):
-                    if libFile[3:-3] in self.config.additionalLibs.keys():
+                    if libFile[3:-3] in additionalLibsNames:
                         os.remove(os.path.join(outputDir, subdir, libFile))
         sourceParentPath = os.path.dirname(sourcePath)
         additionalPythonModules = []
-        for moduleData in self.config.additionalLibs.values():
+        for moduleData in additionalLibsData:
             additionalPythonModules += moduleData.get('pyModuleReq', [])
             additionalPythonModules += moduleData.get('py3ModuleReq', [])
         for subdir in os.listdir(sourceParentPath):
@@ -564,16 +712,18 @@ class Builder(Loggable):
                     shutil.rmtree(os.path.join(sourceParentPath, subdir))
 
     def generateJSON(self) -> bool:
-        """>>> generateJSON() -> success
+        """
         Generate the JSON file with all information needed
         by a connecting client to download the created data.
+
+        :return: True on success, False otherwise.
         """
         self.info('Generating JSON file...')
         requirements = OrderedDict()
         for libName, libData in sorted(self.config.additionalLibs.items()):
             dependencies = ['libraries/' + dep for dep in libData.get('dependencies', [])]
             dependencies += ['data/' + dep[1] for dep in libData.get('data', [])]
-            if 'minAndroidSdk' in libData:
+            if 'minAndroidSdk' in libData and libData['minAndroidSdk'] > self.config.minSdkVersion:
                 dependencies += ['androidSdk/' + str(libData['minAndroidSdk'])]
             if len(dependencies) > 0:
                 requirements['libraries/{name}'.format(name=libName)] = dependencies
@@ -653,16 +803,23 @@ class Builder(Loggable):
                 if not os.path.isdir(abiDir):
                     continue
                 architectureItem = OrderedDict()
+                libFiles = os.listdir(abiDir)
                 if not 'lib' + 'python{ver}.so'.format(ver=buildutils.getShortVersion(version)) in \
-                       os.listdir(abiDir):
+                       libFiles:
                     self.error('The python library was not found in {path}.'.format(path=abiDir))
                     return False
-                for libFile in os.listdir(abiDir):
+                for libRelativePath in libFiles:
+                    libFile = os.path.basename(libRelativePath)
+                    libPath = os.path.join(abiDir, libRelativePath)
+                    if os.path.isdir(libPath):
+                        libFiles.extend(
+                            os.path.join(libRelativePath, file) for file in os.listdir(libPath))
+                        continue
                     lib = 'pythonLib' if 'lib' + 'python' in libFile else libFile[:-3]
-                    libPath = os.path.join(abiDir, libFile)
                     architectureItem[lib] = [
                         'output/{versionDir}/{abi}/{libFile}'
-                        .format(versionDir=versionDir, abi=architecture, libFile=libFile),
+                        .format(versionDir=versionDir, abi=architecture,
+                                libFile=libRelativePath.replace(os.path.sep, '/')),
                         buildutils.createMd5Hash(libPath)
                     ]
                 versionItem[architecture] = architectureItem
@@ -678,10 +835,7 @@ class Builder(Loggable):
         return True
 
     def updateReadMe(self):
-        """>>> updateReadMe()
-        Update the ReadMe file to display all currently
-        available libraries.
-        """
+        """ Update the README file to display all currently available libraries. """
         self.info('Updating README.md...')
         readmeTemplatePath = os.path.join(self.config.currDir, 'README.md.template')
         readmePath = os.path.join(self.config.currDir, 'README.md')
@@ -725,14 +879,17 @@ def main():
     parser.add_argument('--outputDir', default='output',
                         help='The path to the output directory. Defaults to the directory '
                              '"output" in the current directory.')
-    parser.add_argument('--filesDir', default='files',
-                        help='The path to the files directory. Defaults to the directory '
-                             '"files" in the current directory.')
+    parser.add_argument('--buildFilesDir', default='buildFiles',
+                        help='The path to the build files directory. Defaults to the directory '
+                             '"buildFiles" in the current directory.')
     parser.add_argument('--cacheDir', help='The path to the cache directory. Downloaded files will '
                                            'be stored there during compilation. They will get '
                                            'deleted, when the build process succeeds.')
     parser.add_argument('--gitPath', help='The path to the patch executable in the git directory.')
-    parser.add_argument('--ndkPath', help='The path to the ndk-build executable.')
+    parser.add_argument('--cmakePath', help='The path to the cmake executable.')
+    parser.add_argument('--makePath',
+                        help='The path to the make executable (e.g. ninja.exe on Windows).')
+    parser.add_argument('--ndkPath', help='The path to the ndk directory.')
     parser.add_argument('--pythonPatchDir', help='The path to the directory where the pythonPatch '
                                                  'library source code can be found.')
     parser.add_argument('--ipcDir', help='The path to the directory where the IPC '
@@ -743,10 +900,8 @@ def main():
     parser.add_argument('--pythonServerPath', default=Configuration.pythonServerPath,
                         help='The path on the Python server to see all available Python versions. '
                              'Defaults to "{path}".'.format(path=Configuration.pythonServerPath))
-    parser.add_argument('--cpuABIs', nargs='*', default=Configuration.ALL_CPU_ABIS,
-                        choices=Configuration.ALL_CPU_ABIS,
-                        help='The cpu ABIs to compile for. Defaults to all. Possible values are '
-                             + ', '.join(Configuration.ALL_CPU_ABIS))
+    parser.add_argument('--cpuABIs', nargs='*', default=[],
+                        help='The cpu ABIs to compile for. Defaults to all supported by the ndk.')
     parser.add_argument('--disableMultiprocessing', default=False, action='store_true',
                         help='If set, turns off the multiprocessing of the compilation. '
                              'By default, multiprocessing is turned on.')

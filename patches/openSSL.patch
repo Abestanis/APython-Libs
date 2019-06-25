@@ -1,0 +1,56 @@
+diff --git openSSL.orig/crypto/CMakeLists.txt OpenSSL.new/crypto/CMakeLists.txt
+index dad692b..a8dee22 100644
+--- openSSL.orig/crypto/CMakeLists.txt
++++ OpenSSL.new/crypto/CMakeLists.txt
+@@ -277,6 +277,9 @@ endif()
+ 
+ set_target_properties( crypto PROPERTIES
+   VERSION "${LIB_VERSION}" SOVERSION "${LIB_SOVERSION}" )
++target_include_directories(crypto INTERFACE
++        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
++        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>)
+ 
+ install( TARGETS crypto
+     RUNTIME DESTINATION bin
+diff --git openSSL.orig/opensslconf.h.cmake OpenSSL.new/opensslconf.h.cmake
+index c5a5133..09297d6 100644
+--- openSSL.orig/opensslconf.h.cmake
++++ OpenSSL.new/opensslconf.h.cmake
+@@ -51,9 +51,6 @@ extern "C" {
+ #ifndef OPENSSL_NO_EC_NISTP_64_GCC_128
+ # define OPENSSL_NO_EC_NISTP_64_GCC_128
+ #endif
+-#ifndef OPENSSL_NO_EGD
+-# define OPENSSL_NO_EGD
+-#endif
+ #ifndef OPENSSL_NO_EXTERNAL_TESTS
+ # define OPENSSL_NO_EXTERNAL_TESTS
+ #endif
+@@ -75,12 +72,6 @@ extern "C" {
+ #ifndef OPENSSL_NO_SSL_TRACE
+ # define OPENSSL_NO_SSL_TRACE
+ #endif
+-#ifndef OPENSSL_NO_SSL3
+-# define OPENSSL_NO_SSL3
+-#endif
+-#ifndef OPENSSL_NO_SSL3_METHOD
+-# define OPENSSL_NO_SSL3_METHOD
+-#endif
+ #ifndef OPENSSL_NO_UBSAN
+ # define OPENSSL_NO_UBSAN
+ #endif
+diff --git openSSL.orig/ssl/CMakeLists.txt OpenSSL.new/ssl/CMakeLists.txt
+index 9bb2ae1..f5c3477 100644
+--- openSSL.orig/ssl/CMakeLists.txt
++++ OpenSSL.new/ssl/CMakeLists.txt
+@@ -46,6 +46,10 @@ target_link_libraries ( ssl crypto )
+ set_target_properties( ssl PROPERTIES
+   VERSION "${LIB_VERSION}" SOVERSION "${LIB_SOVERSION}" )
+ 
++target_include_directories(ssl INTERFACE
++        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
++        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>)
++
+ install( TARGETS ssl
+     RUNTIME DESTINATION bin
+     LIBRARY DESTINATION lib

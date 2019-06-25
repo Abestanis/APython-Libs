@@ -16,21 +16,22 @@ class Cache:
         self.ensureCacheDir()
 
     def ensureCacheDir(self):
-        """>>> ensureCacheDir
-        Ensures, that the cache directory exists.
-        """
+        """ Ensures, that the cache directory exists. """
         if not os.path.exists(self.cachePath):
             os.mkdir(self.cachePath)
 
     def download(self, url: str, destination: str, logger: Logger) -> Optional[str]:
-        """>>> download(url, destination, logger) -> path or None
-        Searches for a file in the cache and downloads it from 'url',
-        if it is not found in the cache. The retrieved file will be
-        saved in 'destination'. If 'destination' is a directory, the file
-        is saved in this directory with the same name it had on the
-        server. Progress information is written to the logs via
-        'logger'. On success, the path to the downloaded file is
-        returned. In case of an download error, None is returned.
+        """
+        Searches for a file in the cache and downloads it from 'url', if it is not found in the
+        cache. The retrieved file will be saved in 'destination'. If 'destination' is a directory,
+        the file is saved in this directory with the same name it had on the server. Progress
+        information is written to the logs via 'logger'. On success, the path to the downloaded
+        file is returned. In case of an download error, None is returned.
+
+        :param url: The url of the file to download.
+        :param destination: The path to save the file into, or the directory to save the file into.
+        :param logger: A logger to report process.
+        :return: The path to the downloaded file on success, None on failure.
         """
         fileName = os.path.basename(url)
         if (('//github.com' in url) or ('www.github.com' in url))\
@@ -48,10 +49,11 @@ class Cache:
         shutil.copy(cachePath, destination)
         return destination
 
-    def clear(self, ignore_errors: bool=False):
-        """>>> clear(ignore_errors = False)
-        Clears the cache and deletes the cache directory.
-        This Cache instance should not be used afterwards,
-        until a call to ensureCacheDir.
+    def clear(self, ignore_errors: bool = False):
+        """
+        Clears the cache and deletes the cache directory. This Cache instance should not be used
+        afterwards, until a call to ensureCacheDir.
+
+        :param ignore_errors: If True, ignore errors during deletion.
         """
         shutil.rmtree(self.cachePath, ignore_errors=ignore_errors)

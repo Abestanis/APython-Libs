@@ -1,0 +1,61 @@
+diff --git SDL2_ttf.orig/CMakeLists.txt SDL2_ttf.new/CMakeLists.txt
+index ed6e249..6158f27 100644
+--- SDL2_ttf.orig/CMakeLists.txt
++++ SDL2_ttf.new/CMakeLists.txt
+@@ -9,8 +9,16 @@ project(SDL_ttf C)
+ include(GNUInstallDirs)
+ include(CMakePackageConfigHelpers)
+ 
+-find_package(SDL2 REQUIRED)
+-find_package(Freetype REQUIRED)
++#find_package(SDL2 REQUIRED)
++set( SDL2_FOUND True )
++set( SDL2_LIBRARY SDL2 )
++set( SDL2MAIN_LIBRARY SDL2main )
++set( SDL2_INCLUDE_DIR "" )
++#find_package(Freetype REQUIRED)
++add_subdirectory(external/freetype-2.9.1)
++set( freetype_FOUND True )
++set( freetype_LIBRARY freetype )
++set( freetype_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/external/freetype-2.9.1/include )
+ find_package(PkgConfig QUIET)
+ 
+ set(SDL_TTF_MAJOR_VERSION 2)
+@@ -21,9 +29,10 @@ set(SDL_TTF_BINARY_AGE 14)
+ set(SDL_TTF_VERSION "${SDL_TTF_MAJOR_VERSION}.${SDL_TTF_MINOR_VERSION}.${SDL_TTF_MICRO_VERSION}")
+ 
+ ##### library generation #####
+-add_library(SDL2_ttf SDL_ttf.c SDL_ttf.h)
+-target_link_libraries(SDL2_ttf SDL2::SDL2 Freetype::Freetype)
++add_library(SDL2_ttf SHARED SDL_ttf.c SDL_ttf.h)
++target_link_libraries(SDL2_ttf SDL2 freetype)
+ target_include_directories(SDL2_ttf PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/SDL2>)
++target_include_directories(SDL2_ttf INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+ 
+ install(
+   TARGETS SDL2_ttf
+diff --git SDL2_ttf.orig/SDL_ttf.c SDL2_ttf.new/SDL_ttf.c
+index ba7065a..69ced36 100644
+--- SDL2_ttf.orig/SDL_ttf.c
++++ SDL2_ttf.new/SDL_ttf.c
+@@ -591,7 +591,7 @@ static FT_Error Load_Glyph(TTF_Font *font, Uint32 idx, c_glyph *cached, int want
+             cached->advance += font->glyph_overhang;
+         }
+         if (TTF_HANDLE_STYLE_ITALIC(font) && FT_IS_SCALABLE(face)) {
+-            int bump = (int)SDL_ceilf(GLYPH_ITALICS * font->height);
++            int bump = (int)ceilf(GLYPH_ITALICS * font->height); // TODO: update SDL2 && Revert to SDL_ceilf
+             cached->maxx += bump;
+         }
+ 
+diff --git SDL2_ttf.orig/external/freetype-2.9.1/CMakeLists.txt SDL2_ttf.new/external/freetype-2.9.1/CMakeLists.txt
+index ad8ded0..c7c11da 100644
+--- SDL2_ttf.orig/external/freetype-2.9.1/CMakeLists.txt
++++ SDL2_ttf.new/external/freetype-2.9.1/CMakeLists.txt
+@@ -364,6 +364,7 @@ target_include_directories(
+ target_include_directories(
+   freetype
+     PUBLIC $<INSTALL_INTERFACE:include/freetype2>)
++target_include_directories(freetype INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
+ 
+ if (BUILD_FRAMEWORK)
+   set_property(SOURCE ${PUBLIC_CONFIG_HEADERS}

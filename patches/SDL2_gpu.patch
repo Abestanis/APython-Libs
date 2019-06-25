@@ -1,0 +1,140 @@
+diff --git SDL2_gpu.orig/CMakeLists.txt SDL2_gpu.new/CMakeLists.txt
+index 0f743d0..0dfb2d2 100644
+--- SDL2_gpu.orig/CMakeLists.txt
++++ SDL2_gpu.new/CMakeLists.txt
+@@ -10,6 +10,7 @@ set(SDL_gpu_DEFAULT_BUILD_STATIC ON)
+ set(SDL_gpu_DEFAULT_BUILD_DEMOS ON)
+ set(SDL_gpu_DEFAULT_DISABLE_OPENGL OFF)
+ set(SDL_gpu_DEFAULT_DISABLE_GLES ON)
++set(SDL_gpu_DYNAMIC_GLES_3_DEFAULT OFF)
+ 
+ if(IOS)
+   message(" Using iOS defaults.")
+@@ -31,6 +32,7 @@ elseif(ANDROID)
+   set(SDL_gpu_DEFAULT_DISABLE_GLES OFF)
+   set(SDL_gpu_DEFAULT_BUILD_SHARED ON)
+   set(SDL_gpu_DEFAULT_BUILD_STATIC OFF)
++  set(SDL_gpu_DYNAMIC_GLES_3_DEFAULT ON)
+ elseif(WIN32)
+   set(SDL_gpu_INSTALL_BY_DEFAULT OFF)
+ elseif(("${CMAKE_SYSTEM}" MATCHES "Linux") AND ("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "arm"))
+@@ -72,7 +74,7 @@ option(SDL_gpu_DISABLE_GLES_2 "Disable OpenGLES 2.X renderer" OFF)
+ option(SDL_gpu_DISABLE_GLES_3 "Disable OpenGLES 3.X renderer" OFF)
+ 
+ option(SDL_gpu_USE_SYSTEM_GLEW "Attempt to use the system GLEW library (may not support GL 3+)" OFF)
+-option(SDL_gpu_DYNAMIC_GLES_3 "Attempt to run-time link to GLES 3" OFF)
++option(SDL_gpu_DYNAMIC_GLES_3 "Attempt to run-time link to GLES 3" ${SDL_gpu_DYNAMIC_GLES_3_DEFAULT})
+ 
+ option(SDL_gpu_USE_BUFFER_RESET "Upload VBOs by requesting a new one each time (default).  This is often the best for driver optimization)" ON)
+ option(SDL_gpu_USE_BUFFER_UPDATE "Upload VBOs by updating only the needed portion" OFF)
+@@ -122,7 +124,11 @@ if ( SDL_gpu_USE_SDL1 )
+ 	include_directories(${SDL_INCLUDE_DIR})
+ 	link_libraries(${SDL_LIBRARY})
+ else ( SDL_gpu_USE_SDL1 )
+-	find_package(SDL2 REQUIRED)
++	#find_package(SDL2 REQUIRED)
++	set( SDL2_FOUND True )
++	set( SDL2_LIBRARY SDL2 )
++	set( SDL2MAIN_LIBRARY SDL2main )
++	set( SDL2_INCLUDE_DIR "" )
+ 
+ 	if ( NOT SDL2_FOUND )
+ 	   message ( FATAL_ERROR "SDL2 not found!" )
+@@ -231,8 +237,11 @@ else (SDL_gpu_DISABLE_GLES)
+     
+     include_directories(src/externals/gl3stub)
+     if (SDL_gpu_DYNAMIC_GLES_3)
+-        SET(SDL_gpu_HDRS ${SDL_gpu_HDRS} externals/gl3stub/gl3stub.c externals/gl3stub/gl3stub.h)
++        SET(SDL_gpu_SRCS ${SDL_gpu_SRCS} externals/gl3stub/gl3stub.c)
++        SET(SDL_gpu_HDRS ${SDL_gpu_HDRS} externals/gl3stub/gl3stub.h)
+         add_definitions("-DSDL_GPU_DYNAMIC_GLES_3")
++        find_library(EGL_LIBRARY EGL)
++        list(APPEND SDL_gpu_GL_LIBRARIES ${EGL_LIBRARY} )
+     endif(SDL_gpu_DYNAMIC_GLES_3)
+ endif (SDL_gpu_DISABLE_GLES)
+ 
+diff --git SDL2_gpu.orig/src/CMakeLists.txt SDL2_gpu.new/src/CMakeLists.txt
+index d38ee48..9e253f0 100644
+--- SDL2_gpu.orig/src/CMakeLists.txt
++++ SDL2_gpu.new/src/CMakeLists.txt
+@@ -108,8 +108,8 @@ foreach(INC_FILE ${SDL_gpu_public_HDRS})
+     configure_file(${INC_FILE} ${CMAKE_BINARY_DIR}/${OUTPUT_DIR}/include/${BASE} COPYONLY)
+ endforeach(INC_FILE)
+ 
+-configure_file(${CMAKE_SOURCE_DIR}/LICENSE.txt ${CMAKE_BINARY_DIR}/${OUTPUT_DIR}/LICENSE.txt COPYONLY)
+-configure_file(${CMAKE_SOURCE_DIR}/README.md ${CMAKE_BINARY_DIR}/${OUTPUT_DIR}/README.md COPYONLY)
++configure_file(${PROJECT_SOURCE_DIR}/LICENSE.txt ${CMAKE_BINARY_DIR}/${OUTPUT_DIR}/LICENSE.txt COPYONLY)
++configure_file(${PROJECT_SOURCE_DIR}/README.md ${CMAKE_BINARY_DIR}/${OUTPUT_DIR}/README.md COPYONLY)
+ 
+ # Build the shared library (.so or .dll)
+ if(SDL_gpu_BUILD_SHARED)
+@@ -117,6 +117,10 @@ if(SDL_gpu_BUILD_SHARED)
+ 		${SDL_gpu_HDRS}
+ 		${SDL_gpu_SRCS}
+ 	)
++	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DGL_GLEXT_PROTOTYPES")
++	set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-DGL_GLEXT_PROTOTYPES")
++	target_include_directories( SDL_gpu_shared
++        INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> )
+ 	
+ 	target_link_libraries(SDL_gpu_shared ${SDL_gpu_GL_LIBRARIES})
+ 
+@@ -147,13 +151,17 @@ if(SDL_gpu_BUILD_SHARED)
+ 
+ 	else()
+ 		if(ANDROID)
+-			set_target_properties(SDL_gpu_shared PROPERTIES
+-				OUTPUT_NAME ${SDL_gpu_SHARED_OUTPUT}
+-				CLEAN_DIRECT_OUTPUT 1
+-				ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${OUTPUT_DIR}/lib"
+-				LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${OUTPUT_DIR}/lib"
+-				RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${OUTPUT_DIR}/bin"
+-			)
++            set_target_properties(SDL_gpu_shared PROPERTIES
++                    OUTPUT_NAME ${SDL_gpu_SHARED_OUTPUT}
++                    CLEAN_DIRECT_OUTPUT 1
++                    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${OUTPUT_DIR}/lib"
++                    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${OUTPUT_DIR}/bin"
++            )
++            if(NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY)
++                set_target_properties(SDL_gpu_shared PROPERTIES
++                        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${OUTPUT_DIR}/lib"
++                )
++            endif()
+ 		else()
+ 			set_target_properties(SDL_gpu_shared PROPERTIES
+ 				OUTPUT_NAME ${SDL_gpu_SHARED_OUTPUT}
+diff --git SDL2_gpu.orig/src/SDL_gpu.c SDL2_gpu.new/src/SDL_gpu.c
+index c6fb4bd..1ed2a53 100644
+--- SDL2_gpu.orig/src/SDL_gpu.c
++++ SDL2_gpu.new/src/SDL_gpu.c
+@@ -422,8 +422,13 @@ GPU_Target* GPU_Init(Uint16 w, Uint16 h, GPU_WindowFlagEnum SDL_flags)
+     for(i = 0; i < renderer_order_size; i++)
+     {
+         GPU_Target* screen = GPU_InitRendererByID(renderer_order[i], w, h, SDL_flags);
+-        if(screen != NULL)
++        if(screen != NULL) {
+             return screen;
++        } else {
++            // If we cant initialize this renderer, ignore the errors and try the next one.
++            (void) GPU_PopErrorCode();
++            (void) GPU_PopErrorCode();
++        }
+     }
+ 
+     GPU_PushErrorCode("GPU_Init", GPU_ERROR_BACKEND_ERROR, "No renderer out of %d was able to initialize properly", renderer_order_size);
+diff --git SDL2_gpu.orig/src/renderer_GLES_3.c SDL2_gpu.new/src/renderer_GLES_3.c
+index 45dbf85..a24387d 100644
+--- SDL2_gpu.orig/src/renderer_GLES_3.c
++++ SDL2_gpu.new/src/renderer_GLES_3.c
+@@ -10,10 +10,6 @@ void GPU_FreeRenderer_GLES_3(GPU_Renderer* renderer) {}
+ 
+ #else
+ 
+-#if defined(SDL_GPU_DYNAMIC_GLES_3)
+-    #include "gl3stub.c"
+-#endif
+-
+ // Most of the code pulled in from here...
+ #define SDL_GPU_USE_GLES
+ #define SDL_GPU_GLES_MAJOR_VERSION 3

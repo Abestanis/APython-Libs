@@ -1,3 +1,4 @@
 last.log
 *.pyc
 .idea
+config.cfg
