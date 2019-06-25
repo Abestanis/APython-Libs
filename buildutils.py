@@ -30,6 +30,20 @@ def _callSubprocess(args) -> Union[bool, Tuple[int, bytes, bytes]]:
         return True
 
 
+def _handleDownloadProcess(logger, currentBlock, blockSize, totalSize):
+    writtenBytes = currentBlock * blockSize
+    if totalSize == -1:
+        logger.console('[Info ] [{progress}] {bytes} KB'.format(
+            progress=''.join('O' if currentBlock % 3 == i else 'o' for i in range(3)),
+            bytes=round(writtenBytes / 1000), total=round(totalSize / 1000)), end='\r')
+        return
+    percentage = int(round((writtenBytes / totalSize) * 100))
+    twentieth = int(round(percentage / 5))
+    logger.console('[Info ] [{progress}] {bytes}/{total} KB, {percentage}%'.format(
+        progress=('\u2588' * twentieth).ljust(20), bytes=round(writtenBytes / 1000),
+        total=round(totalSize / 1000), percentage=percentage), end='\r')
+
+
 def download(url, destination: str, logger: Logger) -> Optional[str]:
     """>>> download(url, destination, logger) -> None or path
     Downloads a file from 'url'. The retrieved file will be saved
@@ -47,29 +61,8 @@ def download(url, destination: str, logger: Logger) -> Optional[str]:
             destination += os.path.splitext(url)[-1]
     startTime = time()
     try:
-        with closing(urlopen(url)) as response:
-            if response.code != 200 or 'Content-Length' not in response.headers:
-                msg = response.reason if hasattr(response, 'reason') else '?'
-                if response.code is None:
-                    logger.warn('Failed to receive response code from {url} (reason {msg}), '
-                                'download may fail!'.format(url=url, msg=msg))
-                else:
-                    reason = 'Download failed with code {code}: {msg}'\
-                        .format(code=response.code, msg=msg)
-                    raise URLError(reason)
-            totalLength = int(response.headers['Content-Length'])
-            writtenBytes = 0
-            with open(destination, 'wb') as downloadFile:
-                data = response.read(4096)
-                while data:
-                    writtenBytes += downloadFile.write(data)
-                    percentage = int(round((writtenBytes / totalLength) * 100))
-                    twentieth = int(round(percentage / 5))
-                    logger.console('[Info ] [{progress}] {bytes}/{total} KB, {percentage}%'.format(
-                        progress=('\u2588' * twentieth).ljust(20), bytes=round(writtenBytes / 1000),
-                        total=round(totalLength / 1000), percentage=percentage), end='\r')
-                    data = response.read(4096)
-            logger.console(' ' * 60, end='\r')
+        urlretrieve(url, destination, lambda *args: _handleDownloadProcess(logger, *args))
+        logger.console(' ' * 60, end='\r')
     except URLError as error:
         logger.error('Download from {url} failed: {msg}'.format(url=url, msg=error.reason))
         return None
@@ -81,8 +74,8 @@ def download(url, destination: str, logger: Logger) -> Optional[str]:
     return destination
 
 
-def extract(sourceArchive: str, extractionDir: str, extractionFilter: Optional[List[str]]=None,
-            allowedFileTypes: Optional[List[str]]=None) -> Union[str, bool, None]:
+def extract(sourceArchive: str, extractionDir: str, extractionFilter: Optional[List[str]] = None,
+            allowedFileTypes: Optional[List[str]] = None) -> Union[str, bool, None]:
     """>>> extract(sourceArchive, extractionDir, extractionFilter, allowedFileTypes) -> path
     Extracts the archive located under 'sourceArchive'
     and puts its content under 'extractionDir'. If
@@ -203,7 +196,7 @@ def escapeNDKParameter(parameter: str) -> str:
         return parameter
 
 
-def callSubProcessesMultiThreaded(subProcessArgs, logger: Logger) -> bool:
+def callSubProcessesMultiThreaded(subProcessArgs: List[List[List[str]]], logger: Logger) -> bool:
     """>>>callSubProcessesMultiThreaded(subprocessArgs, logger) -> success
     Executes the sub processes constructed from the given 'subprocessArgs' in
     parallel. If one of them fail, the exitcode, stdout and stderr are written
