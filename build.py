@@ -784,10 +784,11 @@ class Builder(Loggable):
                 libraries[lib] = libItem
 
         jsonData = OrderedDict()
-        jsonData['__version__'] = 1
+        jsonData['__version__'] = 2
         jsonData['requirements'] = requirements
         jsonData['data'] = dataItem
         jsonData['libraries'] = libraries
+        jsonData['minSdk'] = self.config.minSdkVersion
         for versionDir in os.listdir(self.config.outputDir):
             if versionDir == 'libraries' or versionDir == 'data':
                 continue
