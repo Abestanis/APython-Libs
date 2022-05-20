@@ -26,7 +26,7 @@ class Cache:
         cache. The retrieved file will be saved in 'destination'. If 'destination' is a directory,
         the file is saved in this directory with the same name it had on the server. Progress
         information is written to the logs via 'logger'. On success, the path to the downloaded
-        file is returned. In case of an download error, None is returned.
+        file is returned. In case of a download error, None is returned.
 
         :param url: The url of the file to download.
         :param destination: The path to save the file into, or the directory to save the file into.
@@ -34,7 +34,7 @@ class Cache:
         :return: The path to the downloaded file on success, None on failure.
         """
         fileName = os.path.basename(url)
-        if (('//github.com' in url) or ('www.github.com' in url))\
+        if (('//github.com' in url) or ('www.github.com' in url)) \
                 and os.path.splitext(url)[1] == '':
             url = buildutils.getGitRepositoryDownloadUrl(url)
             fileName += os.path.splitext(url)[-1]

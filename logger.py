@@ -10,18 +10,20 @@ class Logger:
 
     def console(self, message: str, end: str = '\n'):
         """
-        Write message with end as the last character to sys.stdout, if it is a terminal.
-        :param message: The message to write
-        :param end: The last character
+        Write message with end as the last character to `sys.stdout`, if it is a terminal.
+
+        :param message: The message to write.
+        :param end: The last character.
         """
         if self._output is None and sys.stdout.isatty():
             sys.stdout.write(message + end)
 
     def log(self, prefix: str, message: str):
         """
-        Write the given message appended to the prefix to the logfile or stdout
-        :param prefix: A prefix
-        :param message: The message to write
+        Write the given message appended to the prefix to the logfile or stdout.
+
+        :param prefix: A prefix.
+        :param message: The message to write.
         """
         if self._output is None:
             print(prefix + ' ' + message)
@@ -44,7 +46,7 @@ class Logger:
 
     def getOutput(self) -> Optional[IO]:
         """
-        :return: The output fileobject of this logger or None
+        :return: The output fileobject of this logger or None.
         """
         return self._output
 

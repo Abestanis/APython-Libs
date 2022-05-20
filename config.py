@@ -134,10 +134,10 @@ class Configuration:
             self.warnOnOutputOverwrite = parser.getboolean('General', 'warnOnOutputOverwrite')
         if parser.has_option('General', 'useMultiprocessing'):
             self.useMultiprocessing = parser.getboolean('General', 'useMultiprocessing')
-        if parser.has_option('General', 'versions')\
+        if parser.has_option('General', 'versions') \
                 and parser.get('General', 'versions').strip().lower() not in ['any', 'all']:
             self.versionList = parser.get('General', 'versions').replace(',', ' ').split()
-        if parser.has_option('General', 'cpuABIs')\
+        if parser.has_option('General', 'cpuABIs') \
                 and parser.get('General', 'cpuABIs').strip().lower() not in ['any', 'all']:
             self.cpuABIs = parser.get('General', 'cpuABIs').replace(',', ' ').split()
         if parser.has_option('Paths', 'ndk_dir'):
@@ -255,6 +255,7 @@ class Configuration:
                 if libDataTable[dependentLib][0] < libraryData[0]:
                     libDataTable[dependentLib][0] = libraryData[0]
                     updateMinSdk(libDataTable[dependentLib])
+
         for libData in libDataTable.values():
             updateMinSdk(libData)
 

@@ -127,7 +127,9 @@ class Builder(Loggable):
             self.error('Cancelling build due to interrupt.')
         except Exception as error:
             self.error('Caught exception: {error}'.format(error=error))
-            traceback.print_exception(*(sys.exc_info() + (None, self.config.log.getOutput())))
+            exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
+            traceback.print_exception(exceptionType, exceptionValue, exceptionTraceback,
+                                      None, self.config.log.getOutput())
         finally:
             self.info('Cleaning up...')
             shutil.rmtree(tempdir, ignore_errors=True)
@@ -152,7 +154,7 @@ class Builder(Loggable):
                 if not os.path.isdir(path):
                     os.remove(path)
                 else:
-                    for i in range(3):  # Retry a few times in case of an error
+                    for _ in range(3):  # Retry a few times in case of an error
                         shutil.rmtree(path, ignore_errors=True)
                         if not os.path.exists(path):
                             break
@@ -174,7 +176,7 @@ class Builder(Loggable):
         """
         Download and compile all additional libraries.
         When finished, all libraries and their data are stored in the output directory and
-        'sourceDir' is set up to compile the python binaries in it.
+        'sourceDir' is set up to compile the Python binaries in it.
 
         :param tempDir: The temporary directory to use during building.
         :param sourceDir: The directory to extract the library sources to.
@@ -368,6 +370,7 @@ class Builder(Loggable):
                 newLine = next(lineGenerator)
                 originalLine += newLine
                 yield newLine
+
         wrappedLineGenerator = lineGeneratorWrapper()
         token, line = self._parseNextCmakeToken(originalLine, wrappedLineGenerator)
         if token.lower() != command.lower():
@@ -455,7 +458,7 @@ class Builder(Loggable):
                                   .format(path=libPath, name=libName))
                     patchedTargets.append(libName)
                     data += '({name} {type} IMPORTED GLOBAL)\nset_property(TARGET {name} ' \
-                            'PROPERTY IMPORTED_LOCATION "{path}")\nMACRO_NOOP('\
+                            'PROPERTY IMPORTED_LOCATION "{path}")\nMACRO_NOOP(' \
                             .format(name=libName, type=libType, path=libPath) + restLine
                 elif 'target_include_directories' in tokens:
                     startPoint = line.find('target_include_directories')
@@ -525,7 +528,7 @@ class Builder(Loggable):
         """
         Return the path to the patch file for the specified Python version.
 
-        :param version: The python version.
+        :param version: The Python version.
         :return: The path to the patch file.
         """
         patchFile = os.path.join(self.config.patchesDir, 'Python' + version + '.patch')
@@ -584,11 +587,11 @@ class Builder(Loggable):
 
     def versionToUrl(self, connection: Connection, version: str) -> Union[str, HTTPResponse]:
         """
-        Takes an existing connection to the Python source server and and queries it for the
-        downloadable of the requested Python version. If the version exists, the url to its
+        Takes an existing connection to the Python source server and queries it for the download
+        file of the requested Python version. If the version exists, the url to its
         source is returned, otherwise the network response is returned.
 
-        :param connection: An existing connection to the python download server.
+        :param connection: An existing connection to the Python download server.
         :param version: The Python version.
         :return: The url for the download of the sources of the Python version.
         """
@@ -690,7 +693,7 @@ class Builder(Loggable):
         Remove unnecessary build artifacts in the 'outputDir' and cleans the build directory located
         at 'sourcePath' from the last build, so another Python version can be compiled there.
 
-        :param sourcePath: The path to the sources directory.
+        :param sourcePath: The path to the source directory.
         :param outputDir: The path to the output directory.
         """
         self.info('Removing unnecessary files...')
@@ -807,7 +810,7 @@ class Builder(Loggable):
                 libFiles = os.listdir(abiDir)
                 if not 'lib' + 'python{ver}.so'.format(ver=buildutils.getShortVersion(version)) in \
                        libFiles:
-                    self.error('The python library was not found in {path}.'.format(path=abiDir))
+                    self.error('The Python library was not found in {path}.'.format(path=abiDir))
                     return False
                 for libRelativePath in libFiles:
                     libFile = os.path.basename(libRelativePath)

@@ -12,7 +12,6 @@ from zipfile import ZipFile, BadZipfile
 
 from logger import Logger
 
-
 MAKE_FILE = 'CMakeLists.txt'
 
 
@@ -126,12 +125,14 @@ def extract(sourceArchive: str, extractionDir: str, extractionFilters: Optional[
             archiveFile = ZipFile(sourceArchive)
             archiveMembers = archiveFile.namelist()
 
-            def getMemberName(member): return member
+            def getMemberName(member):
+                return member
         else:
             archiveFile = tarfile.open(sourceArchive)
             archiveMembers = archiveFile.getmembers()
 
-            def getMemberName(member): return member.name
+            def getMemberName(member):
+                return member.name
         if len(archiveMembers) == 0:
             return extractionDir
         baseDir = getMemberName(archiveMembers[0]).split('/')[0]
@@ -141,13 +142,14 @@ def extract(sourceArchive: str, extractionDir: str, extractionFilters: Optional[
                 if getMemberName(member) == baseDir:
                     yield member
                     continue
-                if allowedFileTypes is not None and\
-                   os.path.splitext(getMemberName(member))[-1] not in allowedFileTypes:
+                if allowedFileTypes is not None and \
+                        os.path.splitext(getMemberName(member))[-1] not in allowedFileTypes:
                     continue
-                if matcher is not None and\
-                   matcher.match(getMemberName(member).split('/', 1)[-1]) is None:
+                if matcher is not None and \
+                        matcher.match(getMemberName(member).split('/', 1)[-1]) is None:
                     continue
                 yield member
+
         archiveFile.extractall(path=extractionDir, members=check_members(archiveMembers))
     except tarfile.CompressionError:
         return False
@@ -174,7 +176,7 @@ def getGitRepositoryDownloadUrl(url: str) -> str:
     """
     Takes a git repository url 'url' and returns the url to the master zip.
 
-    :param url: The url to a Github repository.
+    :param url: The url to a GitHub repository.
     :return: The url to the master archive of the repository.
     """
     return url + ('/' if url[-1] != '/' else '') + 'archive/master.zip'
@@ -190,7 +192,7 @@ def getShortVersion(version: str) -> str:
 
 def escapeNDKParameter(parameter: str) -> str:
     """
-    Modifies a parameter so that it can be used by the ndk.
+    Modifies a parameter so that it can be used by the NDK.
 
     :param parameter: The value to escape.
     :return: The escaped value.
