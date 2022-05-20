@@ -1,3 +1,6 @@
+#! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 """
 This script will download and compile all Python versions to libraries which
 can be used by the APython project (see https://github.com/Abestanis/APython).
