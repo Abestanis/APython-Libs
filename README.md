@@ -1,7 +1,7 @@
 # APython-Libs
 This repository hosts all the library files and their generating code for the [APython Project](https://github.com/Abestanis/APython).
 
-The hosted libraries can be accessed with the information provided by the generated index.json which is available at http://abestanis.github.io/APython-Libs/index.json.
+The hosted libraries can be accessed with the information provided by the generated index.json which is available at https://abestanis.github.io/APython-Libs/index.json.
 
 ## Usage
 
@@ -10,7 +10,7 @@ For a list of all available options type ```build.py -h``` or ```build.py --help
 
 The script will also download and compile the source code from some additional libraries to allow the generation of some python modules which depend on these libraries (e.g. _ctypes module depends on ffi).
 
-Currently these additional libraries are downloaded:
+Currently, these additional libraries are downloaded:
 * SDL2 (from https://www.libsdl.org/release/SDL2-2.0.7.zip) for the libraries SDL2_gpu, SDL2_ttf, sdl2X11Emulation
 * SDL2_gpu (from https://github.com/grimfang4/sdl-gpu) for the library sdl2X11Emulation
 * SDL2_ttf (from https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-2.0.15.tar.gz) for the library sdl2X11Emulation
