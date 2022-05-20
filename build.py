@@ -79,12 +79,12 @@ class Builder(Loggable):
                 connection = Connection(self.config.pythonServer)
                 for version in versionList:
                     if self.getPatchFile(version) is None:
-                        self.warn('No patch-file found for specified version {version}. '
-                                  'Ignoring this version.'.format(version=version))
+                        self.warn(f'No patch-file found for specified version {version}. '
+                                  f'Ignoring this version.')
                         continue
                     versions[version] = self.versionToUrl(connection, version)
                 connection.close()
-            self.debug('Got {num} versions to process...'.format(num=len(versions)))
+            self.debug(f'Got {len(versions)} versions to process...')
             for version, versionPath in versions.items():
                 self.info('Processing Python version ' + version)
                 versionOutputDir = os.path.join(self.config.outputDir, 'Python' + version)
@@ -98,16 +98,14 @@ class Builder(Loggable):
                     return False
                 if not buildutils.applyPatch(self.config.gitPath, extractedDir,
                                              self.getPatchFile(version), self.config.log):
-                    self.error('Patching the sources failed for Python version {version}!'
-                               .format(version=version))
+                    self.error(f'Patching the sources failed for Python version {version}!')
                     return False
                 self.info('Generating modules zip...')
                 if not self.generateModulesZip(extractedDir, versionOutputDir):
-                    self.error('Failed to create lib zip at {dir}!'.format(dir=versionOutputDir))
+                    self.error(f'Failed to create lib zip at {versionOutputDir}!')
                     return False
                 if not self.compilePythonSource(extractedDir, version, tempdir):
-                    self.error('Compilation failed for Python version {version}!'
-                               .format(version=version))
+                    self.error(f'Compilation failed for Python version {version}!')
                     return False
                 self.cleanup(extractedDir, versionOutputDir)
             self.info('Done generating libraries.')
@@ -122,14 +120,14 @@ class Builder(Loggable):
             for delta, name in [(deltaHours, 'hours'), (deltaMinutes, 'minutes'),
                                 (deltaSeconds, 'seconds')]:
                 if delta != 0 and len(timeArray) == 0:
-                    timeArray.append('{delta} {name}'.format(delta=int(delta), name=name))
-            self.info('Building finished in {timeStr} and {milliseconds} milliseconds.'
-                      .format(timeStr=', '.join(timeArray), milliseconds=milliseconds))
+                    timeArray.append(f'{int(delta)} {name}')
+            timeString = ', '.join(timeArray)
+            self.info(f'Building finished in {timeString} and {milliseconds} milliseconds.')
             success = True
         except KeyboardInterrupt:
             self.error('Cancelling build due to interrupt.')
         except Exception as error:
-            self.error('Caught exception: {error}'.format(error=error))
+            self.error(f'Caught exception: {error}')
             exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
             traceback.print_exception(exceptionType, exceptionValue, exceptionTraceback,
                                       None, self.config.log.getOutput())
@@ -146,7 +144,7 @@ class Builder(Loggable):
         if os.path.exists(path):
             if not os.path.isdir(path) or len(os.listdir(path)) != 0:
                 if self.config.warnOnOutputOverwrite:
-                    self.warn('The output directory "{dir}" already exists.'.format(dir=path))
+                    self.warn(f'The output directory "{path}" already exists.')
                     # We do not want to override something important
                     if self.config.log.getOutput() is not None:
                         return False
@@ -165,8 +163,7 @@ class Builder(Loggable):
                         try:
                             shutil.rmtree(path, ignore_errors=False)
                         except IOError as error:
-                            self.error('Failed to clean the output directory: {reason}'
-                                       .format(reason=error))
+                            self.error(f'Failed to clean the output directory: {error}')
                             return False
                 # Give the file system time to sync, otherwise creating the dir may raise an error
                 sleep(0.5)
@@ -210,43 +207,40 @@ class Builder(Loggable):
                         self.config.buildFilesDir, name, buildutils.MAKE_FILE)
                     if not os.path.exists(makefilePath):
                         makefilePath = None
-                        self.info('No local {makeFile} file was found for library {name}.'
-                                  .format(makeFile=buildutils.MAKE_FILE, name=name))
+                        self.info(
+                            f'No local {buildutils.MAKE_FILE} file was found for library {name}.')
                     libUrl = libraryData['url']
                     maxRetries = 5
                     for retry in range(maxRetries):
-                        self.info('Downloading library {name} from {url}...'
-                                  .format(name=name, url=libUrl))
+                        self.info(f'Downloading library {name} from {libUrl}...')
                         downloadFile = self.cache.download(libUrl, tempDir, self.config.log)
                         if downloadFile is None:
-                            self.warn('Download from {url} failed, retrying ({retry}/{max})'
-                                      .format(url=libUrl, retry=retry + 1, max=maxRetries))
+                            self.warn(f'Download from {libUrl} failed, retrying '
+                                      f'({retry + 1}/{maxRetries})')
                             continue
-                        self.info('Extracting {file}...'.format(
-                            file=os.path.basename(downloadFile)))
+                        self.info(f'Extracting {os.path.basename(downloadFile)}...')
                         extractDir = buildutils.extract(downloadFile, sourceDir,
                                                         libraryData.get('extractionFilter', None))
                         if extractDir is False:
-                            self.error('Could not extract archive from {url}: Unsupported '
-                                       'archive format!'.format(url=libUrl))
+                            self.error(f'Could not extract archive from {libUrl}: '
+                                       f'Unsupported archive format!')
                             return False
                         if type(extractDir) != str:
-                            self.warn(
-                                'Extraction of archive from {url} failed, retrying ({retry}/{max})'
-                                .format(url=libUrl, retry=retry + 1, max=maxRetries))
+                            self.warn(f'Extraction of archive from {libUrl} failed, retrying '
+                                      f'({retry + 1}/{maxRetries})')
                             continue
                         break
                     else:
-                        self.error('Download from {url} failed!'.format(url=libUrl))
+                        self.error(f'Download from {libUrl} failed!')
                         return False
                     self.info('Extracting done.')
                     diffPath = os.path.join(self.config.patchesDir, name + '.patch')
                     if os.path.exists(diffPath):
-                        self.info('Patching {lib}...'.format(lib=name))
+                        self.info(f'Patching {name}...')
                         if not buildutils.applyPatch(self.config.gitPath, extractDir, diffPath,
                                                      self.config.log):
-                            self.error('Applying patch ({path}) failed for library {name}, '
-                                       'aborting!'.format(path=diffPath, name=name))
+                            self.error(
+                                f'Applying patch ({diffPath}) failed for library {name}, aborting!')
                             return False
                     extractDirMakefile = os.path.join(extractDir, buildutils.MAKE_FILE)
                     if makefilePath:
@@ -255,8 +249,8 @@ class Builder(Loggable):
                         else:
                             self.mergeMakeFiles(makefilePath, extractDirMakefile)
                     elif not os.path.exists(extractDirMakefile):
-                        self.warn('No {makeFile} file was found for library {name}, ignoring it.'
-                                  .format(makeFile=buildutils.MAKE_FILE, name=name))
+                        self.warn(f'No {buildutils.MAKE_FILE} file was found for '
+                                  f'library {name}, ignoring it.')
                         shutil.rmtree(extractDir, ignore_errors=True)
                         continue
                     if 'includeDir' in libraryData:
@@ -277,9 +271,8 @@ class Builder(Loggable):
                             dataSrcPath = os.path.join(self.config.buildFilesDir,
                                                        name, dataSource)
                             if not os.path.exists(dataSrcPath):
-                                self.warn('Data source defined for library {name} does not exist: '
-                                          '{dataSource}. Skipping it.'
-                                          .format(name=libraryName, dataSource=dataSource))
+                                self.warn(f'Data source defined for library {libraryName} does not '
+                                          f'exist: {dataSource}. Skipping it.')
                                 continue
                         if os.path.isdir(dataSrcPath):
                             shutil.make_archive(
@@ -290,8 +283,8 @@ class Builder(Loggable):
                                 self.config.outputDir, 'data',
                                 dataName + '.' + dataSrcPath.split('.', 1)[1])
                             shutil.copy(dataSrcPath, destination)
-            self.info('Compiling {num} additional libraries for Android Sdk version {version}...'
-                      .format(num=len(libraryList), version=sdkVersion))
+            self.info(f'Compiling {len(libraryList)} additional libraries for '
+                      f'Android Sdk version {sdkVersion}...')
             success = buildutils.build(
                 self.config.ndkPath, sourceDir, outputDir, os.path.join(tempDir, 'NDK-Temp'),
                 cmakePath=self.config.cmakePath, makePath=self.config.makePath,
@@ -299,18 +292,17 @@ class Builder(Loggable):
             if not success:
                 self.error('Compiling the additional libraries failed.')
                 return False
-            self.info('Compiling of {num} additional libraries succeeded.'
-                      .format(num=len(libraryList)))
+            self.info(f'Compiling of {len(libraryList)} additional libraries succeeded.')
             if sdkVersion != max(minSdkList.keys()):
                 for libraryName in libraryList:
                     os.rename(os.path.join(libs[libraryName], buildutils.MAKE_FILE),
                               os.path.join(libs[libraryName], buildutils.MAKE_FILE + '.d'))
-        self.info('Compiling of all ({num}) additional libraries succeeded.'.format(num=len(libs)))
+        self.info(f'Compiling of all ({len(libs)}) additional libraries succeeded.')
         for libPath in libs.values():
             if os.path.exists(os.path.join(libPath, buildutils.MAKE_FILE + '.d')):
                 os.rename(os.path.join(libPath, buildutils.MAKE_FILE + '.d'),
                           os.path.join(libPath, buildutils.MAKE_FILE))
-        self.info('Patching {makefile} files...'.format(makefile=buildutils.MAKE_FILE))
+        self.info(f'Patching {buildutils.MAKE_FILE} files...')
         libsOutputDir = buildutils.escapeNDKParameter(outputDir)
         for moduleName, modulePath in libs.items():
             self.patchOptionalLibMakefile(
@@ -447,22 +439,21 @@ class Builder(Loggable):
                         libType = 'SHARED'
                     assert libName != ''
                     libDirGenericPath = outputDir + '/${CMAKE_ANDROID_ARCH_ABI}/'
-                    libPath = libDirGenericPath + 'lib{name}.so'.format(name=libName)
+                    libPath = libDirGenericPath + f'lib{libName}.so'
                     libDirPath = os.path.join(outputDir, cpuABIs[0])
                     if not os.path.isfile(
-                            os.path.join(libDirPath, 'lib{name}.so'.format(name=libName))):
-                        matches = get_close_matches('lib{name}.so'.format(name=libName),
-                                                    os.listdir(libDirPath), n=1, cutoff=0.75)
+                            os.path.join(libDirPath, f'lib{libName}.so')):
+                        matches = get_close_matches(
+                            f'lib{libName}.so', os.listdir(libDirPath), n=1, cutoff=0.75)
                         if len(matches) == 0:
                             data += line
                             continue
                         libPath = libDirGenericPath + matches[0]
-                        self.info('Choosing shared library file {path} for {name}'
-                                  .format(path=libPath, name=libName))
+                        self.info(f'Choosing shared library file {libPath} for {libName}')
                     patchedTargets.append(libName)
-                    data += '({name} {type} IMPORTED GLOBAL)\nset_property(TARGET {name} ' \
-                            'PROPERTY IMPORTED_LOCATION "{path}")\nMACRO_NOOP(' \
-                            .format(name=libName, type=libType, path=libPath) + restLine
+                    data += f'({libName} {libType} IMPORTED GLOBAL)\n' \
+                            f'set_property(TARGET {libName} PROPERTY IMPORTED_LOCATION ' \
+                            f'"{libPath}")\nMACRO_NOOP(' + restLine
                 elif 'target_include_directories' in tokens:
                     startPoint = line.find('target_include_directories')
                     data += line[:startPoint]
@@ -549,20 +540,17 @@ class Builder(Loggable):
         """
         startTime = time()
         connection = Connection(self.config.pythonServer)
-        self.info('Gathering Python versions at "{url}"...'
-                  .format(url=connection.host + self.config.pythonServerPath))
+        url = connection.host + self.config.pythonServerPath
+        self.info(f'Gathering Python versions at "{url}"...')
         connection.request('GET', self.config.pythonServerPath,
                            headers={"Connection": "keep-alive"})
         response = connection.getresponse()
         if response.status != 200:
-            self.error('Failed to connect to "{host}/{path}":'
-                       .format(host=connection.host, path=self.config.pythonServerPath))
-            self.error('Response {status}:{reason}'.format(
-                status=response.status, reason=response.reason))
+            self.error(f'Failed to connect to "{url}":\n'
+                       f'Response {response.status}: {response.reason}')
             return None
         result = response.read().decode('utf-8').split('\n')
-        self.info('Got a response in {seconds} seconds.'
-                  .format(seconds=round(time() - startTime, 2)))
+        self.info(f'Got a response in {round(time() - startTime, 2)} seconds.')
         versions = {}
         self.info('Checking availability of the sources...')
         for line in result:
@@ -574,15 +562,13 @@ class Builder(Loggable):
                 continue
             version = version[:-1]
             if self.getPatchFile(version) is None:
-                self.info('Ignoring version {version} because no patch-file was found.'
-                          .format(version=version))
+                self.info(f'Ignoring version {version} because no patch-file was found.')
                 continue
             url = self.versionToUrl(connection, version)
             if type(url) != str:
                 if version != '2.0':
-                    self.info('Ignoring version {version} because it has no downloadable'
-                              ' source code. Maybe this version is still in development.'
-                              .format(version=version))
+                    self.info(f'Ignoring version {version} because it has no downloadable'
+                              f' source code. Maybe this version is still in development.')
                 continue
             versions[version] = url
         connection.close()
@@ -599,13 +585,12 @@ class Builder(Loggable):
         :return: The url for the download of the sources of the Python version.
         """
         path = self.config.pythonServerPath + version + '/Python-' + version + '.tgz'
-        self.debug('Checking Python version at "{url}"...'.format(url=connection.host + path))
+        self.debug(f'Checking Python version at "{connection.host + path}"...')
         startTime = time()
         connection.request('HEAD', path, headers={"Connection": "keep-alive"})
         response = connection.getresponse()
         response.read()  # Empty the request
-        self.debug('Got a response in {seconds} seconds.'
-                   .format(seconds=round(time() - startTime, 2)))
+        self.debug(f'Got a response in {round(time() - startTime, 2)} seconds.')
         if response.status != 200:
             return response
         return path
@@ -619,10 +604,9 @@ class Builder(Loggable):
         :param downloadDir: The path to the directory to store the downloaded sources in.
         :return: The path to the downloaded file on success or None on failure.
         """
-        self.info('Downloading Python source from "{url}"...'
-                  .format(url=self.config.pythonServer + versionPath))
-        return self.cache.download('https://' + self.config.pythonServer + versionPath,
-                                   downloadDir, self.config.log)
+        url = self.config.pythonServer + versionPath
+        self.info(f'Downloading Python source from "{url}"...')
+        return self.cache.download('https://' + url, downloadDir, self.config.log)
 
     def extractPythonArchive(self, sourceArchive: str, extractedDir: str) -> Optional[str]:
         """
@@ -633,17 +617,17 @@ class Builder(Loggable):
         :return: The path to the first directory of the extracted archive
                  on success or None on error.
         """
-        self.info('Extracting {archive}...'.format(archive=sourceArchive))
+        self.info(f'Extracting {sourceArchive}...')
         res = buildutils.extract(
             sourceArchive, extractedDir,
             ['Include', 'Lib', 'Modules', 'Objects', 'Parser', 'Python', 'LICENSE', 'README'],
             ['.c', '.h', '.py', '.pyc', '.inc', '.txt', '', '.gif', '.png', '.def']
         )
         if res is None:
-            self.error('Failed to extract {archive}!'.format(archive=sourceArchive))
+            self.error(f'Failed to extract {sourceArchive}!')
         elif not res:
-            self.error('Failed to extract {archive}: Archive is compressed with an '
-                       'unsupported compression.'.format(archive=sourceArchive))
+            self.error(f'Failed to extract {sourceArchive}: '
+                       f'Archive is compressed with an unsupported compression.')
             return None
         return res
 
@@ -683,7 +667,7 @@ class Builder(Loggable):
             os.path.join(self.config.buildFilesDir, 'Python' + pythonVersion, buildutils.MAKE_FILE),
             os.path.join(sourcePath, buildutils.MAKE_FILE))
         # Compile
-        self.info('Compiling Python {version}...'.format(version=pythonVersion))
+        self.info(f'Compiling Python {pythonVersion}...')
         outputDir = os.path.join(self.config.outputDir, 'Python' + pythonVersion)
         return buildutils.build(
             self.config.ndkPath, parentDir, outputDir, os.path.join(tempDir, 'NDK-Temp'),
@@ -732,7 +716,7 @@ class Builder(Loggable):
             if 'minAndroidSdk' in libData and libData['minAndroidSdk'] > self.config.minSdkVersion:
                 dependencies += ['androidSdk/' + str(libData['minAndroidSdk'])]
             if len(dependencies) > 0:
-                requirements['libraries/{name}'.format(name=libName)] = dependencies
+                requirements[f'libraries/{libName}'] = dependencies
         moduleDependencies = {}
         for lib, libData in self.config.additionalLibs.items():
             moduleNames = []
@@ -748,7 +732,7 @@ class Builder(Loggable):
                 else:
                     moduleDependencies[moduleName] = ['libraries/' + lib]
         for moduleName, moduleDependencyList in sorted(moduleDependencies.items()):
-            requirements['pyModule/{name}'.format(name=moduleName)] = sorted(moduleDependencyList)
+            requirements[f'pyModule/{moduleName}'] = sorted(moduleDependencyList)
         dataItem = OrderedDict()
         for name, libData in sorted(self.config.additionalLibs.items()):
             if 'data' in libData.keys():
@@ -762,7 +746,7 @@ class Builder(Loggable):
                         else:
                             dataPath += '.zip'
                     item = OrderedDict(path=[
-                        'output/data/{name}'.format(name=os.path.basename(dataPath)),
+                        f'output/data/{os.path.basename(dataPath)}',
                         buildutils.createMd5Hash(dataPath)
                     ])
                     if data[2] != 'files/data':
@@ -783,8 +767,7 @@ class Builder(Loggable):
                     if 'lib' + lib + '.so' in os.listdir(os.path.join(libraryDir, architecture)):
                         filePath = os.path.join(libraryDir, architecture, 'lib' + lib + '.so')
                         libItem[architecture] = [
-                            'output/libraries/{abi}/lib{name}.so'
-                            .format(abi=architecture, name=lib),
+                            f'output/libraries/{architecture}/lib{lib}.so',
                             buildutils.createMd5Hash(filePath)
                         ]
                 libraries[lib] = libItem
@@ -802,8 +785,8 @@ class Builder(Loggable):
             versionItem = OrderedDict()
             modulesFile = os.path.join(self.config.outputDir, versionDir, 'lib.zip')
             if not os.path.exists(modulesFile):
-                self.error('lib.zip not found in {path}.'
-                           .format(path=os.path.join(self.config.outputDir, versionDir)))
+                self.error(
+                    f'lib.zip not found in {os.path.join(self.config.outputDir, versionDir)}.')
                 return False
             for architecture in os.listdir(os.path.join(self.config.outputDir, versionDir)):
                 abiDir = os.path.join(self.config.outputDir, versionDir, architecture)
@@ -811,9 +794,8 @@ class Builder(Loggable):
                     continue
                 architectureItem = OrderedDict()
                 libFiles = os.listdir(abiDir)
-                if not 'lib' + 'python{ver}.so'.format(ver=buildutils.getShortVersion(version)) in \
-                       libFiles:
-                    self.error('The Python library was not found in {path}.'.format(path=abiDir))
+                if not 'lib' + f'python{buildutils.getShortVersion(version)}.so' in libFiles:
+                    self.error(f'The Python library was not found in {abiDir}.')
                     return False
                 for libRelativePath in libFiles:
                     libFile = os.path.basename(libRelativePath)
@@ -823,15 +805,14 @@ class Builder(Loggable):
                             os.path.join(libRelativePath, file) for file in os.listdir(libPath))
                         continue
                     lib = 'pythonLib' if 'lib' + 'python' in libFile else libFile[:-3]
+                    unixLibFile = libRelativePath.replace(os.path.sep, '/')
                     architectureItem[lib] = [
-                        'output/{versionDir}/{abi}/{libFile}'
-                        .format(versionDir=versionDir, abi=architecture,
-                                libFile=libRelativePath.replace(os.path.sep, '/')),
+                        f'output/{versionDir}/{architecture}/{unixLibFile}',
                         buildutils.createMd5Hash(libPath)
                     ]
                 versionItem[architecture] = architectureItem
             versionItem['lib'] = [
-                'output/{versionDir}/lib.zip'.format(versionDir=versionDir),
+                f'output/{versionDir}/lib.zip',
                 buildutils.createMd5Hash(modulesFile)
             ]
             jsonData[version] = versionItem
@@ -856,15 +837,15 @@ class Builder(Loggable):
                 moduleList = libraryData.get('pyModuleReq', [])
                 moduleList += [name for name in libraryData.get('py3ModuleReq', [])
                                if name not in moduleList]
-                libList += ' for the Python {module} {list}'.format(
-                    module='modules' if len(moduleList) > 1 else 'module',
-                    list=', '.join(moduleList))
+                module = 'modules' if len(moduleList) > 1 else 'module'
+                moduleListText = ', '.join(moduleList)
+                libList += f' for the Python {module} {moduleListText}'
                 if len(depList) > 0:
                     libList += ' and'
             if len(depList) > 0:
-                libList += ' for the {library} {list}'.format(
-                    library='libraries' if len(depList) > 1 else 'library',
-                    list=', '.join(sorted(depList)))
+                library = 'libraries' if len(depList) > 1 else 'library'
+                libraryListText = ', '.join(sorted(depList))
+                libList += f' for the {library} {libraryListText}'
             libList += '\n'
         with open(readmeTemplatePath, 'r') as template:
             with open(readmePath, 'w') as output:
@@ -902,11 +883,11 @@ def main():
     parser.add_argument('--ipcDir', help='The path to the directory where the IPC '
                                          'library source code can be found.')
     parser.add_argument('--pythonServer', default=Configuration.pythonServer,
-                        help='The host address of the Python server. Defaults to {host}".'
-                        .format(host=Configuration.pythonServer))
+                        help=f'The host address of the Python server. '
+                             f'Defaults to {Configuration.pythonServer}".')
     parser.add_argument('--pythonServerPath', default=Configuration.pythonServerPath,
-                        help='The path on the Python server to see all available Python versions. '
-                             'Defaults to "{path}".'.format(path=Configuration.pythonServerPath))
+                        help=f'The path on the Python server to see all available Python versions. '
+                             f'Defaults to "{Configuration.pythonServerPath}".')
     parser.add_argument('--cpuABIs', nargs='*', default=[],
                         help='The cpu ABIs to compile for. Defaults to all supported by the ndk.')
     parser.add_argument('--disableMultiprocessing', default=False, action='store_true',

@@ -49,15 +49,14 @@ def _handleDownloadProcess(logger, currentBlock, blockSize, totalSize):
     """
     writtenBytes = currentBlock * blockSize
     if totalSize == -1:
-        logger.console('[Info ] [{progress}] {bytes} KB'.format(
-            progress=''.join('O' if currentBlock % 3 == i else 'o' for i in range(3)),
-            bytes=round(writtenBytes / 1000), total=round(totalSize / 1000)), end='\r')
+        progress = ''.join('O' if currentBlock % 3 == i else 'o' for i in range(3))
+        logger.console(f'[Info ] [{progress}] {round(writtenBytes / 1000)} KB', end='\r')
         return
     percentage = int(round((writtenBytes / totalSize) * 100))
     twentieth = int(round(percentage / 5))
-    logger.console('[Info ] [{progress}] {bytes}/{total} KB, {percentage}%'.format(
-        progress=('\u2588' * twentieth).ljust(20), bytes=round(writtenBytes / 1000),
-        total=round(totalSize / 1000), percentage=percentage), end='\r')
+    progress = ('\u2588' * twentieth).ljust(20)
+    logger.console(f'[Info ] [{progress}] {round(writtenBytes / 1000)}/{round(totalSize / 1000)} '
+                   f'KB, {percentage}%', end='\r')
 
 
 def download(url, destination: str, logger: Logger) -> Optional[str]:
@@ -83,13 +82,12 @@ def download(url, destination: str, logger: Logger) -> Optional[str]:
         urlretrieve(url, destination, lambda *args: _handleDownloadProcess(logger, *args))
         logger.console(' ' * 60, end='\r')
     except URLError as error:
-        logger.error('Download from {url} failed: {msg}'.format(url=url, msg=error.reason))
+        logger.error(f'Download from {url} failed: {error.reason}')
         return None
     except IOError as ioError:
-        logger.error('Download from {url} failed: {msg}'.format(url=url, msg=ioError.strerror))
+        logger.error(f'Download from {url} failed: {ioError.strerror}')
         return None
-    logger.info('Download finished in {seconds} seconds.'
-                .format(seconds=round(time() - startTime, 2)))
+    logger.info(f'Download finished in {round(time() - startTime, 2)} seconds.')
     return destination
 
 
@@ -214,13 +212,13 @@ def callSubProcessesMultiThreaded(subProcessArgs: List[List[List[str]]], logger:
     :return: True on success, False otherwise.
     """
     pool = Pool(min(10, len(subProcessArgs)))
-    logger.debug('Starting {num} sub processes.'.format(num=len(subProcessArgs)))
+    logger.debug(f'Starting {len(subProcessArgs)} sub processes.')
     handles = [pool.apply_async(_callSubprocess, [args]) for args in subProcessArgs]
     pool.close()
     while len(handles) > 0:
         result = handles.pop(0).get()
         if result is not True:
-            logger.error('Subprocess exited with code {code}.'.format(code=result[0]))
+            logger.error(f'Subprocess exited with code {result[0]}.')
             logger.info(result[1].decode('utf-8'))
             logger.error(result[2].decode('utf-8'))
             return False
@@ -293,7 +291,7 @@ def applyPatch(gitPath: str, sourcePath: str, patchFilePath: str, logger: Logger
     Apply the patch in the patchFile 'patchFilePath' to 'sourcePath'.
     """
     args = [gitPath, '-C', sourcePath, 'apply', '-p1', patchFilePath]
-    logger.info('Patching the source code with {path}...'.format(path=patchFilePath))
+    logger.info(f'Patching the source code with {patchFilePath}...')
     logger.debug(subprocess.list2cmdline(args))
     return subprocess.call(args, stdout=logger.getOutput(), stderr=logger.getOutput()) == 0
 

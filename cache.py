@@ -45,7 +45,7 @@ class Cache:
             if buildutils.download(url, cachePath, logger) is None:
                 return None
         else:
-            logger.info('Using cached version from {path}.'.format(path=cachePath))
+            logger.info(f'Using cached version from {cachePath}.')
         shutil.copy(cachePath, destination)
         return destination
 

@@ -90,11 +90,11 @@ class Configuration:
         try:
             self.minSdkVersion, allCpuABIs = self._readNdkDefaults()
         except (RuntimeError, IOError) as error:
-            self.log.error('The given ndk is invalid: {reason}'.format(reason=error))
+            self.log.error(f'The given ndk is invalid: {error}')
             return False
-        self.log.debug('Auto-detected minimum sdk version {sdkVersion} and supported CPU ABIs: '
-                       '{abiList}'.format(sdkVersion=self.minSdkVersion,
-                                          abiList=', '.join(allCpuABIs)))
+        abiList = ', '.join(allCpuABIs)
+        self.log.debug(f'Auto-detected minimum sdk version {self.minSdkVersion} '
+                       f'and supported CPU ABIs: {abiList}')
         if self.pythonPatchDir is None:
             self.log.error('The path to the Python Patch source directory is not specified.')
             return False
@@ -117,7 +117,7 @@ class Configuration:
         if not all([cpuAbi in allCpuABIs for cpuAbi in self.cpuABIs]):
             for cpuABI in self.cpuABIs:
                 if cpuABI not in allCpuABIs:
-                    self.log.error('Got invalid CPU ABI: {abi}'.format(abi=cpuABI))
+                    self.log.error(f"Got invalid CPU ABI: {cpuABI}")
             return False
         if len(self.cpuABIs) == 0:
             self.cpuABIs = allCpuABIs
@@ -180,8 +180,8 @@ class Configuration:
             rawData = dict(parser.items(sectionName))
             sectionData = {}
             if 'url' not in rawData:
-                self.log.warn('Module {name} read from "{path}" does not have the required '
-                              'dataEntry "url", ignoring it.'.format(name=sectionName, path=path))
+                self.log.warn(f'Module {sectionName} read from "{path}" does not have '
+                              f'the required dataEntry "url", ignoring it.')
                 continue
             sectionData['url'] = rawData['url']
             if 'extraction_filter' in rawData:
@@ -200,10 +200,9 @@ class Configuration:
                     try:
                         libData['minAndroidSdk'] = int(rawData[prefix + 'min_android_sdk'])
                     except ValueError as error:
-                        self.log.warn(
-                            'Module {name} read from "{path}" has a malformed (not numeric) '
-                            'dataEntry "{prefix}min_android_sdk", ignoring it: {reason}.'.format(
-                                name=libraryName, prefix=prefix, path=path, reason=error))
+                        self.log.warn(f'Module {libraryName} read from "{path}" has a malformed '
+                                      f'(not numeric) dataEntry "{prefix}min_android_sdk", '
+                                      f'ignoring it: {error}.')
                         continue
                 if prefix + 'data' in rawData:
                     libData['data'] = []
@@ -211,10 +210,9 @@ class Configuration:
                         dataStages = dataEntry.split(' -> ')
                         if len(dataStages) != 3:
                             self.log.warn(
-                                'Module {name} read from "{path}" has a malformed dataEntry in '
-                                '"{prefix}data": "{dataEntry}" (Could not parse 3 stages), '
-                                'ignoring dataEntry.'.format(name=libraryName, prefix=prefix,
-                                                             path=path, dataEntry=dataEntry))
+                                f'Module {libraryName} read from "{path}" has a malformed '
+                                f'dataEntry in "{prefix}data": "{dataEntry}" (Could not parse 3 '
+                                f'stages), ignoring dataEntry.')
                             continue
                         libData['data'].append(dataStages)
                 if prefix + 'lib_dep' in rawData:
