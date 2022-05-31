@@ -1,1 +1,10 @@
 add_subdirectory(source)
+file(WRITE ${CMAKE_BINARY_DIR}/cmake/FindSDL2.cmake "
+if(NOT DEFINED SDL2_FOUND)
+    set(SDL2_FOUND True)
+    set(SDL2_LIBRARY SDL2)
+    set(SDL2MAIN_LIBRARY SDL2main)
+    set(SDL2_INCLUDE_DIR \"\")
+endif()
+")
+add_library(SDL2::SDL2 ALIAS SDL2)

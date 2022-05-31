@@ -316,6 +316,7 @@ def build(ndkPath, sourceDir, outputDir, tempDir, cmakePath, makePath,
     with open(makeFilePath, 'w') as makeFile:
         # noinspection SpellCheckingInspection
         makeFile.write('''cmake_minimum_required(VERSION 3.5)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR}/cmake)
 file(GLOB children RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/*)
 foreach(child ${children})
     if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${child})
