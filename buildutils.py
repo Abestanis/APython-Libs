@@ -176,7 +176,7 @@ def getGitRepositoryDownloadUrl(url: ParseResult) -> str:
     """
     Takes a git repository url 'url' and returns the url to the source zip.
     if the url matches https://github.com/{user}/{repo}/tree/{tag}, the source
-    of the {tag} is downloaded, otherwise the head of the master branch is used.
+    of the {tag} is downloaded, otherwise the head of the main branch is used.
 
     :param url: The url to a GitHub repository.
     :return: The url to the source archive of the repository.
@@ -185,7 +185,7 @@ def getGitRepositoryDownloadUrl(url: ParseResult) -> str:
     if len(pathParts) == 5 and pathParts[3] == 'tree':
         path = '/'.join((*pathParts[:3], 'archive', 'refs', 'tags', pathParts[4] + '.zip'))
     else:
-        path = url.path + ('/' if url.path[-1] != '/' else '') + 'archive/master.zip'
+        path = url.path + ('/' if url.path[-1] != '/' else '') + 'archive/main.zip'
     return urlunparse(url._replace(path=path))
 
 
