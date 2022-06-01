@@ -510,7 +510,7 @@ class Builder(Loggable):
         data = ''
         with open(makefilePath1) as source:
             for line in source:
-                if 'add_subdirectory' in line:
+                if 'add_subdirectory(source)' in line:
                     with open(makefilePath2) as secondMakeFile:
                         data += secondMakeFile.read()
                 else:
