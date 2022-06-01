@@ -3,6 +3,7 @@ import re
 import tarfile
 import subprocess
 from typing import Union, Tuple, Optional, List
+from urllib.parse import urlparse, ParseResult, urlunparse
 from urllib.request import urlretrieve
 from urllib.error import URLError
 from hashlib import md5
@@ -73,8 +74,9 @@ def download(url, destination: str, logger: Logger) -> Optional[str]:
     """
     if os.path.isdir(destination):
         destination = os.path.join(destination, os.path.basename(url))
-    if (('//github.com' in url) or ('www.github.com' in url)) and os.path.splitext(url)[1] == '':
-        url = getGitRepositoryDownloadUrl(url)
+    parsedUrl = urlparse(url)
+    if parsedUrl.netloc in ['github.com', 'www.github.com'] and not url.endswith('.zip'):
+        url = getGitRepositoryDownloadUrl(parsedUrl)
         if os.path.splitext(destination)[-1] == '':
             destination += os.path.splitext(url)[-1]
     startTime = time()
@@ -170,14 +172,21 @@ def createMd5Hash(filePath: str) -> str:
     return md5Hash.hexdigest()
 
 
-def getGitRepositoryDownloadUrl(url: str) -> str:
+def getGitRepositoryDownloadUrl(url: ParseResult) -> str:
     """
-    Takes a git repository url 'url' and returns the url to the master zip.
+    Takes a git repository url 'url' and returns the url to the source zip.
+    if the url matches https://github.com/{user}/{repo}/tree/{tag}, the source
+    of the {tag} is downloaded, otherwise the head of the master branch is used.
 
     :param url: The url to a GitHub repository.
-    :return: The url to the master archive of the repository.
+    :return: The url to the source archive of the repository.
     """
-    return url + ('/' if url[-1] != '/' else '') + 'archive/master.zip'
+    pathParts = url.path.split('/', maxsplit=4)
+    if len(pathParts) == 5 and pathParts[3] == 'tree':
+        path = '/'.join((*pathParts[:3], 'archive', 'refs', 'tags', pathParts[4] + '.zip'))
+    else:
+        path = url.path + ('/' if url.path[-1] != '/' else '') + 'archive/master.zip'
+    return urlunparse(url._replace(path=path))
 
 
 def getShortVersion(version: str) -> str:

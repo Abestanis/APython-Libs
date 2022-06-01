@@ -1,5 +1,6 @@
 import os
 from typing import Optional
+from urllib.parse import urlparse
 
 import buildutils
 import shutil
@@ -34,9 +35,9 @@ class Cache:
         :return: The path to the downloaded file on success, None on failure.
         """
         fileName = os.path.basename(url)
-        if (('//github.com' in url) or ('www.github.com' in url)) \
-                and os.path.splitext(url)[1] == '':
-            url = buildutils.getGitRepositoryDownloadUrl(url)
+        parsedUrl = urlparse(url)
+        if parsedUrl.netloc in ['github.com', 'www.github.com'] and not url.endswith('.zip'):
+            url = buildutils.getGitRepositoryDownloadUrl(parsedUrl)
             fileName += os.path.splitext(url)[-1]
         if os.path.isdir(destination):
             destination = os.path.join(destination, fileName)
