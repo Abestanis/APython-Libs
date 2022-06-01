@@ -7,6 +7,7 @@ char* __real_setlocale(int category, const char *locale);
 void __noreturn __real_exit(int code);
 size_t __real_mbstowcs(wchar_t *dest, const char *src, size_t len);
 char* __real_ttyname(int __fd);
+char* __real_fgets(char* buffer, int size, FILE* stream);
 
 static _exitHandler exitHandler = NULL;
 static char ttyPathBuffer[128];
@@ -50,4 +51,23 @@ char* __wrap_ttyname(int __fd) {
     ttyPathBuffer[pathSize] = '\0';
     return ttyPathBuffer;
     
+}
+
+// fgets (and fgetc) don't return on interrupts.
+// This causes the Python terminal to not respond to Ctrl+C, until an enter key is pressed.
+// Emulate fgets using read to be able to respond to interrupts.
+char* __wrap_fgets(char* const buffer, int size, FILE* stream) {
+    if (size < 1) {
+        return NULL;
+    }
+    int numCharactersRead = 0;
+    ssize_t readResult;
+    while (numCharactersRead < size - 1 &&
+           ((readResult = read(fileno(stream), &buffer[numCharactersRead], 1)) > 0)) {
+        if (buffer[numCharactersRead++] == '\n') {
+            break;
+        }
+    }
+    buffer[numCharactersRead] = '\0';
+    return (readResult < 0 || (readResult == 0 && numCharactersRead == 0)) ? NULL : buffer;
 }

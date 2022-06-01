@@ -13,6 +13,7 @@ char* __wrap_setlocale(int category, const char *locale);
 void __noreturn __wrap_exit(int code);
 size_t __wrap_mbstowcs(wchar_t *dest, const char * src, size_t len);
 char* __wrap_ttyname(int __fd);
+char* __wrap_fgets(char* const buffer, int size, FILE* stream);
 
 #ifdef __cplusplus
 }
