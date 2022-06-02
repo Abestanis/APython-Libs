@@ -1,0 +1,785 @@
+diff --git Python3.10.4.orig/Include/internal/pycore_fileutils.h Python3.10.4.new/Include/internal/pycore_fileutils.h
+index c1c9244..012bac5 100644
+--- Python3.10.4.orig/Include/internal/pycore_fileutils.h
++++ Python3.10.4.new/Include/internal/pycore_fileutils.h
+@@ -44,7 +44,7 @@ PyAPI_FUNC(void) _Py_ResetForceASCII(void);
+ 
+ 
+ PyAPI_FUNC(int) _Py_GetLocaleconvNumeric(
+-    struct lconv *lc,
++    /*struct lconv *lc,*/
+     PyObject **decimal_point,
+     PyObject **thousands_sep);
+ 
+diff --git Python3.10.4.orig/Lib/_sitebuiltins.py Python3.10.4.new/Lib/_sitebuiltins.py
+index c66269a..5da61dd 100644
+--- Python3.10.4.orig/Lib/_sitebuiltins.py
++++ Python3.10.4.new/Lib/_sitebuiltins.py
+@@ -51,7 +51,15 @@ class _Printer(object):
+                     data = fp.read()
+                 break
+             except OSError:
+-                pass
++                try:
++                    import zipfile
++                    zipPath, subPath = filename.split('.zip')
++                    with zipfile.ZipFile(zipPath + '.zip', 'r') as z:
++                        with z.open(subPath.replace('\\', '/')[1:], 'r') as fp:
++                            data = fp.read().decode('utf-8')
++                            break
++                except Exception:
++                    pass
+         if not data:
+             data = self.__data
+         self.__lines = data.split('\n')
+diff --git Python3.10.4.new/Lib/_sysconfigdata__android_.py Python3.10.4.new/Lib/_sysconfigdata__android_.py
+new file mode 100644
+index 0000000..5935607
+--- /dev/null
++++ Python3.10.4.new/Lib/_sysconfigdata__android_.py
+@@ -0,0 +1,2 @@
++# ANDROID: empty default system configuration
++build_time_vars = {}
+diff --git Python3.10.4.orig/Lib/distutils/sysconfig.py Python3.10.4.new/Lib/distutils/sysconfig.py
+index 3414a76..39f3900 100644
+--- Python3.10.4.orig/Lib/distutils/sysconfig.py
++++ Python3.10.4.new/Lib/distutils/sysconfig.py
+@@ -201,7 +201,7 @@ def customize_compiler(compiler):
+     Mainly needed on Unix, so we can plug in the information that
+     varies across Unices and is stored in Python's Makefile.
+     """
+-    if compiler.compiler_type == "unix":
++    if compiler.compiler_type == "unix" and sys.platform != "android":
+         if sys.platform == "darwin":
+             # Perform first-time customization of compiler-related
+             # config vars on OS X now that we know we need a compiler.
+diff --git Python3.10.4.orig/Lib/idlelib/config.py Python3.10.4.new/Lib/idlelib/config.py
+index 04444a3..a968de5 100644
+--- Python3.10.4.orig/Lib/idlelib/config.py
++++ Python3.10.4.new/Lib/idlelib/config.py
+@@ -26,6 +26,8 @@ configuration problem notification and resolution.
+ # TODOs added Oct 2014, tjr
+ 
+ from configparser import ConfigParser
+++from tempfile import mkdtemp
+++from shutil import rmtree, copytree
+ import os
+ import sys
+ 
+@@ -74,7 +76,18 @@ class IdleConfParser(ConfigParser):
+     def Load(self):
+         "Load the configuration file from disk."
+         if self.file:
+-            self.read(self.file)
++            if '.zip' in self.file:
++                try:
++                    import zipfile
++                    import io
++                    zipPath, subPath = self.file.split('.zip')
++                    with zipfile.ZipFile(zipPath + '.zip') as z:
++                        with io.TextIOWrapper(z.open(subPath.replace('\\', '/')[1:])) as fp:
++                            self.read_file(fp, source = self.file)
++                except Exception:
++                    pass
++            else:
++                self.read(self.file)
+ 
+ class IdleUserConfParser(IdleConfParser):
+     """
+@@ -158,6 +171,7 @@ class IdleConf:
+         self.defaultCfg = {}
+         self.userCfg = {}
+         self.cfg = {}  # TODO use to select userCfg vs defaultCfg
++        self.iconDir = None
+         # self.blink_off_time = <first editor text>['insertofftime']
+         # See https:/bugs.python.org/issue4630, msg356516.
+ 
+@@ -183,15 +197,20 @@ class IdleConf:
+         cfgDir = '.idlerc'
+         userDir = os.path.expanduser('~')
+         if userDir != '~': # expanduser() found user home dir
++            warn = None
+             if not os.path.exists(userDir):
+                 if not idlelib.testing:
+                     warn = ('\n Warning: os.path.expanduser("~") points to\n ' +
+                             userDir + ',\n but the path does not exist.')
+-                    try:
+-                        print(warn, file=sys.stderr)
+-                    except OSError:
+-                        pass
+                 userDir = '~'
++            elif not os.access(userDir, os.W_OK | os.R_OK):
++                warn = ('\n Warning: os.path.expanduser("~") points to\n ' +
++                                        userDir + ',\n but the path is not writable.')
++            if warn:
++                try:
++                    print(warn, file=sys.stderr)
++                except OSError:
++                    pass
+         if userDir == "~": # still no path to home!
+             # traditionally IDLE has defaulted to os.getcwd(), is this adequate?
+             userDir = os.getcwd()
+@@ -762,6 +781,29 @@ class IdleConf:
+         for key in self.userCfg:
+             self.userCfg[key].Save()
+ 
++    def GetIconsDir(self):
++        "Get the path to the directory, where all icons our icons are."
++        if self.iconDir == None:
++            self.iconDir = os.path.join(os.path.dirname(__file__), 'Icons')
++            if '.zip' in self.iconDir:
++                # tk does not support loading from a zip
++                cachePath = os.environ.get('XDG_CACHE_HOME')
++                iconDir = os.path.join(cachePath, 'idleIcons')
++                if not os.path.exists(iconDir):
++                    tempPath = mkdtemp(suffix = '-idleIcons')
++                    try:
++                        import zipfile
++                        zipPath, subPath = self.iconDir.split('.zip')
++                        subPath = subPath
++                        with zipfile.ZipFile(zipPath + '.zip', 'r') as pyZip:
++                            pyZip.extractall(path = tempPath, members = [img.filename for img in pyZip.filelist if subPath[1:] in img.filename])
++                        copytree(tempPath + subPath, iconDir)
++                    except Exception:
++                        pass
++                    rmtree(tempPath, ignore_errors = True)
++                self.iconDir = iconDir
++        return self.iconDir
++
+ 
+ idleConf = IdleConf()
+ 
+diff --git Python3.10.4.orig/Lib/idlelib/pyshell.py Python3.10.4.new/Lib/idlelib/pyshell.py
+index 6c333b0..cd1b981 100644
+--- Python3.10.4.orig/Lib/idlelib/pyshell.py
++++ Python3.10.4.new/Lib/idlelib/pyshell.py
+@@ -479,7 +479,7 @@ class ModifiedInterpreter(InteractiveInterpreter):
+         self.spawn_subprocess()
+         #time.sleep(20) # test to simulate GUI not accepting connection
+         # Accept the connection from the Python execution server
+-        self.rpcclt.listening_sock.settimeout(10)
++        self.rpcclt.listening_sock.settimeout(10 * 5000)
+         try:
+             self.rpcclt.accept()
+         except TimeoutError:
+@@ -1619,7 +1619,7 @@ def main():
+     fix_scaling(root)
+ 
+     # set application icon
+-    icondir = os.path.join(os.path.dirname(__file__), 'Icons')
++    icondir = idleConf.GetIconsDir()
+     if system() == 'Windows':
+         iconfile = os.path.join(icondir, 'idle.ico')
+         root.wm_iconbitmap(default=iconfile)
+diff --git Python3.10.4.orig/Lib/idlelib/textview.py Python3.10.4.new/Lib/idlelib/textview.py
+index a66c1a4..412025e 100644
+--- Python3.10.4.orig/Lib/idlelib/textview.py
++++ Python3.10.4.new/Lib/idlelib/textview.py
+@@ -169,8 +169,18 @@ def view_file(parent, title, filename, encoding, modal=True, wrap='word',
+     with contents of the file.
+     """
+     try:
+-        with open(filename, 'r', encoding=encoding) as file:
+-            contents = file.read()
++        if '.zip' in filename:
++            import zipfile
++            zipPath, subPath = filename.split('.zip')
++            try:
++                with zipfile.ZipFile(zipPath + '.zip', 'r') as z:
++                    with z.open(subPath.replace('\\', '/')[1:], 'r') as fp:
++                        contents = fp.read().decode(encoding if encoding != None else 'utf-8')
++            except BadZipfile:
++                raise IOError()
++        else:
++            with open(filename, 'r', encoding=encoding) as file:
++                contents = file.read()
+     except OSError:
+         showerror(title='File Load Error',
+                   message=f'Unable to load file {filename!r} .',
+diff --git Python3.10.4.orig/Lib/idlelib/tree.py Python3.10.4.new/Lib/idlelib/tree.py
+index 5947268..9588d67 100644
+--- Python3.10.4.orig/Lib/idlelib/tree.py
++++ Python3.10.4.new/Lib/idlelib/tree.py
+@@ -22,16 +22,10 @@ from tkinter.ttk import Frame, Scrollbar
+ from idlelib.config import idleConf
+ from idlelib import zoomheight
+ 
+-ICONDIR = "Icons"
+-
+-# Look for Icons subdirectory in the same directory as this module
+-try:
+-    _icondir = os.path.join(os.path.dirname(__file__), ICONDIR)
+-except NameError:
+-    _icondir = ICONDIR
+-if os.path.isdir(_icondir):
+-    ICONDIR = _icondir
+-elif not os.path.isdir(ICONDIR):
++ICONDIR = idleConf.GetIconsDir()
++
++# Verify the icon dir
++if not os.path.isdir(ICONDIR):
+     raise RuntimeError("can't find icon directory (%r)" % (ICONDIR,))
+ 
+ def listicons(icondir=ICONDIR):
+diff --git Python3.10.4.orig/Lib/pkgutil.py Python3.10.4.new/Lib/pkgutil.py
+index 8e010c7..bb68be0 100644
+--- Python3.10.4.orig/Lib/pkgutil.py
++++ Python3.10.4.new/Lib/pkgutil.py
+@@ -293,8 +293,15 @@ class ImpLoader:
+         return mod
+ 
+     def get_data(self, pathname):
+-        with open(pathname, "rb") as file:
+-            return file.read()
++        if '.zip' in pathname:
++            import zipfile
++            zipPath, subPath = filename.split(".zip")
++            with zipfile.ZipFile(zipPath + ".zip", "r") as z:
++                with z.open(subPath.replace("\\", "/")[1:], "r") as fp:
++                    return fp.read()
++        else:
++            with open(pathname, "rb") as file:
++                return file.read()
+ 
+     def _reopen(self):
+         if self.file and self.file.closed:
+diff --git Python3.10.4.orig/Lib/sysconfig.py Python3.10.4.new/Lib/sysconfig.py
+index daf9f00..e2a1f72 100644
+--- Python3.10.4.orig/Lib/sysconfig.py
++++ Python3.10.4.new/Lib/sysconfig.py
+@@ -411,25 +411,35 @@ def _generate_posix_vars():
+     """Generate the Python module containing build-time variables."""
+     import pprint
+     vars = {}
+-    # load the installed Makefile:
+-    makefile = get_makefile_filename()
+-    try:
+-        _parse_makefile(makefile, vars)
+-    except OSError as e:
+-        msg = f"invalid Python installation: unable to open {makefile}"
+-        if hasattr(e, "strerror"):
+-            msg = f"{msg} ({e.strerror})"
+-        raise OSError(msg)
+-    # load the installed pyconfig.h:
+-    config_h = get_config_h_filename()
+-    try:
+-        with open(config_h, encoding="utf-8") as f:
+-            parse_config_h(f, vars)
+-    except OSError as e:
+-        msg = f"invalid Python installation: unable to open {config_h}"
+-        if hasattr(e, "strerror"):
+-            msg = f"{msg} ({e.strerror})"
+-        raise OSError(msg)
++    if sys.platform == 'android':
++        vars['LIBDEST'] = get_path('stdlib')
++        vars['BINLIBDEST'] = get_path('platstdlib')
++
++        #vars['INCLUDEPY'] = get_python_inc(plat_specific=0)
++
++        vars['SO'] = '.so'
++        vars['VERSION'] = _PY_VERSION_SHORT_NO_DOT
++        vars['BINDIR'] = os.path.dirname(_safe_realpath(sys.executable))
++    else:
++        # load the installed Makefile:
++        makefile = get_makefile_filename()
++        try:
++            _parse_makefile(makefile, vars)
++        except OSError as e:
++            msg = f"invalid Python installation: unable to open {makefile}"
++            if hasattr(e, "strerror"):
++                msg = f"{msg} ({e.strerror})"
++            raise OSError(msg)
++        # load the installed pyconfig.h:
++        config_h = get_config_h_filename()
++        try:
++            with open(config_h, encoding="utf-8") as f:
++                parse_config_h(f, vars)
++        except OSError as e:
++            msg = f"invalid Python installation: unable to open {config_h}"
++            if hasattr(e, "strerror"):
++                msg = f"{msg} ({e.strerror})"
++            raise OSError(msg)
+     # On AIX, there are wrong paths to the linker scripts in the Makefile
+     # -- these paths are relative to the Python source, but when installed
+     # the scripts are in another directory.
+@@ -473,10 +483,20 @@ def _generate_posix_vars():
+ def _init_posix(vars):
+     """Initialize the module as appropriate for POSIX systems."""
+     # _sysconfigdata is generated at build time, see _generate_posix_vars()
+-    name = _get_sysconfigdata_name()
+-    _temp = __import__(name, globals(), locals(), ['build_time_vars'], 0)
+-    build_time_vars = _temp.build_time_vars
+-    vars.update(build_time_vars)
++    if sys.platform == 'android':
++        vars['LIBDEST'] = get_path('stdlib')
++        vars['BINLIBDEST'] = get_path('platstdlib')
++
++        #vars['INCLUDEPY'] = get_python_inc(plat_specific=0)
++
++        vars['SO'] = '.so'
++        vars['VERSION'] = _PY_VERSION_SHORT_NO_DOT
++        vars['BINDIR'] = os.path.dirname(_safe_realpath(sys.executable))
++    else:
++        name = _get_sysconfigdata_name()
++        _temp = __import__(name, globals(), locals(), ['build_time_vars'], 0)
++        build_time_vars = _temp.build_time_vars
++        vars.update(build_time_vars)
+ 
+ def _init_non_posix(vars):
+     """Initialize the module as appropriate for NT"""
+diff --git Python3.10.4.orig/Lib/test/libregrtest/runtest.py Python3.10.4.new/Lib/test/libregrtest/runtest.py
+index 489ab98..3b77581 100644
+--- Python3.10.4.orig/Lib/test/libregrtest/runtest.py
++++ Python3.10.4.new/Lib/test/libregrtest/runtest.py
+@@ -155,7 +155,16 @@ def findtestdir(path=None):
+ def findtests(testdir=None, stdtests=STDTESTS, nottests=NOTTESTS):
+     """Return a list of all applicable test modules."""
+     testdir = findtestdir(testdir)
+-    names = os.listdir(testdir)
++    parts = testdir.split('.zip')
++    if len(parts) == 2:
++        zipPath = parts[0] + '.zip'
++        subPath = parts[1].replace('\\', '/')[1:]
++        import zipfile
++        with zipfile.ZipFile(zipPath, 'r') as z:
++            names = (name[len(subPath) + 1:] for name in z.namelist() if name.startswith(subPath))
++            names = [name for name in names if name and '/' not in name]
++    else:
++        names = os.listdir(testdir)
+     tests = []
+     others = set(stdtests) | nottests
+     for name in names:
+diff --git Python3.10.4.orig/Lib/turtledemo/__main__.py Python3.10.4.new/Lib/turtledemo/__main__.py
+index caea022..239d747 100644
+--- Python3.10.4.orig/Lib/turtledemo/__main__.py
++++ Python3.10.4.new/Lib/turtledemo/__main__.py
+@@ -114,7 +114,17 @@ MAXIMUM_FONT_SIZE = 100
+ font_sizes = [8, 9, 10, 11, 12, 14, 18, 20, 22, 24, 30]
+ 
+ def getExampleEntries():
+-    return [entry[:-3] for entry in os.listdir(demo_dir) if
++    demoFileList = []
++    if '.zip' in demo_dir:
++        import zipfile
++        zipPath, subPath = demo_dir.split('.zip')
++        with zipfile.ZipFile(zipPath + '.zip', 'r') as z:
++            demoFileList = [filename for filename in (
++                relativePath[len(subPath) + 1:] for relativePath in z.namelist() if relativePath.startswith(subPath))
++                            if not '/' in filename]
++    else:
++        demoFileList = os.listdir(demo_dir)
++    return [entry[:-3] for entry in demoFileList if
+             entry.endswith(".py") and entry[0] != '_']
+ 
+ help_entries = (  # (help_label,  help_doc)
+@@ -332,8 +342,16 @@ class DemoWindow(object):
+         modname = 'turtledemo.' + filename
+         __import__(modname)
+         self.module = sys.modules[modname]
+-        with open(self.module.__file__, 'r') as f:
+-            chars = f.read()
++        moduleFilePath = self.module.__file__
++        if '.zip' in moduleFilePath:
++            import zipfile
++            zipPath, subPath = moduleFilePath.split('.zip')
++            with zipfile.ZipFile(zipPath + '.zip', 'r') as z:
++                with z.open(subPath.replace('\\', '/')[1:], 'r') as fp:
++                    chars = fp.read().decode('utf-8')
++        else:
++            with open(moduleFilePath, 'r') as f:
++                chars = f.read()
+         self.text.delete("1.0", "end")
+         self.text.insert("1.0", chars)
+         self.root.title(filename + " - a Python turtle graphics example")
+diff --git Python3.10.4.orig/Modules/_decimal/libmpdec/io.c Python3.10.4.new/Modules/_decimal/libmpdec/io.c
+index e7bd6ae..2e1c7fe 100644
+--- Python3.10.4.orig/Modules/_decimal/libmpdec/io.c
++++ Python3.10.4.new/Modules/_decimal/libmpdec/io.c
+@@ -882,17 +882,17 @@ mpd_parse_fmt_str(mpd_spec_t *spec, const char *fmt, int caps)
+     }
+     else if (*cp == 'N' || *cp == 'n') {
+         /* locale specific conversion */
+-        struct lconv *lc;
++//        struct lconv *lc;
+         /* separator has already been specified */
+         if (*spec->sep) {
+             return 0;
+         }
+         spec->type = *cp++;
+         spec->type = (spec->type == 'N') ? 'G' : 'g';
+-        lc = localeconv();
+-        spec->dot = lc->decimal_point;
+-        spec->sep = lc->thousands_sep;
+-        spec->grouping = lc->grouping;
++//        lc = localeconv();
++        spec->dot = "."; //lc->decimal_point;
++        spec->sep = ""; //lc->thousands_sep;
++        spec->grouping = ""; // lc->grouping;
+         if (mpd_validate_lconv(spec) < 0) {
+             return 0; /* GCOV_NOT_REACHED */
+         }
+diff --git Python3.10.4.orig/Modules/_localemodule.c Python3.10.4.new/Modules/_localemodule.c
+index 564f559..d4cadb1 100644
+--- Python3.10.4.orig/Modules/_localemodule.c
++++ Python3.10.4.new/Modules/_localemodule.c
+@@ -153,14 +153,14 @@ locale_is_ascii(const char *str)
+ }
+ 
+ static int
+-locale_decode_monetary(PyObject *dict, struct lconv *lc)
++locale_decode_monetary(PyObject *dict/*, struct lconv *lc*/)
+ {
+ #ifndef MS_WINDOWS
+     int change_locale;
+-    change_locale = (!locale_is_ascii(lc->int_curr_symbol)
+-                     || !locale_is_ascii(lc->currency_symbol)
+-                     || !locale_is_ascii(lc->mon_decimal_point)
+-                     || !locale_is_ascii(lc->mon_thousands_sep));
++    change_locale = (!locale_is_ascii(/*lc->int_curr_symbol*/"")
++                     || !locale_is_ascii(/*lc->currency_symbol*/"")
++                     || !locale_is_ascii(/*lc->mon_decimal_point*/".")
++                     || !locale_is_ascii(/*lc->mon_thousands_sep*/""));
+ 
+     /* Keep a copy of the LC_CTYPE locale */
+     char *oldloc = NULL, *loc = NULL;
+@@ -191,7 +191,7 @@ locale_decode_monetary(PyObject *dict, struct lconv *lc)
+         }
+     }
+ 
+-#define GET_LOCALE_STRING(ATTR) PyUnicode_DecodeLocale(lc->ATTR, NULL)
++#define GET_LOCALE_STRING(ATTR) PyUnicode_DecodeLocale(/*lc->*/ATTR, NULL)
+ #else  /* MS_WINDOWS */
+ /* Use _W_* fields of Windows struct lconv */
+ #define GET_LOCALE_STRING(ATTR) PyUnicode_FromWideChar(lc->_W_ ## ATTR, -1)
+@@ -213,10 +213,10 @@ locale_decode_monetary(PyObject *dict, struct lconv *lc)
+         Py_DECREF(obj); \
+     } while (0)
+ 
+-    RESULT_STRING(int_curr_symbol);
+-    RESULT_STRING(currency_symbol);
+-    RESULT_STRING(mon_decimal_point);
+-    RESULT_STRING(mon_thousands_sep);
++    RESULT_STRING(/*int_curr_symbol*/"");
++    RESULT_STRING(/*currency_symbol*/"");
++    RESULT_STRING(/*mon_decimal_point*/".");
++    RESULT_STRING(/*mon_thousands_sep*/"");
+ #undef RESULT_STRING
+ #undef GET_LOCALE_STRING
+ 
+@@ -243,7 +243,7 @@ _locale_localeconv_impl(PyObject *module)
+ /*[clinic end generated code: output=43a54515e0a2aef5 input=f1132d15accf4444]*/
+ {
+     PyObject* result;
+-    struct lconv *lc;
++//    struct lconv *lc;
+     PyObject *x;
+ 
+     result = PyDict_New();
+@@ -252,7 +252,7 @@ _locale_localeconv_impl(PyObject *module)
+     }
+ 
+     /* if LC_NUMERIC is different in the C library, use saved value */
+-    lc = localeconv();
++//    lc = localeconv();
+ 
+     /* hopefully, the localeconv result survives the C library calls
+        involved herein */
+@@ -272,7 +272,7 @@ _locale_localeconv_impl(PyObject *module)
+ /* Use _W_* fields of Windows struct lconv */
+ #define GET_LOCALE_STRING(ATTR) PyUnicode_FromWideChar(lc->_W_ ## ATTR, -1)
+ #else
+-#define GET_LOCALE_STRING(ATTR) PyUnicode_DecodeLocale(lc->ATTR, NULL)
++#define GET_LOCALE_STRING(ATTR) PyUnicode_DecodeLocale(/*lc->*/ATTR, NULL)
+ #endif
+ #define RESULT_STRING(s)\
+     do { \
+@@ -282,31 +282,31 @@ _locale_localeconv_impl(PyObject *module)
+ 
+ #define RESULT_INT(i)\
+     do { \
+-        x = PyLong_FromLong(lc->i); \
++        x = PyLong_FromLong(/*lc->*/i); \
+         RESULT(#i, x); \
+     } while (0)
+ 
+     /* Monetary information: LC_MONETARY encoding */
+-    if (locale_decode_monetary(result, lc) < 0) {
++    if (locale_decode_monetary(result/*, lc*/) < 0) {
+         goto failed;
+     }
+-    x = copy_grouping(lc->mon_grouping);
++    x = copy_grouping(/*lc->mon_grouping*/"");
+     RESULT("mon_grouping", x);
+ 
+-    RESULT_STRING(positive_sign);
+-    RESULT_STRING(negative_sign);
+-    RESULT_INT(int_frac_digits);
+-    RESULT_INT(frac_digits);
+-    RESULT_INT(p_cs_precedes);
+-    RESULT_INT(p_sep_by_space);
+-    RESULT_INT(n_cs_precedes);
+-    RESULT_INT(n_sep_by_space);
+-    RESULT_INT(p_sign_posn);
+-    RESULT_INT(n_sign_posn);
++    RESULT_STRING(/*positive_sign*/"");
++    RESULT_STRING(/*negative_sign*/"");
++    RESULT_INT(/*int_frac_digits*/CHAR_MAX);
++    RESULT_INT(/*frac_digits*/CHAR_MAX);
++    RESULT_INT(/*p_cs_precedes*/CHAR_MAX);
++    RESULT_INT(/*p_sep_by_space*/CHAR_MAX);
++    RESULT_INT(/*n_cs_precedes*/CHAR_MAX);
++    RESULT_INT(/*n_sep_by_space*/CHAR_MAX);
++    RESULT_INT(/*p_sign_posn*/CHAR_MAX);
++    RESULT_INT(/*n_sign_posn*/CHAR_MAX);
+ 
+     /* Numeric information: LC_NUMERIC encoding */
+     PyObject *decimal_point = NULL, *thousands_sep = NULL;
+-    if (_Py_GetLocaleconvNumeric(lc, &decimal_point, &thousands_sep) < 0) {
++    if (_Py_GetLocaleconvNumeric(/*lc,*/ &decimal_point, &thousands_sep) < 0) {
+         Py_XDECREF(decimal_point);
+         Py_XDECREF(thousands_sep);
+         goto failed;
+@@ -325,7 +325,7 @@ _locale_localeconv_impl(PyObject *module)
+     }
+     Py_DECREF(thousands_sep);
+ 
+-    x = copy_grouping(lc->grouping);
++    x = copy_grouping(/*lc->grouping*/"");
+     RESULT("grouping", x);
+ 
+     return result;
+diff --git Python3.10.4.orig/Modules/_ssl.c Python3.10.4.new/Modules/_ssl.c
+index af25204..f8f7d79 100644
+--- Python3.10.4.orig/Modules/_ssl.c
++++ Python3.10.4.new/Modules/_ssl.c
+@@ -51,6 +51,10 @@
+ #include <sys/poll.h>
+ #endif
+ 
++#ifdef __ANDROID_API__
++#include <dirent.h>
++#endif
++
+ /* Include OpenSSL header files */
+ #include "openssl/rsa.h"
+ #include "openssl/crypto.h"
+@@ -3167,6 +3171,38 @@ _ssl__SSLContext_impl(PyTypeObject *type, int proto_version)
+                                    sizeof(SID_CTX));
+ #undef SID_CTX
+ 
++#ifdef __ANDROID_API__
++    struct stat certFileStat;
++    struct dirent* entry;
++    DIR* certificationDir;
++    char pathBuffer[512];
++    FILE* certFile;
++    static char* const certificationPaths[] = {
++            "/system/etc/security/cacerts",
++            "/data/misc/keychain/certs-added"
++    };
++    for (int i = 0; i < sizeof(certificationPaths) / sizeof(certificationPaths[0]); i++) {
++        if ((certificationDir = opendir(certificationPaths[i])) != NULL) {
++            while ((entry = readdir(certificationDir)) != NULL) {
++                if (entry->d_type == DT_REG || entry->d_type == DT_UNKNOWN) {
++                    snprintf(pathBuffer, 512, "%s/%s", certificationPaths[i], entry->d_name);
++                    certFile = fopen(pathBuffer, "r");
++                    if (certFile == NULL) { continue; }
++                    if (entry->d_type == DT_REG || (fstat(fileno(certFile), &certFileStat) == 0
++                                                    && S_ISREG(certFileStat.st_mode))) {
++                        X509 *cert = PEM_read_X509(certFile, NULL, NULL, NULL);
++                        if (cert) {
++                            X509_STORE_add_cert(SSL_CTX_get_cert_store(self->ctx), cert);
++                        }
++                    }
++                    fclose(certFile);
++                }
++            }
++            closedir(certificationDir);
++        }
++    }
++#endif /* __ANDROID_API__ */
++
+     params = SSL_CTX_get0_param(self->ctx);
+     /* Improve trust chain building when cross-signed intermediate
+        certificates are present. See https://bugs.python.org/issue23476. */
+diff --git Python3.10.4.orig/Modules/signalmodule.c Python3.10.4.new/Modules/signalmodule.c
+index c3a5237..45d4075 100644
+--- Python3.10.4.orig/Modules/signalmodule.c
++++ Python3.10.4.new/Modules/signalmodule.c
+@@ -151,6 +151,8 @@ typedef struct {
+ #endif
+ } _signal_module_state;
+ 
++static pthread_t main_thread;
++
+ 
+ Py_LOCAL_INLINE(PyObject *)
+ get_handler(int i)
+@@ -378,6 +380,18 @@ signal_handler(int sig_num)
+ {
+     int save_errno = errno;
+ 
++#ifdef __ANDROID__
++    if (!_PyOS_IsMainThread()) {
++        /* On Android the main Python thread may not be the main process thread.
++           As a consequence, we have to relay the signal to the main Python thread
++           to allow the interrupting of sleep and input to work. */
++        if (pthread_kill(main_thread, sig_num) == 0) {
++            errno = save_errno;
++            return;
++        }
++    }
++#endif /* defined __ANDROID__ */
++
+     trip_signal(sig_num);
+ 
+ #ifndef HAVE_SIGACTION
+@@ -1957,6 +1971,8 @@ _PySignal_Init(int install_signal_handlers)
+         return -1;
+     }
+ 
++    main_thread = pthread_self();
++
+ #ifdef MS_WINDOWS
+     /* Create manual-reset event, initially unset */
+     state->sigint_event = CreateEvent(NULL, TRUE, FALSE, FALSE);
+diff --git Python3.10.4.orig/Python/fileutils.c Python3.10.4.new/Python/fileutils.c
+index c3144ee..364ad16 100644
+--- Python3.10.4.orig/Python/fileutils.c
++++ Python3.10.4.new/Python/fileutils.c
+@@ -2274,7 +2274,7 @@ _Py_open_osfhandle(void *handle, int flags)
+ #endif  /* MS_WINDOWS */
+ 
+ int
+-_Py_GetLocaleconvNumeric(struct lconv *lc,
++_Py_GetLocaleconvNumeric(/*struct lconv *lc,*/
+                          PyObject **decimal_point, PyObject **thousands_sep)
+ {
+     assert(decimal_point != NULL);
+@@ -2282,12 +2282,12 @@ _Py_GetLocaleconvNumeric(struct lconv *lc,
+ 
+ #ifndef MS_WINDOWS
+     int change_locale = 0;
+-    if ((strlen(lc->decimal_point) > 1 || ((unsigned char)lc->decimal_point[0]) > 127)) {
+-        change_locale = 1;
+-    }
+-    if ((strlen(lc->thousands_sep) > 1 || ((unsigned char)lc->thousands_sep[0]) > 127)) {
+-        change_locale = 1;
+-    }
++//    if ((strlen(lc->decimal_point) > 1 || ((unsigned char)lc->decimal_point[0]) > 127)) {
++//        change_locale = 1;
++//    }
++//    if ((strlen(lc->thousands_sep) > 1 || ((unsigned char)lc->thousands_sep[0]) > 127)) {
++//        change_locale = 1;
++//    }
+ 
+     /* Keep a copy of the LC_CTYPE locale */
+     char *oldloc = NULL, *loc = NULL;
+@@ -2319,7 +2319,7 @@ _Py_GetLocaleconvNumeric(struct lconv *lc,
+         }
+     }
+ 
+-#define GET_LOCALE_STRING(ATTR) PyUnicode_DecodeLocale(lc->ATTR, NULL)
++#define GET_LOCALE_STRING(ATTR) PyUnicode_DecodeLocale(/*lc->*/ATTR, NULL)
+ #else /* MS_WINDOWS */
+ /* Use _W_* fields of Windows strcut lconv */
+ #define GET_LOCALE_STRING(ATTR) PyUnicode_FromWideChar(lc->_W_ ## ATTR, -1)
+@@ -2327,12 +2327,12 @@ _Py_GetLocaleconvNumeric(struct lconv *lc,
+ 
+     int res = -1;
+ 
+-    *decimal_point = GET_LOCALE_STRING(decimal_point);
++    *decimal_point = GET_LOCALE_STRING(/*decimal_point*/".");
+     if (*decimal_point == NULL) {
+         goto done;
+     }
+ 
+-    *thousands_sep = GET_LOCALE_STRING(thousands_sep);
++    *thousands_sep = GET_LOCALE_STRING(/*thousands_sep*/"");
+     if (*thousands_sep == NULL) {
+         goto done;
+     }
+diff --git Python3.10.4.orig/Python/formatter_unicode.c Python3.10.4.new/Python/formatter_unicode.c
+index 7b5a7bd..ff08104 100644
+--- Python3.10.4.orig/Python/formatter_unicode.c
++++ Python3.10.4.new/Python/formatter_unicode.c
+@@ -700,25 +700,25 @@ static int
+ get_locale_info(enum LocaleType type, LocaleInfo *locale_info)
+ {
+     switch (type) {
+-    case LT_CURRENT_LOCALE: {
+-        struct lconv *lc = localeconv();
+-        if (_Py_GetLocaleconvNumeric(lc,
+-                                     &locale_info->decimal_point,
+-                                     &locale_info->thousands_sep) < 0) {
+-            return -1;
+-        }
+-
+-        /* localeconv() grouping can become a dangling pointer or point
+-           to a different string if another thread calls localeconv() during
+-           the string formatting. Copy the string to avoid this risk. */
+-        locale_info->grouping_buffer = _PyMem_Strdup(lc->grouping);
+-        if (locale_info->grouping_buffer == NULL) {
+-            PyErr_NoMemory();
+-            return -1;
+-        }
+-        locale_info->grouping = locale_info->grouping_buffer;
+-        break;
+-    }
++    case LT_CURRENT_LOCALE:// {
++//        struct lconv *lc = localeconv();
++//        if (_Py_GetLocaleconvNumeric(lc,
++//                                     &locale_info->decimal_point,
++//                                     &locale_info->thousands_sep) < 0) {
++//            return -1;
++//        }
++//
++//        /* localeconv() grouping can become a dangling pointer or point
++//           to a different string if another thread calls localeconv() during
++//           the string formatting. Copy the string to avoid this risk. */
++//        locale_info->grouping_buffer = _PyMem_Strdup(lc->grouping);
++//        if (locale_info->grouping_buffer == NULL) {
++//            PyErr_NoMemory();
++//            return -1;
++//        }
++//        locale_info->grouping = locale_info->grouping_buffer;
++//        break;
++//    }
+     case LT_DEFAULT_LOCALE:
+     case LT_UNDERSCORE_LOCALE:
+     case LT_UNDER_FOUR_LOCALE:
+diff --git Python3.10.4.orig/Python/pystrtod.c Python3.10.4.new/Python/pystrtod.c
+index 9145d4e..04dbd25 100644
+--- Python3.10.4.orig/Python/pystrtod.c
++++ Python3.10.4.new/Python/pystrtod.c
+@@ -166,7 +166,7 @@ _PyOS_ascii_strtod(const char *nptr, char **endptr)
+ {
+     char *fail_pos;
+     double val;
+-    struct lconv *locale_data;
++//    struct lconv *locale_data;
+     const char *decimal_point;
+     size_t decimal_point_len;
+     const char *p, *decimal_point_pos;
+@@ -178,8 +178,8 @@ _PyOS_ascii_strtod(const char *nptr, char **endptr)
+ 
+     fail_pos = NULL;
+ 
+-    locale_data = localeconv();
+-    decimal_point = locale_data->decimal_point;
++//    locale_data = localeconv();
++    decimal_point = "."; //locale_data->decimal_point;
+     decimal_point_len = strlen(decimal_point);
+ 
+     assert(decimal_point_len != 0);
+@@ -448,8 +448,8 @@ _Py_string_to_number_with_underscores(
+ Py_LOCAL_INLINE(void)
+ change_decimal_from_locale_to_dot(char* buffer)
+ {
+-    struct lconv *locale_data = localeconv();
+-    const char *decimal_point = locale_data->decimal_point;
++//    struct lconv *locale_data = localeconv();
++    const char *decimal_point = ".";//locale_data->decimal_point;
+ 
+     if (decimal_point[0] != '.' || decimal_point[1] != 0) {
+         size_t decimal_point_len = strlen(decimal_point);
