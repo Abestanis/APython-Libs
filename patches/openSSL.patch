@@ -1,17 +1,25 @@
 diff --git openSSL.orig/crypto/CMakeLists.txt OpenSSL.new/crypto/CMakeLists.txt
-index dad692b..a8dee22 100644
+index 2aba30a..bb7a5bb 100644
 --- openSSL.orig/crypto/CMakeLists.txt
 +++ OpenSSL.new/crypto/CMakeLists.txt
-@@ -277,6 +277,9 @@ endif()
+@@ -278,7 +278,7 @@ else()
+   add_submodule ( . threads_pthread.c )
+ endif()
  
- set_target_properties( crypto PROPERTIES
+-add_library( crypto ${LIBSRC} ${OBJECTS_SRC} )
++add_library( crypto SHARED ${LIBSRC} ${OBJECTS_SRC} )
+ 
+ target_include_directories( crypto PUBLIC ${PROJECT_BINARY_DIR}/include )
+ 
+@@ -297,7 +297,7 @@ set_target_properties( crypto PROPERTIES
    VERSION "${LIB_VERSION}" SOVERSION "${LIB_SOVERSION}" )
-+target_include_directories(crypto INTERFACE
-+        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
-+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>)
  
- install( TARGETS crypto
-     RUNTIME DESTINATION bin
+ if( ANDROID )
+-  set_target_properties( crypto PROPERTIES OUTPUT_NAME "crypto_1_1" )
++  set_target_properties( crypto PROPERTIES OUTPUT_NAME "crypto" )
+ endif()
+ 
+ if( MSVC )
 diff --git openSSL.orig/opensslconf.h.cmake OpenSSL.new/opensslconf.h.cmake
 index c5a5133..09297d6 100644
 --- openSSL.orig/opensslconf.h.cmake
@@ -40,17 +48,24 @@ index c5a5133..09297d6 100644
  # define OPENSSL_NO_UBSAN
  #endif
 diff --git openSSL.orig/ssl/CMakeLists.txt OpenSSL.new/ssl/CMakeLists.txt
-index 9bb2ae1..f5c3477 100644
+index a1ff744..66257c9 100644
 --- openSSL.orig/ssl/CMakeLists.txt
 +++ OpenSSL.new/ssl/CMakeLists.txt
-@@ -46,6 +46,10 @@ target_link_libraries ( ssl crypto )
- set_target_properties( ssl PROPERTIES
+@@ -43,7 +43,7 @@ include_directories( BEFORE SYSTEM
+   ${PROJECT_SOURCE_DIR}/ # e_os.h
+ )
+ 
+-add_library( ssl ${LIBSRC} )
++add_library( ssl SHARED ${LIBSRC} )
+ 
+ target_include_directories( ssl PUBLIC ${PROJECT_BINARY_DIR}/include )
+ 
+@@ -53,7 +53,7 @@ set_target_properties( ssl PROPERTIES
    VERSION "${LIB_VERSION}" SOVERSION "${LIB_SOVERSION}" )
  
-+target_include_directories(ssl INTERFACE
-+        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
-+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>)
-+
- install( TARGETS ssl
-     RUNTIME DESTINATION bin
-     LIBRARY DESTINATION lib
+ if( ANDROID )
+-  set_target_properties( ssl PROPERTIES OUTPUT_NAME "ssl_1_1" )
++  set_target_properties( ssl PROPERTIES OUTPUT_NAME "ssl" )
+ endif()
+ 
+ if( MSVC )
