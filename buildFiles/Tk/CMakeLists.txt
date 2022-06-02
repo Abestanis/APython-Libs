@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.4.1)
 project(Tk C)
 
 add_definitions(-DHAVE_TK_CONFIG_H)
-add_compile_options(--imacros=tkConfig.h)
+add_compile_options(-imacros ${PROJECT_BINARY_DIR}/include/tkConfig.h)
+
+configure_file(source/tkConfig.h ${PROJECT_BINARY_DIR}/include/tkConfig.h COPYONLY) # TODO
 
 add_library(tk SHARED
         source/generic/ttk/ttkNotebook.c source/generic/ttk/ttkProgress.c
@@ -92,10 +94,9 @@ add_library(tk SHARED
 target_include_directories(tk
         PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/source/generic>
+        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
         PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/source/unix>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/source/bitmaps>)
 
-target_link_libraries(
-        tk
-        tcl sdl2X11Emulation)
+target_link_libraries(tk tcl sdl2X11Emulation)

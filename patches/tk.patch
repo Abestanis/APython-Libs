@@ -1,8 +1,8 @@
-diff --git Tk.new/unix/tkConfig.h Tk.new/unix/tkConfig.h
+diff --git Tk.new/tkConfig.h Tk.new/tkConfig.h
 new file mode 100644
 index 0000000..3a3e37b
 --- /dev/null
-+++ Tk.new/unix/tkConfig.h
++++ Tk.new/tkConfig.h
 @@ -0,0 +1,265 @@
 +/* ../unix/tkConfig.h.in. */
 +
@@ -269,17 +269,3 @@ index 0000000..3a3e37b
 +/* override */ #undef PACKAGE_STRING
 +/* override */ #undef PACKAGE_TARNAME
 +#endif /* _TKCONFIG */
-diff --git tk.orig/unix/tkUnixPort.h Tk.new/unix/tkUnixPort.h
-index 9051c63..80c621e 100644
---- tk.orig/unix/tkUnixPort.h
-+++ Tk.new/unix/tkUnixPort.h
-@@ -75,6 +75,9 @@
- 
- #ifndef NO_FD_SET
- #   define SELECT_MASK fd_set
-+#   ifdef NO_FD_MASK
-+    typedef long fd_mask; 
-+#   endif
- #else
- #   ifndef _AIX
- 	typedef long fd_mask;
