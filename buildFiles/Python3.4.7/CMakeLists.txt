@@ -145,6 +145,7 @@ list(REMOVE_ITEM SOURCE_FILES ${otherExcluded})
 # Separate Modules #
 unset(moduleSources)
 unset(additionalModules)
+unset(additionalModuleDependencies)
 function(addModule name)
     cmake_parse_arguments(ARG "" "" "DEPS;SOURCES" ${ARGN})
     add_library(modulePython${PYTHON_SHORT_VERSION}_${name} SHARED ${ARG_SOURCES})
@@ -158,6 +159,8 @@ function(addModule name)
     set(moduleSources ${moduleSources} PARENT_SCOPE)
     list(APPEND additionalModules modulePython${PYTHON_SHORT_VERSION}_${name})
     set(additionalModules ${additionalModules} PARENT_SCOPE)
+    list(APPEND additionalModuleDependencies ${ARG_DEPS})
+    set(additionalModuleDependencies ${additionalModuleDependencies} PARENT_SCOPE)
 endfunction()
 
 # _ssl
@@ -203,7 +206,7 @@ addModule(_ctypes DEPS ffi SOURCES
 
 # Excluded files because they are in their own separate module
 if (${COMPILE_WITH_ADDITIONAL_PYTHON_MODULES})
-    target_link_libraries(python${PYTHON_SHORT_VERSION} ffi bzip ssl tk tcl readline ncurses)
+    target_link_libraries(python${PYTHON_SHORT_VERSION} ${additionalModuleDependencies})
     add_definitions(-Dcrypt=DES_crypt -DCOMPILE_WITH_ADDITIONAL_PYTHON_MODULES)
 else()
     list(REMOVE_ITEM SOURCE_FILES ${moduleSources})
