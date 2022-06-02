@@ -620,8 +620,10 @@ class Builder(Loggable):
         self.info(f'Extracting {sourceArchive}...')
         res = buildutils.extract(
             sourceArchive, extractedDir,
-            ['Include', 'Lib', 'Modules', 'Objects', 'Parser', 'Python', 'LICENSE', 'README'],
-            ['.c', '.h', '.py', '.pyc', '.inc', '.txt', '', '.gif', '.png', '.def']
+            ['Include', 'Lib', 'Modules', 'Objects', 'Parser', 'Python', 'LICENSE', 'README',
+             'pyconfig.h.in'],
+            ['.c', '.h', '.py', '.pyc', '.inc', '.txt', '', '.gif', '.png', '.def', '.in',
+             '.macros']
         )
         if res is None:
             self.error(f'Failed to extract {sourceArchive}!')
