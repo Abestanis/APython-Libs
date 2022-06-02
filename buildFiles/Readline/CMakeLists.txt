@@ -1,13 +1,14 @@
 cmake_minimum_required(VERSION 3.4.1)
 project(Readline C)
 
-add_definitions(-DRL_LIBRARY_VERSION="7.0" -DHAVE_CONFIG_H)
+add_definitions(-DRL_LIBRARY_VERSION="8.0" -DHAVE_CONFIG_H)
+configure_file(source/config.h ${PROJECT_BINARY_DIR}/include/config.h COPYONLY)
 
 add_library(readline SHARED
         source/android.c source/android.h source/ansi_stdlib.h source/bind.c
         source/callback.c source/chardefs.h source/colors.c source/colors.h
-        source/compat.c source/complete.c source/config.h source/display.c
-        source/funmap.c source/histexpand.c source/histfile.c source/histlib.h
+        source/compat.c source/complete.c source/display.c source/funmap.c
+        source/histexpand.c source/histfile.c source/histlib.h
         source/history.c source/history.h source/histsearch.c source/input.c
         source/isearch.c source/keymaps.c source/keymaps.h source/kill.c
         source/macro.c source/mbutil.c source/misc.c source/nls.c

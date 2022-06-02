@@ -27,12 +27,11 @@ index 0000000..0d16a54
 +}
 diff --git Readline.new/android.h Readline.new/android.h
 new file mode 100644
-index 0000000..88840b7
+index 0000000..68bbbce
 --- /dev/null
 +++ Readline.new/android.h
-@@ -0,0 +1,15 @@
-+#ifndef _ANDROID_H_
-+#define _ANDROID_H_
+@@ -0,0 +1,12 @@
++#pragma once
 +
 +#ifdef __cplusplus
 +extern "C" {
@@ -44,10 +43,8 @@ index 0000000..88840b7
 +#ifdef __cplusplus
 +}
 +#endif
-+
-+#endif /* _ANDROID_H_ */
 diff --git readline.orig/callback.c Readline.new/callback.c
-index cc3ce11..1969612 100644
+index a466cf9..64201d5 100644
 --- readline.orig/callback.c
 +++ Readline.new/callback.c
 @@ -37,6 +37,10 @@
@@ -63,7 +60,7 @@ index cc3ce11..1969612 100644
  /* System-specific feature definitions and include files. */
 @@ -82,6 +86,9 @@ static int in_handler;		/* terminal_prepped and signals set? */
  static void
- _rl_callback_newline ()
+ _rl_callback_newline (void)
  {
 +#ifdef __ANDROID__
 +  rl_android_start_rl_mode();
@@ -71,26 +68,17 @@ index cc3ce11..1969612 100644
    rl_initialize ();
  
    if (in_handler == 0)
-@@ -279,6 +286,10 @@ rl_callback_read_char ()
+@@ -277,6 +284,10 @@ rl_callback_read_char (void)
  #if defined (HANDLE_SIGNALS)
  	  rl_clear_signals ();
  #endif
 +#ifdef __ANDROID__
 +      rl_android_end_rl_mode();
 +#endif
-+      
++
  	  in_handler = 0;
  	  (*rl_linefunc) (line);
  
-@@ -289,7 +300,7 @@ rl_callback_read_char ()
- 	  /* Redisplay the prompt if readline_handler_{install,remove}
- 	     not called. */
- 	  if (in_handler == 0 && rl_linefunc)
--	    _rl_callback_newline ();
-+        _rl_callback_newline ();
- 	}
-     }
-   while (rl_pending_input || _rl_pushed_input_available () || RL_ISSTATE (RL_STATE_MACROINPUT));
 diff --git Readline.new/config.h Readline.new/config.h
 new file mode 100644
 index 0000000..e26e7c3
@@ -397,24 +385,8 @@ index 0000000..e26e7c3
 +#endif
 +
 +/* VARARGS defines moved to rlstdc.h */
-diff --git readline.orig/nls.c Readline.new/nls.c
-index d3b3634..c5685cf 100644
---- readline.orig/nls.c
-+++ Readline.new/nls.c
-@@ -141,6 +141,11 @@ _rl_init_eightbit ()
-   if (lspec == 0)
-     lspec = "";
-   t = setlocale (LC_CTYPE, lspec);
-+#ifdef __ANDROID__
-+  if (t == NULL) { // setLocale does not work on Android.
-+    t = lspec;
-+  }
-+#endif /* __ANDROID__ */
- 
-   if (t && *t)
-     _rl_utf8locale = utf8locale (t);
 diff --git readline.orig/readline.c Readline.new/readline.c
-index e51df4f..59bf71b 100644
+index 678f989..f145883 100644
 --- readline.orig/readline.c
 +++ Readline.new/readline.c
 @@ -64,6 +64,10 @@ extern int errno;
@@ -428,7 +400,7 @@ index e51df4f..59bf71b 100644
  /* Some standard library routines. */
  #include "readline.h"
  #include "history.h"
-@@ -365,6 +369,10 @@ readline (prompt)
+@@ -366,6 +370,10 @@ readline (const char *prompt)
  
    rl_set_prompt (prompt);
  
@@ -439,7 +411,7 @@ index e51df4f..59bf71b 100644
    rl_initialize ();
    if (rl_prep_term_function)
      (*rl_prep_term_function) (_rl_meta_flag);
-@@ -391,6 +399,10 @@ readline (prompt)
+@@ -392,6 +400,10 @@ readline (const char *prompt)
      _rl_audit_tty (value);
  #endif
  
@@ -450,25 +422,3 @@ index e51df4f..59bf71b 100644
    return (value);
  }
  
-diff --git readline.orig/rlconf.h Readline.new/rlconf.h
-index 98c970a..bb82144 100644
---- readline.orig/rlconf.h
-+++ Readline.new/rlconf.h
-@@ -43,7 +43,7 @@
- #define DEFAULT_INPUTRC "~/.inputrc"
- 
- /* The ultimate last-ditch filenname for an init file -- system-wide. */
--#define SYS_INPUTRC "/etc/inputrc"
-+#define SYS_INPUTRC "/system/etc/inputrc"
- 
- /* If defined, expand tabs to spaces. */
- #define DISPLAY_TABS
-@@ -60,7 +60,7 @@
- #define READLINE_CALLBACKS
- 
- /* Define this if you want the cursor to indicate insert or overwrite mode. */
--/* #define CURSOR_MODE */
-+#define CURSOR_MODE
- 
- /* Define this if you want to enable code that talks to the Linux kernel
-    tty auditing system. */
