@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.4.1)
 project(Tcl C)
 
-if (NOT DEFINED CMAKE_ANDROID_ARCH_ABI)
+if(NOT DEFINED CMAKE_ANDROID_ARCH_ABI)
     message(FATAL_ERROR "Build must be a crosscompile for Android!")
 endif()
 
-if (${CMAKE_ANDROID_ARCH_ABI} STREQUAL "arm64-v8a" OR
+if(${CMAKE_ANDROID_ARCH_ABI} STREQUAL "arm64-v8a" OR
         ${CMAKE_ANDROID_ARCH_ABI} STREQUAL "x86_64" OR
         ${CMAKE_ANDROID_ARCH_ABI} STREQUAL "mips64")
     add_definitions(-DABI_64_BIT)
@@ -13,12 +13,15 @@ else()
     add_definitions(-UABI_64_BIT)
 endif()
 add_definitions(
-        -DHAVE_TCL_CONFIG_H -DTCL_LIBRARY="library/" -DTCL_PACKAGE_PATH="library/Tcl/"
+        -DHAVE_TCL_CONFIG_H -DBUILD_tcl -DMP_FIXED_CUTOFFS -DMP_NO_STDINT
+        -DTCL_LIBRARY="library/" -DTCL_PACKAGE_PATH="library/Tcl/"
         -DCFG_RUNTIME_LIBDIR="" -DCFG_RUNTIME_BINDIR="" -DCFG_RUNTIME_SCRDIR=""
         -DCFG_RUNTIME_INCDIR="" -DCFG_RUNTIME_DOCDIR="" -DCFG_INSTALL_LIBDIR=""
         -DCFG_INSTALL_BINDIR="" -DCFG_INSTALL_SCRDIR="" -DCFG_INSTALL_INCDIR=""
         -DCFG_INSTALL_DOCDIR="")
-add_compile_options(-include stdio.h)
+add_compile_options(-imacros ${PROJECT_BINARY_DIR}/include/tclConfig.h)
+
+configure_file(source/tclConfig.h ${PROJECT_BINARY_DIR}/include/tclConfig.h COPYONLY) # TODO
 
 add_library(tcl SHARED
         source/generic/tclOOStubLib.c source/generic/tclOOBasic.c
@@ -79,7 +82,76 @@ add_library(tcl SHARED
         source/generic/tclTrace.c source/generic/tclOOStubInit.c
         source/generic/tclIORChan.c source/generic/tclOOCall.c
         source/generic/tclPort.h source/generic/tclUniData.c
-        source/generic/tclTomMathDecls.h source/unix/tclUnixTime.c
+        source/generic/tclTomMathDecls.h
+        # TODO: Automate this from source/unix/Makefile.in:TOMMATH_OBJS
+        source/libtommath/bn_s_mp_reverse.c
+        source/libtommath/bn_s_mp_mul_digs_fast.c
+        source/libtommath/bn_s_mp_sqr_fast.c
+        source/libtommath/bn_mp_add.c
+        source/libtommath/bn_mp_add_d.c
+        source/libtommath/bn_mp_and.c
+        source/libtommath/bn_mp_clamp.c
+        source/libtommath/bn_mp_clear.c
+        source/libtommath/bn_mp_clear_multi.c
+        source/libtommath/bn_mp_cmp.c
+        source/libtommath/bn_mp_cmp_d.c
+        source/libtommath/bn_mp_cmp_mag.c
+        source/libtommath/bn_mp_cnt_lsb.c
+        source/libtommath/bn_mp_copy.c
+        source/libtommath/bn_mp_count_bits.c
+        source/libtommath/bn_mp_div.c
+        source/libtommath/bn_mp_div_d.c
+        source/libtommath/bn_mp_div_2.c
+        source/libtommath/bn_mp_div_2d.c
+        source/libtommath/bn_mp_div_3.c
+        source/libtommath/bn_mp_exch.c
+        source/libtommath/bn_mp_expt_u32.c
+        source/libtommath/bn_mp_grow.c
+        source/libtommath/bn_mp_init.c
+        source/libtommath/bn_mp_init_copy.c
+        source/libtommath/bn_mp_init_multi.c
+        source/libtommath/bn_mp_init_set.c
+        source/libtommath/bn_mp_init_size.c
+        source/libtommath/bn_s_mp_karatsuba_mul.c
+        source/libtommath/bn_s_mp_karatsuba_sqr.c
+        source/libtommath/bn_s_mp_balance_mul.c
+        source/libtommath/bn_mp_lshd.c
+        source/libtommath/bn_mp_mod.c
+        source/libtommath/bn_mp_mod_2d.c
+        source/libtommath/bn_mp_mul.c
+        source/libtommath/bn_mp_mul_2.c
+        source/libtommath/bn_mp_mul_2d.c
+        source/libtommath/bn_mp_mul_d.c
+        source/libtommath/bn_mp_neg.c
+        source/libtommath/bn_mp_or.c
+        source/libtommath/bn_mp_radix_size.c
+        source/libtommath/bn_mp_radix_smap.c
+        source/libtommath/bn_mp_read_radix.c
+        source/libtommath/bn_mp_rshd.c
+        source/libtommath/bn_mp_set.c
+        source/libtommath/bn_mp_shrink.c
+        source/libtommath/bn_mp_sqr.c
+        source/libtommath/bn_mp_sqrt.c
+        source/libtommath/bn_mp_sub.c
+        source/libtommath/bn_mp_sub_d.c
+        source/libtommath/bn_mp_signed_rsh.c
+        source/libtommath/bn_mp_to_ubin.c
+        source/libtommath/bn_s_mp_toom_mul.c
+        source/libtommath/bn_s_mp_toom_sqr.c
+        source/libtommath/bn_mp_to_radix.c
+        source/libtommath/bn_mp_ubin_size.c
+        source/libtommath/bn_mp_xor.c
+        source/libtommath/bn_mp_zero.c
+        source/libtommath/bn_s_mp_add.c
+        source/libtommath/bn_s_mp_mul_digs.c
+        source/libtommath/bn_s_mp_sqr.c
+        source/libtommath/bn_s_mp_sub.c
+        
+        source/libtommath/tommath_class.h
+        source/libtommath/tommath_cutoffs.h
+        source/libtommath/tommath_private.h
+        source/libtommath/tommath_superclass.h
+        source/unix/tclUnixTime.c
         source/unix/tclUnixPipe.c source/unix/tclUnixThrd.h
         source/unix/tclLoadDl.c source/unix/tclUnixFCmd.c
         source/unix/tclUnixInit.c source/unix/tclUnixEvent.c
@@ -87,49 +159,15 @@ add_library(tcl SHARED
         source/unix/tclUnixChan.c source/unix/tclUnixThrd.c
         source/unix/tclUnixPort.h source/unix/tclUnixFile.c
         source/unix/tclUnixSock.c source/unix/tclUnixNotfy.c
-        source/unix/tclConfig.h source/libtommath/bn_fast_s_mp_mul_digs.c
-        source/libtommath/bn_fast_s_mp_sqr.c source/libtommath/bn_mp_add.c
-        source/libtommath/bn_mp_add_d.c source/libtommath/bn_mp_and.c
-        source/libtommath/bn_mp_clamp.c source/libtommath/bn_mp_clear.c
-        source/libtommath/bn_mp_clear_multi.c source/libtommath/bn_mp_cmp.c
-        source/libtommath/bn_mp_cmp_d.c source/libtommath/bn_mp_cmp_mag.c
-        source/libtommath/bn_mp_cnt_lsb.c source/libtommath/bn_mp_copy.c
-        source/libtommath/bn_mp_count_bits.c source/libtommath/bn_mp_div.c
-        source/libtommath/bn_mp_div_2.c source/libtommath/bn_mp_div_2d.c
-        source/libtommath/bn_mp_div_3.c source/libtommath/bn_mp_div_d.c
-        source/libtommath/bn_mp_exch.c source/libtommath/bn_mp_expt_d.c
-        source/libtommath/bn_mp_grow.c source/libtommath/bn_mp_init.c
-        source/libtommath/bn_mp_init_copy.c source/libtommath/bn_mp_init_multi.c
-        source/libtommath/bn_mp_init_set.c source/libtommath/bn_mp_init_set_int.c
-        source/libtommath/bn_mp_init_size.c source/libtommath/bn_mp_karatsuba_mul.c
-        source/libtommath/bn_mp_karatsuba_sqr.c source/libtommath/bn_mp_lshd.c
-        source/libtommath/bn_mp_mod.c source/libtommath/bn_mp_mod_2d.c
-        source/libtommath/bn_mp_mul.c source/libtommath/bn_mp_mul_2.c
-        source/libtommath/bn_mp_mul_2d.c source/libtommath/bn_mp_mul_d.c
-        source/libtommath/bn_mp_neg.c source/libtommath/bn_mp_or.c
-        source/libtommath/bn_mp_radix_size.c source/libtommath/bn_mp_radix_smap.c
-        source/libtommath/bn_mp_read_radix.c source/libtommath/bn_mp_rshd.c
-        source/libtommath/bn_mp_set.c source/libtommath/bn_mp_set_int.c
-        source/libtommath/bn_mp_shrink.c source/libtommath/bn_mp_sqr.c
-        source/libtommath/bn_mp_sqrt.c source/libtommath/bn_mp_sub.c
-        source/libtommath/bn_mp_sub_d.c source/libtommath/bn_mp_to_unsigned_bin.c
-        source/libtommath/bn_mp_to_unsigned_bin_n.c source/libtommath/bn_mp_toom_mul.c
-        source/libtommath/bn_mp_toom_sqr.c source/libtommath/bn_mp_toradix_n.c
-        source/libtommath/bn_mp_unsigned_bin_size.c source/libtommath/bn_mp_xor.c
-        source/libtommath/bn_mp_zero.c source/libtommath/bn_reverse.c
-        source/libtommath/bn_s_mp_add.c source/libtommath/bn_s_mp_mul_digs.c
-        source/libtommath/bn_s_mp_sqr.c source/libtommath/bn_s_mp_sub.c
-        source/libtommath/bncore.c source/libtommath/tommath.h
-        source/libtommath/tommath_class.h source/libtommath/tommath_superclass.h)
+        ${PROJECT_BINARY_DIR}/include/tclConfig.h)
 
 target_include_directories(tcl
         PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/source/generic>
+        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
         PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/source/unix>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/source/libtommath>)
 
 find_library(z-lib z)
-target_link_libraries(
-        tcl
-        ${z-lib})
+target_link_libraries(tcl ${z-lib})

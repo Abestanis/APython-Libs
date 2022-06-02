@@ -1,8 +1,8 @@
-diff --git Tcl.new/unix/tclConfig.h Tcl.new/unix/tclConfig.h
+diff --git Tcl.new/tclConfig.h Tcl.new/tclConfig.h
 new file mode 100644
-index 0000000..3ef668e
+index 0000000..15a6078
 --- /dev/null
-+++ Tcl.new/unix/tclConfig.h
++++ Tcl.new/tclConfig.h
 @@ -0,0 +1,538 @@
 +/* ../unix/tclConfig.h  */
 +
@@ -374,7 +374,7 @@ index 0000000..3ef668e
 +#undef PACKAGE_TARNAME
 +
 +/* Define to the version of this package. */
-+#define PACKAGE_VERSION "8.6.4"
++#define PACKAGE_VERSION "8.6.12"
 +
 +/* Is this a static build? */
 +#undef STATIC_BUILD
@@ -542,20 +542,3 @@ index 0000000..3ef668e
 +/* override */ #undef PACKAGE_STRING
 +/* override */ #undef PACKAGE_TARNAME
 +#endif /* _TCLCONFIG */
-diff --git tcl.orig/unix/tclUnixChan.c Tcl.new/unix/tclUnixChan.c
-index a1fe090..d0d1289 100644
---- tcl.orig/unix/tclUnixChan.c
-+++ Tcl.new/unix/tclUnixChan.c
-@@ -1582,7 +1582,11 @@ TclpGetDefaultStdChannel(
-      * Set up the normal channel options for stdio handles.
-      */
- 
--    if (Tcl_GetChannelType(channel) == &fileChannelType) {
-+    if (Tcl_GetChannelType(channel) == &fileChannelType
-+        #ifdef SUPPORTS_TTY
-+        || Tcl_GetChannelType(channel) == &ttyChannelType
-+        #endif
-+            ) {
- 	Tcl_SetChannelOption(NULL, channel, "-translation", "auto");
-     } else {
- 	Tcl_SetChannelOption(NULL, channel, "-translation", "auto crlf");
